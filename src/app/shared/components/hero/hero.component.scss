@@ -1,0 +1,14 @@
+@use '@angular/material' as mat;
+
+// Customize the entire app. Change :root to your selector if you want to scope the styles.
+:root {
+  @include mat.select-overrides((
+    panel-background-color: orange,
+    enabled-trigger-text-color: red,
+  ));
+}
+
+.mdc-text-field  {
+ background-color: white !important;
+  border-radius: 4px;
+}

@@ -1,0 +1,176 @@
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Background Video -->
+    <video 
+        class="absolute inset-0 w-full h-full object-cover hero-video"
+        autoplay 
+        muted 
+        loop
+        playsinline
+    >
+        <source src="https://fiverr-res.cloudinary.com/video/upload/v1/video-attachments/generic_asset/asset/18ad23debdc5ce914d67939eceb5fc27-1738830703211/Desktop%20Header%20new%20version" type="video/mp4">
+        <source src="https://fiverr-res.cloudinary.com/video/upload/v1/video-attachments/generic_asset/asset/18ad23debdc5ce914d67939eceb5fc27-1738830703211/Desktop%20Header%20new%20version" type="video/mp4">
+        <!-- Fallback -->
+        <source src="https://fiverr-res.cloudinary.com/video/upload/v1/video-attachments/generic_asset/asset/18ad23debdc5ce914d67939eceb5fc27-1738830703211/Desktop%20Header%20new%20version" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Overlay -->
+    <div class="absolute inset-0 "></div>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center fade-in">
+        <h2 class="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+            Find Her Business<br>
+            <span class="text-blue-400">Back Her Roots</span>
+        </h2>
+        
+        <p class="text-xl md:text-2xl text-gray-200 mb-12 max-w-3xl mx-auto">
+            Connect with women making <span class="sparkle text-yellow-300 text-2xl">✨</span> across America.
+        </p>
+
+        <!-- Search Bar with Country Selection -->
+        <div class="max-w-6xl mx-auto mb-8">
+            <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+                <div class="relative">
+                    <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-2xl overflow-hidden search-input">
+                        <!-- Service Search Input -->
+                        <div class="flex-1 relative">
+                            <input 
+                                type="text" 
+                                placeholder="What service are you looking for? *"
+                                formControlName="searchQuery"
+                                class="w-full px-6 py-4 text-gray-700 text-lg focus:outline-none"
+                                [class.border-red-300]="searchQueryControl?.invalid && searchQueryControl?.touched"
+                                [class.focus:border-red-500]="searchQueryControl?.invalid && searchQueryControl?.touched"
+                            >
+                            @if (searchQueryControl?.invalid && searchQueryControl?.touched) {
+                                <div class="absolute top-full left-0 mt-1 text-red-600 text-xs px-6">
+                                    @if (searchQueryControl?.hasError('required')) {
+                                        Search query is required
+                                    } @else if (searchQueryControl?.hasError('minlength')) {
+                                        Please enter at least 2 characters
+                                    }
+                                </div>
+                            }
+                        </div>
+                        
+                        <!-- Country Selection Dropdown -->
+                        <div class="relative lg:w-40 border-t lg:border-t-0 lg:border-l border-gray-200">
+                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full no-border custom-mat-select">
+                                <mat-select 
+                                    formControlName="selectedCountries"
+                                    multiple
+                                    placeholder="Select heritage"
+                                    class="custom-select"
+                                >
+                                    @for (country of countries; track country.code) {
+                                        <mat-option [value]="country.code">
+                                            {{ country.flag }} {{ country.name }}
+                                        </mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        
+                        <!-- Search Button -->
+                        <button 
+                            type="submit"
+                            [disabled]="!isFormValid"
+                            class="cta-button text-white px-8 py-4 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Selected Countries Display -->
+            <div class="mt-4 flex flex-wrap gap-2 justify-center">
+                @for (countryCode of searchForm.get('selectedCountries')?.value || []; track countryCode) {
+                    @for (country of countries; track country.code) {
+                        @if (country.code === countryCode) {
+                            <span class="country-tag bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                {{ country.flag }} {{ country.name }}
+                            </span>
+                        }
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Popular Searches -->
+        <div class="flex flex-wrap justify-center gap-3 mb-12">
+            <span class="text-gray-300 text-sm">Popular:</span>
+            <button 
+                type="button"
+                (click)="onPopularSearch('Web Design')"
+                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
+            >
+                Web Design
+            </button>
+            <button 
+                type="button"
+                (click)="onPopularSearch('Marketing')"
+                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
+            >
+                Marketing
+            </button>
+            <button 
+                type="button"
+                (click)="onPopularSearch('Photography')"
+                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
+            >
+                Photography
+            </button>
+            <button 
+                type="button"
+                (click)="onPopularSearch('Writing')"
+                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
+            >
+                Writing
+            </button>
+            <button 
+                type="button"
+                (click)="onPopularSearch('Consulting')"
+                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
+            >
+                Consulting
+            </button>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button class="cta-button text-white px-8 py-4 rounded-xl font-semibold text-lg">
+                Find Services
+            </button>
+            <button class="bg-white/20 backdrop-blur-sm border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-gray-800 transition-all">
+                Become a Seller
+            </button>
+        </div>
+
+        <!-- Trust Indicators -->
+        <div class="mt-16 grid grid-cols-3 gap-8 text-white/80">
+            <div class="text-center">
+                <div class="text-3xl font-bold text-blue-400">50K+</div>
+                <div class="text-sm">Women Entrepreneurs</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl font-bold text-blue-400">100K+</div>
+                <div class="text-sm">Services Completed</div>
+            </div>
+            <div class="text-center">
+                <div class="text-3xl font-bold text-blue-400">4.9/5</div>
+                <div class="text-sm">Average Rating</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/60">
+        <div class="animate-bounce">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </div>
+    </div>
+</section>
