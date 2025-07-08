@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { UserService } from './user.service';
-import { Profile } from '../types/database.types';
+import { Tables, TablesUpdate } from '../types/database.types';
 
 @Injectable({
   providedIn: 'root'
@@ -61,7 +61,6 @@ export class AuthService {
       if (data.user) {
         await this.supabaseService.createProfile({
           id: data.user.id,
-          email: data.user.email!,
           full_name: fullName
         });
       }
@@ -162,7 +161,7 @@ export class AuthService {
     }
   }
 
-  async getCurrentProfile(): Promise<Profile | null> {
+  async getCurrentProfile(): Promise<Tables<'profiles'> | null> {
     const user = this.currentUser;
     if (!user) return null;
 
@@ -176,7 +175,7 @@ export class AuthService {
     return data;
   }
 
-  async updateProfile(updates: Partial<Profile>) {
+  async updateProfile(updates: TablesUpdate<'profiles'>) {
     const user = this.currentUser;
     if (!user) throw new Error('No authenticated user');
 

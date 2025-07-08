@@ -4,79 +4,63 @@
             <h3 class="text-4xl md:text-5xl font-bold text-blue-700 mb-4">Featured Women & Their Skills</h3>
             <p class="text-xl text-gray-600 max-w-2xl mx-auto">Discover talented women and the unique skills they bring to the community.</p>
         </div>
-        <div class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 [column-fill:_balance]">
-            <!-- Card 1 -->
-            <div class="mb-6 break-inside-avoid rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80" alt="Fatima - Graphic Designer" class="w-full h-56 object-cover">
-                <div class="p-6">
-                    <h4 class="text-xl font-semibold text-blue-700 mb-1">Fatima Yusuf</h4>
-                    <span class="text-sm text-blue-400 mb-2 block">Graphic Designer</span>
-                    <p class="text-gray-600">Specializes in branding, logo design, and digital illustrations for modern businesses.</p>
-                </div>
+        
+        <!-- Loading State -->
+        @if (loading()) {
+            <div class="text-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                <p class="mt-4 text-gray-600">Loading featured profiles...</p>
             </div>
-            <!-- Card 2 -->
-            <div class="mb-6 break-inside-avoid rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80" alt="Maria - App Developer" class="w-full h-64 object-cover">
-                <div class="p-6">
-                    <h4 class="text-xl font-semibold text-blue-700 mb-1">Maria Rodriguez</h4>
-                    <span class="text-sm text-blue-400 mb-2 block">App Developer</span>
-                    <p class="text-gray-600">Builds intuitive mobile apps and web solutions for startups and small businesses.</p>
-                </div>
+        }
+        
+        <!-- Error State -->
+        @else if (error()) {
+            <div class="text-center py-12">
+                <p class="text-red-600">{{ error() }}</p>
+                <button 
+                    (click)="loadFeaturedProfiles()" 
+                    class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    Try Again
+                </button>
             </div>
-            <!-- Card 3 -->
-            <div class="mb-6 break-inside-avoid rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <img src="https://img.freepik.com/free-photo/young-gardener-girl-apron-summer-hat-being-displeased-with-serious-face-standing-purple-wall_141793-81863.jpg?t=st=1751374905~exp=1751378505~hmac=282a7c72b47c431cfbce65b9907ad88af93787ba3b41d9e6a8e254e0281a7df7&w=2000" alt="Aisha - Content Writer" class="w-full h-52 object-cover">
-                <div class="p-6">
-                    <h4 class="text-xl font-semibold text-blue-700 mb-1">Aisha Bello</h4>
-                    <span class="text-sm text-blue-400 mb-2 block">Content Writer</span>
-                    <p class="text-gray-600">Crafts engaging blog posts, articles, and marketing copy that connect with audiences.</p>
-                </div>
+        }
+        
+        <!-- Featured Profiles -->
+        @else {
+            <div class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-6 [column-fill:_balance]">
+                @for (profile of featuredProfiles(); track profile.id) {
+                    <div class="mb-6 break-inside-avoid rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                        <img 
+                            [src]="getProfileImageUrl(profile)" 
+                            [alt]="profile.full_name || 'Featured Woman'" 
+                            class="w-full h-56 object-cover"
+                            (error)="onImageError($event)">
+                        <div class="p-6">
+                            <h4 class="text-xl font-semibold text-blue-700 mb-1">
+                                {{ profile.full_name || 'Entrepreneur' }}
+                            </h4>
+                            <span class="text-sm text-blue-400 mb-2 block">
+                                {{ getBusinessName(profile) }}
+                            </span>
+                            <p class="text-gray-600">
+                                {{ getBusinessDescription(profile) }}
+                            </p>
+                            @if (profile.country_of_origin) {
+                                <div class="mt-3 text-xs text-gray-500">
+                                    📍 {{ profile.country_of_origin }}
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                
+                <!-- Fallback when no profiles -->
+                @if (featuredProfiles().length === 0) {
+                    <div class="col-span-full text-center py-12">
+                        <p class="text-gray-600">No featured profiles available at the moment.</p>
+                    </div>
+                }
             </div>
-            <!-- Card 4 -->
-            <div class="mb-6 break-inside-avoid rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <img src="https://img.freepik.com/premium-photo/portrait-beautiful-young-woman-summer-dress_1048944-1641868.jpg?ga=GA1.1.420807660.1751374894&semt=ais_hybrid&w=740" alt="Chinwe - Photographer" class="w-full h-72 object-cover">
-                <div class="p-6">
-                    <h4 class="text-xl font-semibold text-blue-700 mb-1">Chinwe Okafor</h4>
-                    <span class="text-sm text-blue-400 mb-2 block">Photographer</span>
-                    <p class="text-gray-600">Captures stunning portraits and event photography with a creative touch.</p>
-                </div>
-            </div>
-            <!-- Card 5 -->
-            <div class="mb-6 break-inside-avoid rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <img src="https://img.freepik.com/free-photo/young-woman-wearing-chain-necklace_23-2149490517.jpg?t=st=1751374994~exp=1751378594~hmac=345aa56f67e2cb2d85a369a70620ac57e3b632e08be727ab8ca8227be18250b6&w=1380" alt="Linh - Marketing Expert" class="w-full h-60 object-cover">
-                <div class="p-6">
-                    <h4 class="text-xl font-semibold text-blue-700 mb-1">Linh Tran</h4>
-                    <span class="text-sm text-blue-400 mb-2 block">Marketing Expert</span>
-                    <p class="text-gray-600">Drives brand growth with creative campaigns and social media strategies.</p>
-                </div>
-            </div>
-            <!-- Card 6 -->
-            <div class="mb-6 break-inside-avoid rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1517202383675-eb0a6e27775f?auto=format&fit=crop&w=600&q=80" alt="Nia - UI/UX Designer" class="w-full h-56 object-cover">
-                <div class="p-6">
-                    <h4 class="text-xl font-semibold text-blue-700 mb-1">Nia Johnson</h4>
-                    <span class="text-sm text-blue-400 mb-2 block">UI/UX Designer</span>
-                    <p class="text-gray-600">Designs user-friendly interfaces and delightful digital experiences for all devices.</p>
-                </div>
-            </div>
-            <!-- Card 7 -->
-            <div class="mb-6 break-inside-avoid rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=600&q=80" alt="Sofia - Business Consultant" class="w-full h-64 object-cover">
-                <div class="p-6">
-                    <h4 class="text-xl font-semibold text-blue-700 mb-1">Sofia Garcia</h4>
-                    <span class="text-sm text-blue-400 mb-2 block">Business Consultant</span>
-                    <p class="text-gray-600">Helps businesses grow with strategic planning and expert advice.</p>
-                </div>
-            </div>
-            <!-- Card 8 -->
-            <div class="mb-6 break-inside-avoid rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=600&q=80" alt="Amara - Product Designer" class="w-full h-60 object-cover">
-                <div class="p-6">
-                    <h4 class="text-xl font-semibold text-blue-700 mb-1">Amara Nwosu</h4>
-                    <span class="text-sm text-blue-400 mb-2 block">Product Designer</span>
-                    <p class="text-gray-600">Creates innovative product designs that delight users and solve real problems.</p>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </section>

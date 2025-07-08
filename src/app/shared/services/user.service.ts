@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { SupabaseService } from './supabase.service';
-import { Profile, ProfileUpdate, Service } from '../types/database.types';
+import { Profile, UserProfile, ProfileUpdate, User } from '../../models';
 
 @Injectable({
   providedIn: 'root'
@@ -10,17 +10,24 @@ export class UserService {
   
   // Signals for reactive state management
   public currentProfile = signal<Profile | null>(null);
-  public userServices = signal<Service[]>([]);
   public loading = signal(false);
   public error = signal<string | null>(null);
 
   // Computed signals
   public isProfileComplete = computed(() => {
     const profile = this.currentProfile();
-    return profile && profile.full_name && profile.bio && profile.profession;
+    return profile && profile.full_name;
   });
 
-  public serviceCount = computed(() => this.userServices().length);
+  public isBuyer = computed(() => {
+    const profile = this.currentProfile();
+    return profile?.is_buyer || false;
+  });
+
+  public isSeller = computed(() => {
+    const profile = this.currentProfile();
+    return profile?.is_seller || false;
+  });
 
   async loadUserProfile(userId: string) {
     this.loading.set(true);
@@ -80,31 +87,6 @@ export class UserService {
     }
   }
 
-  async loadUserServices(userId: string) {
-    this.loading.set(true);
-    this.error.set(null);
-    
-    try {
-      const { data, error } = await this.supabaseService
-        .from('services')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        this.error.set(error.message);
-        return { data: [], error };
-      }
-      
-      this.userServices.set(data || []);
-      return { data: data || [], error: null };
-    } catch (err: any) {
-      this.error.set(err.message);
-      return { data: [], error: err };
-    } finally {
-      this.loading.set(false);
-    }
-  }
 
   async uploadAvatar(file: File, userId: string) {
     this.loading.set(true);
@@ -144,19 +126,20 @@ export class UserService {
     }
   }
 
-  async toggleFeaturedStatus(userId: string) {
-    const currentProfile = this.currentProfile();
-    if (!currentProfile) return;
-
-    return await this.updateProfile({
-      is_featured: !currentProfile.is_featured
-    });
+  async updatePersonalInfo(data: {
+    full_name?: string;
+    avatar_url?: string;
+    country_of_origin?: string;
+    is_buyer?: boolean;
+    is_seller?: boolean;
+    last_name?: string;
+  }) {
+    return await this.updateProfile(data);
   }
 
   // Clear user data on logout
   clearUserData() {
     this.currentProfile.set(null);
-    this.userServices.set([]);
     this.error.set(null);
   }
 }

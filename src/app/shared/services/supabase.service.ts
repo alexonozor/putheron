@@ -4,23 +4,16 @@ import { environment } from '../../../environments/environment';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { 
   Database, 
-  Profile, 
-  ProfileInsert, 
-  ProfileUpdate,
-  AuthState,
-  Service,
-  ServiceInsert,
-  ServiceUpdate,
-  Order,
-  OrderInsert,
-  OrderUpdate,
-  Review,
-  ReviewInsert,
-  ReviewUpdate,
-  Category,
-  Message,
-  MessageInsert
+  Tables,
+  TablesInsert,
+  TablesUpdate
 } from '../types/database.types';
+
+// Define auth state interface
+export interface AuthState {
+  user: User | null;
+  session: any;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -105,7 +98,7 @@ export class SupabaseService {
   }
 
   // Profile methods
-  async getProfile(userId: string): Promise<{ data: Profile | null; error: any }> {
+  async getProfile(userId: string): Promise<{ data: Tables<'profiles'> | null; error: any }> {
     const { data, error } = await this.supabase
       .from('profiles')
       .select('*')
@@ -115,13 +108,10 @@ export class SupabaseService {
     return { data, error };
   }
 
-  async updateProfile(userId: string, updates: ProfileUpdate) {
+  async updateProfile(userId: string, updates: TablesUpdate<'profiles'>) {
     const { data, error } = await this.supabase
       .from('profiles')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
+      .update(updates)
       .eq('id', userId)
       .select()
       .single();
@@ -129,15 +119,10 @@ export class SupabaseService {
     return { data, error };
   }
 
-  async createProfile(profile: ProfileInsert) {
-    const now = new Date().toISOString();
+  async createProfile(profile: TablesInsert<'profiles'>) {
     const { data, error } = await this.supabase
       .from('profiles')
-      .insert({
-        ...profile,
-        created_at: now,
-        updated_at: now
-      })
+      .insert(profile)
       .select()
       .single();
 
@@ -178,7 +163,7 @@ export class SupabaseService {
   }
 
   // Generic database methods
-  from(table: string) {
+  from(table: keyof Database['public']['Tables']) {
     return this.supabase.from(table);
   }
 
@@ -198,22 +183,11 @@ export class SupabaseService {
     return this.supabase;
   }
 
-  // Additional service methods for your database tables
-  
-  // Services table methods
-  async getServices(limit?: number, offset?: number) {
+  // Business-related methods
+  async getBusinesses(limit?: number, offset?: number) {
     let query = this.supabase
-      .from('services')
-      .select(`
-        *,
-        profiles (
-          id,
-          full_name,
-          avatar_url,
-          rating,
-          is_verified
-        )
-      `)
+      .from('businesses')
+      .select('*')
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
@@ -223,171 +197,28 @@ export class SupabaseService {
     return await query;
   }
 
-  async getServiceById(serviceId: string) {
+  async getBusinessById(businessId: number) {
     return await this.supabase
-      .from('services')
-      .select(`
-        *,
-        profiles (
-          id,
-          full_name,
-          avatar_url,
-          bio,
-          rating,
-          total_reviews,
-          is_verified
-        )
-      `)
-      .eq('id', serviceId)
-      .single();
-  }
-
-  async createService(service: ServiceInsert) {
-    const now = new Date().toISOString();
-    return await this.supabase
-      .from('services')
-      .insert({
-        ...service,
-        created_at: now,
-        updated_at: now
-      })
-      .select()
-      .single();
-  }
-
-  async updateService(serviceId: string, updates: ServiceUpdate) {
-    return await this.supabase
-      .from('services')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', serviceId)
-      .select()
-      .single();
-  }
-
-  // Orders table methods
-  async getOrdersByUser(userId: string, type: 'buyer' | 'seller' = 'buyer') {
-    const column = type === 'buyer' ? 'buyer_id' : 'seller_id';
-    
-    return await this.supabase
-      .from('orders')
-      .select(`
-        *,
-        services (
-          id,
-          title,
-          images
-        ),
-        buyer_profile:profiles!buyer_id (
-          id,
-          full_name,
-          avatar_url
-        ),
-        seller_profile:profiles!seller_id (
-          id,
-          full_name,
-          avatar_url
-        )
-      `)
-      .eq(column, userId)
-      .order('created_at', { ascending: false });
-  }
-
-  async createOrder(order: OrderInsert) {
-    const now = new Date().toISOString();
-    return await this.supabase
-      .from('orders')
-      .insert({
-        ...order,
-        created_at: now,
-        updated_at: now
-      })
-      .select()
-      .single();
-  }
-
-  async updateOrder(orderId: string, updates: OrderUpdate) {
-    return await this.supabase
-      .from('orders')
-      .update({
-        ...updates,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', orderId)
-      .select()
-      .single();
-  }
-
-  // Reviews table methods
-  async getReviewsForService(serviceId: string) {
-    return await this.supabase
-      .from('reviews')
-      .select(`
-        *,
-        reviewer_profile:profiles!reviewer_id (
-          id,
-          full_name,
-          avatar_url
-        )
-      `)
-      .eq('service_id', serviceId)
-      .eq('is_public', true)
-      .order('created_at', { ascending: false });
-  }
-
-  async createReview(review: ReviewInsert) {
-    const now = new Date().toISOString();
-    return await this.supabase
-      .from('reviews')
-      .insert({
-        ...review,
-        created_at: now,
-        updated_at: now
-      })
-      .select()
-      .single();
-  }
-
-  // Categories table methods
-  async getCategories() {
-    return await this.supabase
-      .from('categories')
+      .from('businesses')
       .select('*')
-      .eq('is_active', true)
-      .order('sort_order');
+      .eq('id', businessId)
+      .single();
   }
 
-  // Messages table methods
-  async getMessagesForOrder(orderId: string) {
+  async createBusiness(business: TablesInsert<'businesses'>) {
     return await this.supabase
-      .from('messages')
-      .select('*')
-      .eq('order_id', orderId)
-      .order('created_at', { ascending: true });
-  }
-
-  async sendMessage(message: MessageInsert) {
-    const now = new Date().toISOString();
-    return await this.supabase
-      .from('messages')
-      .insert({
-        ...message,
-        created_at: now,
-        updated_at: now
-      })
+      .from('businesses')
+      .insert(business)
       .select()
       .single();
   }
 
-  async markMessageAsRead(messageId: string) {
+  async updateBusiness(businessId: number, updates: TablesUpdate<'businesses'>) {
     return await this.supabase
-      .from('messages')
-      .update({ 
-        is_read: true,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', messageId);
+      .from('businesses')
+      .update(updates)
+      .eq('id', businessId)
+      .select()
+      .single();
   }
 }

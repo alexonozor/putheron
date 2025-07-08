@@ -1,362 +1,402 @@
-export interface Database {
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
   public: {
     Tables: {
-      profiles: {
+      businesses: {
         Row: {
-          id: string;
-          email: string;
-          full_name: string | null;
-          avatar_url: string | null;
-          bio: string | null;
-          location: string | null;
-          website: string | null;
-          phone: string | null;
-          date_of_birth: string | null;
-          gender: string | null;
-          profession: string | null;
-          skills: string[] | null;
-          social_links: Record<string, any> | null;
-          is_verified: boolean;
-          is_featured: boolean;
-          rating: number | null;
-          total_reviews: number;
-          created_at: string;
-          updated_at: string;
-        };
+          address: string | null
+          business_type: string | null
+          category_id: string | null
+          city: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          country: string | null
+          created_at: string | null
+          description: string | null
+          id: number
+          is_active: boolean | null
+          logo_url: string | null
+          name: string
+          postal_code: string | null
+          profile_id: string
+          state: string | null
+          subcategory_id: string | null
+          updated_at: string | null
+          website_url: string | null
+        }
         Insert: {
-          id: string;
-          email: string;
-          full_name?: string | null;
-          avatar_url?: string | null;
-          bio?: string | null;
-          location?: string | null;
-          website?: string | null;
-          phone?: string | null;
-          date_of_birth?: string | null;
-          gender?: string | null;
-          profession?: string | null;
-          skills?: string[] | null;
-          social_links?: Record<string, any> | null;
-          is_verified?: boolean;
-          is_featured?: boolean;
-          rating?: number | null;
-          total_reviews?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
+          address?: string | null
+          business_type?: string | null
+          category_id?: string | null
+          city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: never
+          is_active?: boolean | null
+          logo_url?: string | null
+          name: string
+          postal_code?: string | null
+          profile_id: string
+          state?: string | null
+          subcategory_id?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
         Update: {
-          id?: string;
-          email?: string;
-          full_name?: string | null;
-          avatar_url?: string | null;
-          bio?: string | null;
-          location?: string | null;
-          website?: string | null;
-          phone?: string | null;
-          date_of_birth?: string | null;
-          gender?: string | null;
-          profession?: string | null;
-          skills?: string[] | null;
-          social_links?: Record<string, any> | null;
-          is_verified?: boolean;
-          is_featured?: boolean;
-          rating?: number | null;
-          total_reviews?: number;
-          updated_at?: string;
-        };
-      };
-      services: {
-        Row: {
-          id: string;
-          user_id: string;
-          title: string;
-          description: string;
-          category: string;
-          subcategory: string | null;
-          price: number;
-          currency: string;
-          duration: string | null;
-          delivery_time: string | null;
-          images: string[] | null;
-          tags: string[] | null;
-          requirements: string | null;
-          packages: Record<string, any> | null;
-          is_active: boolean;
-          is_featured: boolean;
-          views_count: number;
-          orders_count: number;
-          rating: number | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          title: string;
-          description: string;
-          category: string;
-          subcategory?: string | null;
-          price: number;
-          currency?: string;
-          duration?: string | null;
-          delivery_time?: string | null;
-          images?: string[] | null;
-          tags?: string[] | null;
-          requirements?: string | null;
-          packages?: Record<string, any> | null;
-          is_active?: boolean;
-          is_featured?: boolean;
-          views_count?: number;
-          orders_count?: number;
-          rating?: number | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          title?: string;
-          description?: string;
-          category?: string;
-          subcategory?: string | null;
-          price?: number;
-          currency?: string;
-          duration?: string | null;
-          delivery_time?: string | null;
-          images?: string[] | null;
-          tags?: string[] | null;
-          requirements?: string | null;
-          packages?: Record<string, any> | null;
-          is_active?: boolean;
-          is_featured?: boolean;
-          views_count?: number;
-          orders_count?: number;
-          rating?: number | null;
-          updated_at?: string;
-        };
-      };
-      orders: {
-        Row: {
-          id: string;
-          service_id: string;
-          buyer_id: string;
-          seller_id: string;
-          package_type: string;
-          total_amount: number;
-          currency: string;
-          status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
-          requirements_submitted: boolean;
-          delivery_date: string | null;
-          payment_status: 'pending' | 'paid' | 'refunded';
-          payment_intent_id: string | null;
-          notes: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          service_id: string;
-          buyer_id: string;
-          seller_id: string;
-          package_type: string;
-          total_amount: number;
-          currency?: string;
-          status?: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
-          requirements_submitted?: boolean;
-          delivery_date?: string | null;
-          payment_status?: 'pending' | 'paid' | 'refunded';
-          payment_intent_id?: string | null;
-          notes?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          service_id?: string;
-          buyer_id?: string;
-          seller_id?: string;
-          package_type?: string;
-          total_amount?: number;
-          currency?: string;
-          status?: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
-          requirements_submitted?: boolean;
-          delivery_date?: string | null;
-          payment_status?: 'pending' | 'paid' | 'refunded';
-          payment_intent_id?: string | null;
-          notes?: string | null;
-          updated_at?: string;
-        };
-      };
-      reviews: {
-        Row: {
-          id: string;
-          order_id: string;
-          reviewer_id: string;
-          reviewee_id: string;
-          service_id: string;
-          rating: number;
-          comment: string | null;
-          is_public: boolean;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          order_id: string;
-          reviewer_id: string;
-          reviewee_id: string;
-          service_id: string;
-          rating: number;
-          comment?: string | null;
-          is_public?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          order_id?: string;
-          reviewer_id?: string;
-          reviewee_id?: string;
-          service_id?: string;
-          rating?: number;
-          comment?: string | null;
-          is_public?: boolean;
-          updated_at?: string;
-        };
-      };
+          address?: string | null
+          business_type?: string | null
+          category_id?: string | null
+          city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: never
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string
+          postal_code?: string | null
+          profile_id?: string
+          state?: string | null
+          subcategory_id?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "businesses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "business_categories_view"
+            referencedColumns: ["category_id"]
+          },
+          {
+            foreignKeyName: "businesses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "businesses_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "business_categories_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "businesses_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profile_businesses"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "businesses_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "businesses_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "business_categories_view"
+            referencedColumns: ["subcategory_id"]
+          },
+          {
+            foreignKeyName: "businesses_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
-          id: string;
-          name: string;
-          slug: string;
-          description: string | null;
-          icon: string | null;
-          is_active: boolean;
-          sort_order: number;
-          created_at: string;
-          updated_at: string;
-        };
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
         Insert: {
-          id?: string;
-          name: string;
-          slug: string;
-          description?: string | null;
-          icon?: string | null;
-          is_active?: boolean;
-          sort_order?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
         Update: {
-          id?: string;
-          name?: string;
-          slug?: string;
-          description?: string | null;
-          icon?: string | null;
-          is_active?: boolean;
-          sort_order?: number;
-          updated_at?: string;
-        };
-      };
-      messages: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
         Row: {
-          id: string;
-          order_id: string;
-          sender_id: string;
-          receiver_id: string;
-          content: string;
-          attachments: string[] | null;
-          is_read: boolean;
-          message_type: 'text' | 'file' | 'system';
-          created_at: string;
-          updated_at: string;
-        };
+          avatar_url: string | null
+          country_of_origin: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          is_buyer: boolean | null
+          is_seller: boolean | null
+          last_name: string | null
+          updated_at: string | null
+        }
         Insert: {
-          id?: string;
-          order_id: string;
-          sender_id: string;
-          receiver_id: string;
-          content: string;
-          attachments?: string[] | null;
-          is_read?: boolean;
-          message_type?: 'text' | 'file' | 'system';
-          created_at?: string;
-          updated_at?: string;
-        };
+          avatar_url?: string | null
+          country_of_origin?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          is_buyer?: boolean | null
+          is_seller?: boolean | null
+          last_name?: string | null
+          updated_at?: string | null
+        }
         Update: {
-          id?: string;
-          order_id?: string;
-          sender_id?: string;
-          receiver_id?: string;
-          content?: string;
-          attachments?: string[] | null;
-          is_read?: boolean;
-          message_type?: 'text' | 'file' | 'system';
-          updated_at?: string;
-        };
-      };
-    };
+          avatar_url?: string | null
+          country_of_origin?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          is_buyer?: boolean | null
+          is_seller?: boolean | null
+          last_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      subcategories: {
+        Row: {
+          category_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          category_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          category_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "business_categories_view"
+            referencedColumns: ["category_id"]
+          },
+          {
+            foreignKeyName: "subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
     Views: {
-      [_ in never]: never;
-    };
+      business_categories_view: {
+        Row: {
+          address: string | null
+          business_description: string | null
+          business_id: number | null
+          business_name: string | null
+          category_id: string | null
+          category_name: string | null
+          city: string | null
+          country: string | null
+          profile_id: string | null
+          profile_name: string | null
+          state: string | null
+          subcategory_id: string | null
+          subcategory_name: string | null
+        }
+        Relationships: []
+      }
+      profile_businesses: {
+        Row: {
+          business_id: number | null
+          business_name: string | null
+          business_type: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          description: string | null
+          full_name: string | null
+          is_buyer: boolean | null
+          is_seller: boolean | null
+          profile_id: string | null
+        }
+        Relationships: []
+      }
+    }
     Functions: {
-      [_ in never]: never;
-    };
+      is_admin: {
+        Args: Record<PropertyKey, never> | { user_id: string }
+        Returns: boolean
+      }
+      update_business_membership: {
+        Args: {
+          _business_id: string
+          _tier: Database["public"]["Enums"]["membership_tier"]
+          _billing_frequency: string
+          _months: number
+        }
+        Returns: undefined
+      }
+    }
     Enums: {
-      order_status: 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
-      payment_status: 'pending' | 'paid' | 'refunded';
-      message_type: 'text' | 'file' | 'system';
-    };
-  };
+      membership_tier: "starter" | "spotlight" | "luminary"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
 }
 
-// Export specific types for easier use
-export type Profile = Database['public']['Tables']['profiles']['Row'];
-export type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
-export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
-export type Service = Database['public']['Tables']['services']['Row'];
-export type ServiceInsert = Database['public']['Tables']['services']['Insert'];
-export type ServiceUpdate = Database['public']['Tables']['services']['Update'];
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
-export type Order = Database['public']['Tables']['orders']['Row'];
-export type OrderInsert = Database['public']['Tables']['orders']['Insert'];
-export type OrderUpdate = Database['public']['Tables']['orders']['Update'];
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
-export type Review = Database['public']['Tables']['reviews']['Row'];
-export type ReviewInsert = Database['public']['Tables']['reviews']['Insert'];
-export type ReviewUpdate = Database['public']['Tables']['reviews']['Update'];
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
-export type Category = Database['public']['Tables']['categories']['Row'];
-export type CategoryInsert = Database['public']['Tables']['categories']['Insert'];
-export type CategoryUpdate = Database['public']['Tables']['categories']['Update'];
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
-export type Message = Database['public']['Tables']['messages']['Row'];
-export type MessageInsert = Database['public']['Tables']['messages']['Insert'];
-export type MessageUpdate = Database['public']['Tables']['messages']['Update'];
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
-// Enum types
-export type OrderStatus = Database['public']['Enums']['order_status'];
-export type PaymentStatus = Database['public']['Enums']['payment_status'];
-export type MessageType = Database['public']['Enums']['message_type'];
-
-// Common interfaces for application use
-export interface AuthState {
-  user: any | null;
-  session: any | null;
-}
-
-export interface ServiceWithProfile extends Service {
-  profiles: Profile;
-}
-
-export interface OrderWithDetails extends Order {
-  services: Service;
-  buyer_profile: Profile;
-  seller_profile: Profile;
-}
-
-export interface ReviewWithDetails extends Review {
-  reviewer_profile: Profile;
-  service: Service;
-}
+export const Constants = {
+  public: {
+    Enums: {
+      membership_tier: ["starter", "spotlight", "luminary"],
+    },
+  },
+} as const
