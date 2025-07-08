@@ -25,7 +25,7 @@
         </h2>
         
         <p class="text-xl md:text-2xl text-gray-200 mb-12 max-w-3xl mx-auto">
-            Connect with women making <span class="sparkle text-yellow-300 text-2xl">✨</span> across America.
+            Connect with verified women-owned and minority-owned businesses across America.
         </p>
 
         <!-- Search Bar with Country Selection -->
@@ -37,7 +37,7 @@
                         <div class="flex-1 relative">
                             <input 
                                 type="text" 
-                                placeholder="What service are you looking for? *"
+                                placeholder="Search businesses, services, or locations."
                                 formControlName="searchQuery"
                                 class="w-full px-6 py-4 text-gray-700 text-lg focus:outline-none"
                                 [class.border-red-300]="searchQueryControl?.invalid && searchQueryControl?.touched"
@@ -103,31 +103,31 @@
             <span class="text-gray-300 text-sm">Popular:</span>
             <button 
                 type="button"
-                (click)="onPopularSearch('Web Design')"
+                (click)="onPopularSearch('Bookeping & Tax prep')"
                 class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
             >
-                Web Design
+                Bookeping & Tax prep
+                       </button>
+            <button 
+                type="button"
+                (click)="onPopularSearch('Quickbooks')"
+                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
+            >
+                Quickbooks
             </button>
             <button 
                 type="button"
-                (click)="onPopularSearch('Marketing')"
+                (click)="onPopularSearch('eCommerce')"
                 class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
             >
-                Marketing
+                eCommerce
             </button>
             <button 
                 type="button"
-                (click)="onPopularSearch('Photography')"
+                (click)="onPopularSearch('Grant Writing')"
                 class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
             >
-                Photography
-            </button>
-            <button 
-                type="button"
-                (click)="onPopularSearch('Writing')"
-                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
-            >
-                Writing
+               Grant Writing
             </button>
             <button 
                 type="button"
@@ -141,10 +141,10 @@
         <!-- CTA Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <button class="cta-button text-white px-8 py-4 rounded-xl font-semibold text-lg">
-                Find Services
+                Find Businesses
             </button>
             <button class="bg-white/20 backdrop-blur-sm border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-gray-800 transition-all">
-                Become a Seller
+                List Your Business
             </button>
         </div>
 
@@ -156,11 +156,11 @@
             </div>
             <div class="text-center">
                 <div class="text-3xl font-bold text-blue-400">100K+</div>
-                <div class="text-sm">Services Completed</div>
+                <div class="text-sm">Businesses Listed</div>
             </div>
             <div class="text-center">
-                <div class="text-3xl font-bold text-blue-400">4.9/5</div>
-                <div class="text-sm">Average Rating</div>
+                <div class="text-3xl font-bold text-blue-400">1million+</div>
+                <div class="text-sm">Verified WBE MBE Certified</div>
             </div>
         </div>
     </div>
