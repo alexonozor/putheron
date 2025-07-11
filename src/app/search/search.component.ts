@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,6 +14,7 @@ import { HeaderComponent } from '../shared/components/header/header.component';
 import { BusinessService } from '../shared/services/business.service';
 import { CategoryService } from '../shared/services/category.service';
 import { SupabaseService } from '../shared/services/supabase.service';
+import { ReviewsService } from '../shared/services/reviews.service';
 import { Tables } from '../shared/types/database.types';
 
 // Define interfaces for search functionality
@@ -65,10 +66,12 @@ interface PriceRange {
 })
 export class SearchComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private fb = inject(FormBuilder);
   private businessService = inject(BusinessService);
   private categoryService = inject(CategoryService);
   private supabaseService = inject(SupabaseService);
+  private reviewsService = inject(ReviewsService);
   
   // Signals
   searchQuery = signal<string>('');
@@ -238,5 +241,22 @@ export class SearchComponent implements OnInit {
   handleImageError(event: any): void {
     const target = event.target as HTMLImageElement;
     target.src = 'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400';
+  }
+
+  viewBusinessDetails(business: SearchBusiness): void {
+    this.router.navigate(['/business', business.id]);
+  }
+
+  // Rating helper methods
+  getStarArray(rating: number): boolean[] {
+    return this.reviewsService.getStarArray(rating);
+  }
+
+  formatRating(rating: number): string {
+    return this.reviewsService.formatRating(rating);
+  }
+
+  hasRating(business: SearchBusiness): boolean {
+    return business.average_rating !== null && business.average_rating > 0;
   }
 }

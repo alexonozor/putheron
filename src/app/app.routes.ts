@@ -4,6 +4,7 @@ import { AuthComponent } from './auth/auth.component';
 import { ProfileComponent } from './profile/profile.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { SearchComponent } from './search/search.component';
+import { BusinessProfileComponent } from './business-profile/business-profile.component';
 import { AuthGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
@@ -22,5 +23,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   { path: 'search', component: SearchComponent },
+  { path: 'business/:id', component: BusinessProfileComponent },
   { path: '**', redirectTo: '' }
 ];

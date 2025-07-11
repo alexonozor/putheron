@@ -7,11 +7,112 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   public: {
     Tables: {
+      business_reviews: {
+        Row: {
+          business_id: number
+          communication: number | null
+          created_at: string | null
+          id: number
+          rating: number
+          review_text: string | null
+          service_quality: number | null
+          timeliness: number | null
+          updated_at: string | null
+          user_business_project_id: number
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          business_id: number
+          communication?: number | null
+          created_at?: string | null
+          id?: never
+          rating: number
+          review_text?: string | null
+          service_quality?: number | null
+          timeliness?: number | null
+          updated_at?: string | null
+          user_business_project_id: number
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          business_id?: number
+          communication?: number | null
+          created_at?: string | null
+          id?: never
+          rating?: number
+          review_text?: string | null
+          service_quality?: number | null
+          timeliness?: number | null
+          updated_at?: string | null
+          user_business_project_id?: number
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_categories_view"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "business_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "business_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_review_details"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "business_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "profile_businesses"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "business_reviews_user_business_project_id_fkey"
+            columns: ["user_business_project_id"]
+            isOneToOne: false
+            referencedRelation: "business_review_details"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "business_reviews_user_business_project_id_fkey"
+            columns: ["user_business_project_id"]
+            isOneToOne: false
+            referencedRelation: "user_business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           address: string | null
+          average_rating: number | null
           business_type: string | null
           category_id: string | null
           city: string | null
@@ -26,6 +127,7 @@ export type Database = {
           name: string
           postal_code: string | null
           profile_id: string
+          review_count: number | null
           state: string | null
           subcategory_id: string | null
           updated_at: string | null
@@ -33,6 +135,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          average_rating?: number | null
           business_type?: string | null
           category_id?: string | null
           city?: string | null
@@ -47,6 +150,7 @@ export type Database = {
           name: string
           postal_code?: string | null
           profile_id: string
+          review_count?: number | null
           state?: string | null
           subcategory_id?: string | null
           updated_at?: string | null
@@ -54,6 +158,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          average_rating?: number | null
           business_type?: string | null
           category_id?: string | null
           city?: string | null
@@ -68,6 +173,7 @@ export type Database = {
           name?: string
           postal_code?: string | null
           profile_id?: string
+          review_count?: number | null
           state?: string | null
           subcategory_id?: string | null
           updated_at?: string | null
@@ -93,6 +199,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "business_categories_view"
+            referencedColumns: ["profile_id"]
+          },
+          {
+            foreignKeyName: "businesses_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "business_review_details"
             referencedColumns: ["profile_id"]
           },
           {
@@ -152,6 +265,9 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
+          city: string | null
+          country: string | null
           country_of_origin: string | null
           created_at: string | null
           full_name: string | null
@@ -163,6 +279,9 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
           country_of_origin?: string | null
           created_at?: string | null
           full_name?: string | null
@@ -174,6 +293,9 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
           country_of_origin?: string | null
           created_at?: string | null
           full_name?: string | null
@@ -184,6 +306,165 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      projects: {
+        Row: {
+          business_id: number
+          category: string | null
+          client_name: string | null
+          completion_date: string | null
+          created_at: string | null
+          description: string | null
+          gallery_urls: string[] | null
+          id: number
+          image_url: string | null
+          is_featured: boolean | null
+          testimonial: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: number
+          category?: string | null
+          client_name?: string | null
+          completion_date?: string | null
+          created_at?: string | null
+          description?: string | null
+          gallery_urls?: string[] | null
+          id?: never
+          image_url?: string | null
+          is_featured?: boolean | null
+          testimonial?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: number
+          category?: string | null
+          client_name?: string | null
+          completion_date?: string | null
+          created_at?: string | null
+          description?: string | null
+          gallery_urls?: string[] | null
+          id?: never
+          image_url?: string | null
+          is_featured?: boolean | null
+          testimonial?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_categories_view"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "projects_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "projects_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_review_details"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "projects_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "profile_businesses"
+            referencedColumns: ["business_id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          business_id: number
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: number
+          image_url: string | null
+          is_active: boolean | null
+          name: string
+          price: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id: number
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: never
+          image_url?: string | null
+          is_active?: boolean | null
+          name: string
+          price?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: number
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: never
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string
+          price?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_categories_view"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "services_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "services_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_review_details"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "services_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "profile_businesses"
+            referencedColumns: ["business_id"]
+          },
+        ]
       }
       subcategories: {
         Row: {
@@ -227,6 +508,98 @@ export type Database = {
           },
         ]
       }
+      user_business_projects: {
+        Row: {
+          business_id: number
+          completion_date: string | null
+          created_at: string | null
+          id: number
+          project_description: string | null
+          project_id: number | null
+          project_title: string
+          start_date: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          business_id: number
+          completion_date?: string | null
+          created_at?: string | null
+          id?: never
+          project_description?: string | null
+          project_id?: number | null
+          project_title: string
+          start_date?: string | null
+          status: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          business_id?: number
+          completion_date?: string | null
+          created_at?: string | null
+          id?: never
+          project_description?: string | null
+          project_id?: number | null
+          project_title?: string
+          start_date?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_business_projects_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_categories_view"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "user_business_projects_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "user_business_projects_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_review_details"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "user_business_projects_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_business_projects_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "profile_businesses"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "user_business_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "user_business_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       business_categories_view: {
@@ -244,6 +617,47 @@ export type Database = {
           state: string | null
           subcategory_id: string | null
           subcategory_name: string | null
+        }
+        Relationships: []
+      }
+      business_projects: {
+        Row: {
+          business_description: string | null
+          business_id: number | null
+          business_name: string | null
+          client_name: string | null
+          completion_date: string | null
+          gallery_urls: string[] | null
+          image_url: string | null
+          is_featured: boolean | null
+          project_category: string | null
+          project_description: string | null
+          project_id: number | null
+          project_title: string | null
+          testimonial: string | null
+        }
+        Relationships: []
+      }
+      business_review_details: {
+        Row: {
+          business_average_rating: number | null
+          business_id: number | null
+          business_name: string | null
+          business_review_count: number | null
+          communication: number | null
+          profile_id: string | null
+          project_completion_date: string | null
+          project_id: number | null
+          project_title: string | null
+          rating: number | null
+          review_date: string | null
+          review_id: number | null
+          review_text: string | null
+          reviewer_avatar: string | null
+          reviewer_name: string | null
+          service_quality: number | null
+          timeliness: number | null
+          value: number | null
         }
         Relationships: []
       }
@@ -265,9 +679,59 @@ export type Database = {
       }
     }
     Functions: {
+      complete_user_business_project: {
+        Args: { p_project_id: number; p_completion_date?: string }
+        Returns: boolean
+      }
+      create_user_business_project: {
+        Args: {
+          p_user_id: string
+          p_business_id: number
+          p_project_title: string
+          p_project_description?: string
+          p_start_date?: string
+          p_status?: string
+        }
+        Returns: number
+      }
+      get_business_review_stats: {
+        Args: { p_business_id: number }
+        Returns: {
+          business_id: number
+          business_name: string
+          average_rating: number
+          review_count: number
+          avg_service_quality: number
+          avg_communication: number
+          avg_timeliness: number
+          avg_value: number
+          five_star_count: number
+          four_star_count: number
+          three_star_count: number
+          two_star_count: number
+          one_star_count: number
+        }[]
+      }
+      insert_sample_review_data: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       is_admin: {
         Args: Record<PropertyKey, never> | { user_id: string }
         Returns: boolean
+      }
+      submit_business_review: {
+        Args: {
+          p_business_id: number
+          p_project_id: number
+          p_rating: number
+          p_review_text: string
+          p_service_quality: number
+          p_communication: number
+          p_timeliness: number
+          p_value: number
+        }
+        Returns: number
       }
       update_business_membership: {
         Args: {
@@ -288,21 +752,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -320,14 +788,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -343,14 +813,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -366,14 +838,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -381,14 +855,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never

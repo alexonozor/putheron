@@ -16,7 +16,7 @@ export interface BusinessWithProfile extends Business {
   favorites_count?: number;
   is_favorited?: boolean;
   reviews_count?: number;
-  average_rating?: number;
+  // Note: average_rating is already defined in Business type as number | null
 }
 
 // Business search filters

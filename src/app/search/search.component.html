@@ -137,7 +137,8 @@
           <!-- Masonry Grid -->
           <div class="columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6">
             @for (business of filteredBusinesses(); track business.id) {
-              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden break-inside-avoid hover:shadow-md transition-shadow duration-200">
+              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden break-inside-avoid hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                   (click)="viewBusinessDetails(business)">
                 <!-- Business Image -->
                 <div class="relative h-48 bg-gray-100">
                   <img 
@@ -179,6 +180,23 @@
                     </div>
                   }
 
+                  <!-- Rating Display -->
+                  @if (hasRating(business)) {
+                    <div class="flex items-center mb-3">
+                      <div class="flex items-center mr-2">
+                        @for (star of getStarArray(business.average_rating!); track $index) {
+                          <mat-icon class="text-yellow-400 text-xs">
+                            {{ star ? 'star' : 'star_border' }}
+                          </mat-icon>
+                        }
+                      </div>
+                      <span class="text-sm font-medium text-gray-900">{{ formatRating(business.average_rating!) }}</span>
+                      @if (business.review_count) {
+                        <span class="text-xs text-gray-500 ml-1">({{ business.review_count }})</span>
+                      }
+                    </div>
+                  }
+
                   <!-- Contact and Location -->
                   <div class="text-xs text-gray-500 mb-3 space-y-1">
                     @if (business.contact_email) {
@@ -212,7 +230,9 @@
                     } @else {
                       <span class="text-gray-400 text-sm">No website</span>
                     }
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                    <button 
+                      (click)="viewBusinessDetails(business); $event.stopPropagation()"
+                      class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
                       View Details
                     </button>
                   </div>
