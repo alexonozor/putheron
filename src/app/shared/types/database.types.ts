@@ -16,7 +16,7 @@ export type Database = {
     Tables: {
       business_reviews: {
         Row: {
-          business_id: number
+          business_id: string
           communication: number | null
           created_at: string | null
           id: number
@@ -30,7 +30,7 @@ export type Database = {
           value: number | null
         }
         Insert: {
-          business_id: number
+          business_id: string
           communication?: number | null
           created_at?: string | null
           id?: never
@@ -44,7 +44,7 @@ export type Database = {
           value?: number | null
         }
         Update: {
-          business_id?: number
+          business_id?: string
           communication?: number | null
           created_at?: string | null
           id?: never
@@ -76,13 +76,6 @@ export type Database = {
             foreignKeyName: "business_reviews_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
-            referencedRelation: "business_review_details"
-            referencedColumns: ["business_id"]
-          },
-          {
-            foreignKeyName: "business_reviews_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
             referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
@@ -92,13 +85,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profile_businesses"
             referencedColumns: ["business_id"]
-          },
-          {
-            foreignKeyName: "business_reviews_user_business_project_id_fkey"
-            columns: ["user_business_project_id"]
-            isOneToOne: false
-            referencedRelation: "business_review_details"
-            referencedColumns: ["project_id"]
           },
           {
             foreignKeyName: "business_reviews_user_business_project_id_fkey"
@@ -121,7 +107,7 @@ export type Database = {
           country: string | null
           created_at: string | null
           description: string | null
-          id: number
+          id: string
           is_active: boolean | null
           logo_url: string | null
           name: string
@@ -205,13 +191,6 @@ export type Database = {
             foreignKeyName: "businesses_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "business_review_details"
-            referencedColumns: ["profile_id"]
-          },
-          {
-            foreignKeyName: "businesses_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
             referencedRelation: "profile_businesses"
             referencedColumns: ["profile_id"]
           },
@@ -262,6 +241,62 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_conversations: {
+        Row: {
+          business_id: string
+          created_at: string | null
+          id: string
+          project_id: number
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string | null
+          id?: string
+          project_id: number
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string | null
+          id?: string
+          project_id?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string | null
+          id: number
+          message: string
+          sender_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string | null
+          id?: number
+          message: string
+          sender_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string | null
+          id?: number
+          message?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -309,7 +344,7 @@ export type Database = {
       }
       projects: {
         Row: {
-          business_id: number
+          business_id: string
           category: string | null
           client_name: string | null
           completion_date: string | null
@@ -324,7 +359,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          business_id: number
+          business_id: string
           category?: string | null
           client_name?: string | null
           completion_date?: string | null
@@ -339,7 +374,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          business_id?: number
+          business_id?: string
           category?: string | null
           client_name?: string | null
           completion_date?: string | null
@@ -372,13 +407,6 @@ export type Database = {
             foreignKeyName: "projects_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
-            referencedRelation: "business_review_details"
-            referencedColumns: ["business_id"]
-          },
-          {
-            foreignKeyName: "projects_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
             referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
@@ -393,7 +421,7 @@ export type Database = {
       }
       services: {
         Row: {
-          business_id: number
+          business_id: string
           created_at: string | null
           description: string | null
           duration_minutes: number | null
@@ -405,7 +433,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          business_id: number
+          business_id: string
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
@@ -417,7 +445,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          business_id?: number
+          business_id?: string
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
@@ -441,13 +469,6 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "business_projects"
-            referencedColumns: ["business_id"]
-          },
-          {
-            foreignKeyName: "services_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
-            referencedRelation: "business_review_details"
             referencedColumns: ["business_id"]
           },
           {
@@ -510,12 +531,12 @@ export type Database = {
       }
       user_business_projects: {
         Row: {
-          business_id: number
+          business_id: string
           completion_date: string | null
           created_at: string | null
           id: number
           project_description: string | null
-          project_id: number | null
+          project_id: string | null
           project_title: string
           start_date: string | null
           status: string
@@ -523,12 +544,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          business_id: number
+          business_id: string
           completion_date?: string | null
           created_at?: string | null
           id?: never
           project_description?: string | null
-          project_id?: number | null
+          project_id?: string | null
           project_title: string
           start_date?: string | null
           status: string
@@ -536,12 +557,12 @@ export type Database = {
           user_id: string
         }
         Update: {
-          business_id?: number
+          business_id?: string
           completion_date?: string | null
           created_at?: string | null
           id?: never
           project_description?: string | null
-          project_id?: number | null
+          project_id?: string | null
           project_title?: string
           start_date?: string | null
           status?: string
@@ -561,13 +582,6 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "business_projects"
-            referencedColumns: ["business_id"]
-          },
-          {
-            foreignKeyName: "user_business_projects_business_id_fkey"
-            columns: ["business_id"]
-            isOneToOne: false
-            referencedRelation: "business_review_details"
             referencedColumns: ["business_id"]
           },
           {
@@ -606,7 +620,7 @@ export type Database = {
         Row: {
           address: string | null
           business_description: string | null
-          business_id: number | null
+          business_id: string | null
           business_name: string | null
           category_id: string | null
           category_name: string | null
@@ -623,7 +637,7 @@ export type Database = {
       business_projects: {
         Row: {
           business_description: string | null
-          business_id: number | null
+          business_id: string | null
           business_name: string | null
           client_name: string | null
           completion_date: string | null
@@ -632,7 +646,7 @@ export type Database = {
           is_featured: boolean | null
           project_category: string | null
           project_description: string | null
-          project_id: number | null
+          project_id: string | null
           project_title: string | null
           testimonial: string | null
         }
@@ -640,30 +654,63 @@ export type Database = {
       }
       business_review_details: {
         Row: {
-          business_average_rating: number | null
-          business_id: number | null
+          business_id: string | null
           business_name: string | null
-          business_review_count: number | null
           communication: number | null
-          profile_id: string | null
           project_completion_date: string | null
-          project_id: number | null
+          project_id: string | null
           project_title: string | null
           rating: number | null
           review_date: string | null
           review_id: number | null
           review_text: string | null
-          reviewer_avatar: string | null
           reviewer_name: string | null
           service_quality: number | null
           timeliness: number | null
+          user_id: string | null
           value: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "business_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_categories_view"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "business_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_projects"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "business_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_reviews_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "profile_businesses"
+            referencedColumns: ["business_id"]
+          },
+          {
+            foreignKeyName: "business_reviews_user_business_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "user_business_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_businesses: {
         Row: {
-          business_id: number | null
+          business_id: string | null
           business_name: string | null
           business_type: string | null
           city: string | null
@@ -686,7 +733,7 @@ export type Database = {
       create_user_business_project: {
         Args: {
           p_user_id: string
-          p_business_id: number
+          p_business_id: string
           p_project_title: string
           p_project_description?: string
           p_start_date?: string
@@ -695,9 +742,9 @@ export type Database = {
         Returns: number
       }
       get_business_review_stats: {
-        Args: { p_business_id: number }
+        Args: { p_business_id: string }
         Returns: {
-          business_id: number
+          business_id: string
           business_name: string
           average_rating: number
           review_count: number
@@ -712,6 +759,24 @@ export type Database = {
           one_star_count: number
         }[]
       }
+      get_business_reviews: {
+        Args: { p_business_id: string }
+        Returns: {
+          review_id: number
+          business_id: string
+          business_name: string
+          reviewer_name: string
+          project_title: string
+          rating: number
+          review_text: string
+          service_quality: number
+          communication: number
+          timeliness: number
+          value: number
+          review_date: string
+          project_completion_date: string
+        }[]
+      }
       insert_sample_review_data: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -720,9 +785,13 @@ export type Database = {
         Args: Record<PropertyKey, never> | { user_id: string }
         Returns: boolean
       }
+      start_chat_conversation: {
+        Args: { p_user_id: string; p_business_id: string; p_project_id: number }
+        Returns: string
+      }
       submit_business_review: {
         Args: {
-          p_business_id: number
+          p_business_id: string
           p_project_id: number
           p_rating: number
           p_review_text: string

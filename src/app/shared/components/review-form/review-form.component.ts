@@ -167,7 +167,7 @@ import { AuthService } from '../../services/auth.service';
   `]
 })
 export class ReviewFormComponent {
-  @Input() businessId!: number;
+  @Input() businessId!: string;
   @Input() businessName!: string;
   @Output() reviewSubmitted = new EventEmitter<void>();
 

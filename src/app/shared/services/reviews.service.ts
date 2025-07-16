@@ -20,7 +20,7 @@ export interface ReviewWithDetails {
 
 // Interface for review stats
 export interface ReviewStats {
-  business_id: number;
+  business_id: string;
   business_name: string;
   average_rating: number;
   review_count: number;
@@ -53,7 +53,7 @@ export interface UserBusinessProject extends Tables<'user_business_projects'> {
 export class ReviewsService {
   private supabaseService = inject(SupabaseService);
 
-  async getBusinessReviews(businessId: number): Promise<ReviewWithDetails[]> {
+  async getBusinessReviews(businessId: string): Promise<ReviewWithDetails[]> {
     try {
       const { data, error } = await this.supabaseService.getClient()
         .from('business_reviews')
@@ -74,7 +74,7 @@ export class ReviewsService {
           )
         `)
         .eq('business_id', businessId)
-        .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching business reviews:', error);
@@ -114,7 +114,7 @@ export class ReviewsService {
     }
   }
 
-  async getBusinessReviewStats(businessId: number): Promise<ReviewStats | null> {
+  async getBusinessReviewStats(businessId: string): Promise<ReviewStats | null> {
     try {
       // Get business basic info
       const { data: businessData, error: businessError } = await this.supabaseService.getClient()
@@ -209,7 +209,7 @@ export class ReviewsService {
     }
   }
 
-  async getBusinessReviewStatsFromEdgeFunction(businessId: number): Promise<ReviewStats | null> {
+  async getBusinessReviewStatsFromEdgeFunction(businessId: string): Promise<ReviewStats | null> {
     try {
       const { data, error } = await this.supabaseService.getClient()
         .functions
@@ -261,7 +261,7 @@ export class ReviewsService {
 
   async createUserBusinessProject(
     userId: string,
-    businessId: number,
+    businessId: string,
     projectTitle: string,
     projectDescription?: string,
     startDate?: string,
@@ -315,7 +315,7 @@ export class ReviewsService {
 
   async submitBusinessReview(
     userId: string,
-    businessId: number,
+    businessId: string,
     userBusinessProjectId: number,
     rating: number,
     reviewText?: string,
@@ -349,7 +349,7 @@ export class ReviewsService {
     }
   }
 
-  async getBusinessReviewsAndStats(businessId: number): Promise<{
+  async getBusinessReviewsAndStats(businessId: string): Promise<{
     reviews: ReviewWithDetails[];
     stats: ReviewStats | null;
   }> {

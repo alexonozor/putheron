@@ -244,6 +244,10 @@ export class SearchComponent implements OnInit {
   }
 
   viewBusinessDetails(business: SearchBusiness): void {
+    console.log('Navigating to business:', business);
+    console.log('Business ID:', business.id);
+    console.log('Business ID type:', typeof business.id);
+    console.log('Profile ID:', business.profile_id);
     this.router.navigate(['/business', business.id]);
   }
 

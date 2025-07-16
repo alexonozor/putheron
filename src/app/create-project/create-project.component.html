@@ -1,0 +1,360 @@
+<app-header />
+
+<div class="min-h-screen bg-gray-50">
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  } @else if (error()) {
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="text-red-400 mb-4">
+          <mat-icon class="text-6xl">error_outline</mat-icon>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ error() }}</h3>
+        <div class="space-x-4">
+          <button 
+            (click)="goBack()"
+            class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+            Go Back
+          </button>
+          <button 
+            (click)="loadData()"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Header -->
+      <div class="mb-8">
+        <button 
+          (click)="goBack()"
+          class="mb-4 flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+          <mat-icon class="mr-2">arrow_back</mat-icon>
+          Back to Business Profile
+        </button>
+        
+        @if (business()) {
+          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="flex items-center space-x-4">
+              @if (business()?.profile?.avatar_url) {
+                <img 
+                  [src]="business()?.profile?.avatar_url" 
+                  [alt]="business()?.name"
+                  class="w-16 h-16 rounded-full object-cover">
+              } @else {
+                <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+                  <mat-icon class="text-blue-600 text-2xl">business</mat-icon>
+                </div>
+              }
+              <div>
+                <h1 class="text-2xl font-bold text-gray-900">
+                  Start a Project with {{ business()?.name }}
+                </h1>
+                @if (business()?.profile?.full_name) {
+                  <p class="text-gray-600">
+                    Owned by {{ business()?.profile?.full_name }}
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Project Creation Form -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <mat-stepper #stepper [linear]="true" class="project-stepper">
+          <!-- Step 1: Service Selection -->
+          <mat-step [stepControl]="serviceSelectionForm" label="Select Service">
+            <form [formGroup]="serviceSelectionForm" class="p-6 space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Choose a Service
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Select the service you'd like to request from this business.
+                </p>
+                
+                @if (hasServices()) {
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Service</mat-label>
+                    <mat-select formControlName="serviceId" required>
+                      @for (service of activeServices(); track service.id) {
+                        <mat-option [value]="service.id">
+                          <div class="py-2">
+                            <div class="font-medium">{{ service.name }}</div>
+                            @if (service.description) {
+                              <div class="text-sm text-gray-500 mt-1">
+                                {{ service.description }}
+                              </div>
+                            }
+                            <div class="flex items-center justify-between mt-2">
+                              @if (service.price) {
+                                <div class="text-sm font-medium text-green-600">
+                                  ${{ service.price }}
+                                </div>
+                              }
+                              @if (service.duration_minutes) {
+                                <div class="text-sm text-gray-500">
+                                  {{ formatDuration(service.duration_minutes) }}
+                                </div>
+                              }
+                            </div>
+                          </div>
+                        </mat-option>
+                      }
+                    </mat-select>
+                    @if (serviceSelectionForm.get('serviceId')?.hasError('required') && serviceSelectionForm.get('serviceId')?.touched) {
+                      <mat-error>Please select a service</mat-error>
+                    }
+                  </mat-form-field>
+                } @else {
+                  <div class="text-center py-8 text-gray-500">
+                    <mat-icon class="text-4xl mb-2">info</mat-icon>
+                    <p>This business hasn't listed any services yet.</p>
+                    <p class="text-sm mt-2">You can still create a project with custom requirements.</p>
+                  </div>
+                }
+              </div>
+
+              <div class="flex justify-end">
+                <button 
+                  type="button"
+                  mat-flat-button 
+                  color="primary"
+                  (click)="nextStep(stepper)"
+                  [disabled]="!serviceSelectionForm.valid && hasServices()">
+                  Next
+                  <mat-icon class="ml-2">arrow_forward</mat-icon>
+                </button>
+              </div>
+            </form>
+          </mat-step>
+
+          <!-- Step 2: Project Details -->
+          <mat-step [stepControl]="projectDetailsForm" label="Project Details">
+            <form [formGroup]="projectDetailsForm" class="p-6 space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Project Information
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Provide details about your project to help the business understand your needs.
+                </p>
+              </div>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Project Title</mat-label>
+                <input 
+                  matInput 
+                  formControlName="title" 
+                  placeholder="e.g., Website redesign for my small business"
+                  required>
+                @if (projectDetailsForm.get('title')?.hasError('required') && projectDetailsForm.get('title')?.touched) {
+                  <mat-error>Project title is required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Project Description</mat-label>
+                <textarea 
+                  matInput 
+                  formControlName="description"
+                  rows="6"
+                  placeholder="Describe your project requirements, goals, timeline, and any specific needs..."
+                  required></textarea>
+                @if (projectDetailsForm.get('description')?.hasError('required') && projectDetailsForm.get('description')?.touched) {
+                  <mat-error>Project description is required</mat-error>
+                }
+              </mat-form-field>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <mat-form-field appearance="outline">
+                  <mat-label>Budget Range</mat-label>
+                  <mat-select formControlName="budgetRange">
+                    <mat-option value="under-500">Under $500</mat-option>
+                    <mat-option value="500-1000">$500 - $1,000</mat-option>
+                    <mat-option value="1000-2500">$1,000 - $2,500</mat-option>
+                    <mat-option value="2500-5000">$2,500 - $5,000</mat-option>
+                    <mat-option value="5000-10000">$5,000 - $10,000</mat-option>
+                    <mat-option value="over-10000">Over $10,000</mat-option>
+                    <mat-option value="not-sure">Not sure yet</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Timeline</mat-label>
+                  <mat-select formControlName="timeline">
+                    <mat-option value="asap">ASAP</mat-option>
+                    <mat-option value="1-week">Within 1 week</mat-option>
+                    <mat-option value="2-weeks">Within 2 weeks</mat-option>
+                    <mat-option value="1-month">Within 1 month</mat-option>
+                    <mat-option value="2-months">Within 2 months</mat-option>
+                    <mat-option value="3-months">Within 3 months</mat-option>
+                    <mat-option value="flexible">Flexible</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div>
+                <h4 class="text-md font-medium text-gray-900 mb-3">Priority Level</h4>
+                <mat-radio-group formControlName="priority" class="flex flex-col space-y-2">
+                  <mat-radio-button value="low" class="mb-2">
+                    <span class="ml-2">
+                      <strong>Low Priority</strong> - No rush, flexible timeline
+                    </span>
+                  </mat-radio-button>
+                  <mat-radio-button value="medium" class="mb-2">
+                    <span class="ml-2">
+                      <strong>Medium Priority</strong> - Standard timeline
+                    </span>
+                  </mat-radio-button>
+                  <mat-radio-button value="high" class="mb-2">
+                    <span class="ml-2">
+                      <strong>High Priority</strong> - Urgent, quick turnaround needed
+                    </span>
+                  </mat-radio-button>
+                </mat-radio-group>
+              </div>
+
+              <div class="flex justify-between">
+                <button 
+                  type="button"
+                  mat-button 
+                  color="primary"
+                  (click)="previousStep(stepper)">
+                  <mat-icon class="mr-2">arrow_back</mat-icon>
+                  Previous
+                </button>
+                <button 
+                  type="button"
+                  mat-flat-button 
+                  color="primary"
+                  (click)="nextStep(stepper)"
+                  [disabled]="!projectDetailsForm.valid">
+                  Next
+                  <mat-icon class="ml-2">arrow_forward</mat-icon>
+                </button>
+              </div>
+            </form>
+          </mat-step>
+
+          <!-- Step 3: Review & Submit -->
+          <mat-step label="Review & Submit">
+            <div class="p-6 space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Review Your Project
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Please review your project details before submitting.
+                </p>
+              </div>
+
+              <!-- Project Summary -->
+              <div class="bg-gray-50 rounded-lg p-6 space-y-4">
+                @if (selectedService()) {                    <div class="border-b border-gray-200 pb-4">
+                      <h4 class="font-medium text-gray-900 mb-2">Selected Service</h4>
+                      <div class="text-gray-700">
+                        <div class="font-medium">{{ selectedService()?.name }}</div>
+                        @if (selectedService()?.description) {
+                          <div class="text-sm text-gray-600 mt-1">
+                            {{ selectedService()?.description }}
+                          </div>
+                        }
+                      </div>
+                    </div>
+                }
+
+                <div class="border-b border-gray-200 pb-4">
+                  <h4 class="font-medium text-gray-900 mb-2">Project Details</h4>
+                  <div class="space-y-2">
+                    <div>
+                      <span class="text-sm font-medium text-gray-600">Title:</span>
+                      <span class="ml-2 text-gray-900">{{ projectDetailsForm.get('title')?.value }}</span>
+                    </div>
+                    <div>
+                      <span class="text-sm font-medium text-gray-600">Description:</span>
+                      <div class="ml-2 text-gray-900 mt-1 text-sm">
+                        {{ projectDetailsForm.get('description')?.value }}
+                      </div>
+                    </div>
+                    @if (projectDetailsForm.get('budgetRange')?.value) {
+                      <div>
+                        <span class="text-sm font-medium text-gray-600">Budget:</span>
+                        <span class="ml-2 text-gray-900">{{ getBudgetLabel(projectDetailsForm.get('budgetRange')?.value) }}</span>
+                      </div>
+                    }
+                    @if (projectDetailsForm.get('timeline')?.value) {
+                      <div>
+                        <span class="text-sm font-medium text-gray-600">Timeline:</span>
+                        <span class="ml-2 text-gray-900">{{ getTimelineLabel(projectDetailsForm.get('timeline')?.value) }}</span>
+                      </div>
+                    }
+                    @if (projectDetailsForm.get('priority')?.value) {
+                      <div>
+                        <span class="text-sm font-medium text-gray-600">Priority:</span>
+                        <span class="ml-2 text-gray-900">{{ getPriorityLabel(projectDetailsForm.get('priority')?.value) }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <div>
+                  <h4 class="font-medium text-gray-900 mb-2">Next Steps</h4>
+                  <div class="text-sm text-gray-600 space-y-1">
+                    <div class="flex items-center">
+                      <mat-icon class="text-green-600 mr-2 text-base">check_circle</mat-icon>
+                      Your project will be sent to {{ business()?.name }}
+                    </div>
+                    <div class="flex items-center">
+                      <mat-icon class="text-green-600 mr-2 text-base">check_circle</mat-icon>
+                      A chat conversation will be started automatically
+                    </div>
+                    <div class="flex items-center">
+                      <mat-icon class="text-green-600 mr-2 text-base">check_circle</mat-icon>
+                      You'll be able to discuss details and negotiate terms
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-between">
+                <button 
+                  type="button"
+                  mat-button 
+                  color="primary"
+                  (click)="previousStep(stepper)">
+                  <mat-icon class="mr-2">arrow_back</mat-icon>
+                  Previous
+                </button>
+                <button 
+                  type="button"
+                  mat-flat-button 
+                  color="primary"
+                  (click)="submitProject()"
+                  [disabled]="submitting()">
+                  @if (submitting()) {
+                    <ng-container>
+                      <mat-icon class="mr-2 animate-spin">refresh</mat-icon>
+                      Creating Project...
+                    </ng-container>
+                  } @else {
+                    <ng-container>
+                      <mat-icon class="mr-2">send</mat-icon>
+                      Create Project & Start Chat
+                    </ng-container>
+                  }
+                </button>
+              </div>
+            </div>
+          </mat-step>
+        </mat-stepper>
+      </div>
+    </div>
+  }
+</div>

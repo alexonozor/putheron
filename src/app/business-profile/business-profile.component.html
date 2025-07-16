@@ -107,10 +107,18 @@
 
             <!-- Contact Actions -->
             <div class="flex flex-wrap gap-3">
+              <!-- Primary CTA: Start a Project -->
+              <button 
+                (click)="startProject()"
+                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center font-medium">
+                <mat-icon class="mr-2">add_circle</mat-icon>
+                Start a Project
+              </button>
+
               @if (business()?.contact_email || business()?.contact_phone) {
                 <button 
                   (click)="contactBusiness()"
-                  class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                  class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center">
                   <mat-icon class="mr-2">contact_mail</mat-icon>
                   Contact Business
                 </button>

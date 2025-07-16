@@ -1,0 +1,409 @@
+<app-header />
+
+<div class="min-h-screen bg-gray-50">
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  } @else if (error()) {
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="text-red-400 mb-4">
+          <mat-icon class="text-6xl">error_outline</mat-icon>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ error() }}</h3>
+        <div class="space-x-4">
+          <button 
+            (click)="goBack()"
+            class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+            Go Back
+          </button>
+          <button 
+            (click)="loadData()"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Header -->
+      <div class="mb-8">
+        <button 
+          (click)="goBack()"
+          class="mb-4 flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+          <mat-icon class="mr-2">arrow_back</mat-icon>
+          Back to Dashboard
+        </button>
+        
+        <div class="text-center">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">
+            Create Your Business
+          </h1>
+          <p class="text-gray-600">
+            Set up your business profile and start connecting with customers
+          </p>
+        </div>
+      </div>
+
+      <!-- Business Creation Form -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <mat-stepper #stepper [linear]="true" class="business-stepper">
+          <!-- Step 1: Business Information -->
+          <mat-step [stepControl]="businessInfoForm" label="Business Information">
+            <form [formGroup]="businessInfoForm" class="p-6 space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Tell us about your business
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Provide basic information about your business to get started.
+                </p>
+              </div>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Business Name</mat-label>
+                <input 
+                  matInput 
+                  formControlName="name" 
+                  placeholder="Enter your business name"
+                  required>
+                @if (businessInfoForm.get('name')?.hasError('required') && businessInfoForm.get('name')?.touched) {
+                  <mat-error>Business name is required</mat-error>
+                }
+                @if (businessInfoForm.get('name')?.hasError('minlength') && businessInfoForm.get('name')?.touched) {
+                  <mat-error>Business name must be at least 2 characters</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Business Description</mat-label>
+                <textarea 
+                  matInput 
+                  formControlName="description"
+                  rows="4"
+                  placeholder="Describe what your business does, your services, and what makes you unique..."
+                  required></textarea>
+                @if (businessInfoForm.get('description')?.hasError('required') && businessInfoForm.get('description')?.touched) {
+                  <mat-error>Business description is required</mat-error>
+                }
+                @if (businessInfoForm.get('description')?.hasError('minlength') && businessInfoForm.get('description')?.touched) {
+                  <mat-error>Description must be at least 10 characters</mat-error>
+                }
+              </mat-form-field>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <mat-form-field appearance="outline">
+                  <mat-label>Business Type</mat-label>
+                  <mat-select formControlName="business_type" required>
+                    <mat-option value="service">Service Business</mat-option>
+                    <mat-option value="product">Product Business</mat-option>
+                    <mat-option value="consulting">Consulting</mat-option>
+                    <mat-option value="retail">Retail</mat-option>
+                    <mat-option value="online">Online Business</mat-option>
+                    <mat-option value="other">Other</mat-option>
+                  </mat-select>
+                  @if (businessInfoForm.get('business_type')?.hasError('required') && businessInfoForm.get('business_type')?.touched) {
+                    <mat-error>Please select a business type</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Category</mat-label>
+                  <mat-select 
+                    formControlName="category_id" 
+                    (selectionChange)="onCategoryChange($event.value)"
+                    required>
+                    @for (category of categories(); track category.id) {
+                      <mat-option [value]="category.id">
+                        {{ category.name }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                  @if (businessInfoForm.get('category_id')?.hasError('required') && businessInfoForm.get('category_id')?.touched) {
+                    <mat-error>Please select a category</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              @if (subcategories().length > 0) {
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Subcategory (Optional)</mat-label>
+                  <mat-select formControlName="subcategory_id">
+                    <mat-option value="">None</mat-option>
+                    @for (subcategory of subcategories(); track subcategory.id) {
+                      <mat-option [value]="subcategory.id">
+                        {{ subcategory.name }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              }
+
+              <div class="flex justify-end">
+                <button 
+                  type="button"
+                  mat-flat-button 
+                  color="primary"
+                  (click)="nextStep(stepper)"
+                  [disabled]="!isBusinessInfoValid()">
+                  Next
+                  <mat-icon class="ml-2">arrow_forward</mat-icon>
+                </button>
+              </div>
+            </form>
+          </mat-step>
+
+          <!-- Step 2: Business Details -->
+          <mat-step [stepControl]="businessDetailsForm" label="Contact & Location">
+            <form [formGroup]="businessDetailsForm" class="p-6 space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Contact Information & Location
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Help customers find and contact your business.
+                </p>
+              </div>
+
+              <!-- Location Fields -->
+              <div>
+                <h4 class="text-md font-medium text-gray-900 mb-3">Business Location</h4>
+                <div class="space-y-4">
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Street Address (Optional)</mat-label>
+                    <input 
+                      matInput 
+                      formControlName="address" 
+                      placeholder="123 Main Street">
+                  </mat-form-field>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <mat-form-field appearance="outline">
+                      <mat-label>City</mat-label>
+                      <input 
+                        matInput 
+                        formControlName="city" 
+                        placeholder="Enter city"
+                        required>
+                      @if (businessDetailsForm.get('city')?.hasError('required') && businessDetailsForm.get('city')?.touched) {
+                        <mat-error>City is required</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>State/Province</mat-label>
+                      <input 
+                        matInput 
+                        formControlName="state" 
+                        placeholder="Enter state/province">
+                    </mat-form-field>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Country</mat-label>
+                      <input 
+                        matInput 
+                        formControlName="country" 
+                        placeholder="Enter country"
+                        required>
+                      @if (businessDetailsForm.get('country')?.hasError('required') && businessDetailsForm.get('country')?.touched) {
+                        <mat-error>Country is required</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Postal Code</mat-label>
+                      <input 
+                        matInput 
+                        formControlName="postal_code" 
+                        placeholder="Enter postal code">
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contact Fields -->
+              <div>
+                <h4 class="text-md font-medium text-gray-900 mb-3">Contact Information</h4>
+                <div class="space-y-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Business Email</mat-label>
+                      <input 
+                        matInput 
+                        type="email"
+                        formControlName="contact_email" 
+                        placeholder="business@example.com">
+                      @if (businessDetailsForm.get('contact_email')?.hasError('email') && businessDetailsForm.get('contact_email')?.touched) {
+                        <mat-error>Please enter a valid email address</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                      <mat-label>Business Phone</mat-label>
+                      <input 
+                        matInput 
+                        type="tel"
+                        formControlName="contact_phone" 
+                        placeholder="+1 (555) 123-4567">
+                    </mat-form-field>
+                  </div>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Website URL (Optional)</mat-label>
+                    <input 
+                      matInput 
+                      type="url"
+                      formControlName="website_url" 
+                      placeholder="https://your-website.com">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Logo URL (Optional)</mat-label>
+                    <input 
+                      matInput 
+                      type="url"
+                      formControlName="logo_url" 
+                      placeholder="https://example.com/logo.jpg">
+                    <mat-hint>You can upload a logo later from your business profile</mat-hint>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="flex justify-between">
+                <button 
+                  type="button"
+                  mat-button 
+                  color="primary"
+                  (click)="previousStep(stepper)">
+                  <mat-icon class="mr-2">arrow_back</mat-icon>
+                  Previous
+                </button>
+                <button 
+                  type="button"
+                  mat-flat-button 
+                  color="primary"
+                  (click)="nextStep(stepper)"
+                  [disabled]="!isBusinessDetailsValid()">
+                  Next
+                  <mat-icon class="ml-2">arrow_forward</mat-icon>
+                </button>
+              </div>
+            </form>
+          </mat-step>
+
+          <!-- Step 3: Review & Submit -->
+          <mat-step label="Review & Submit">
+            <div class="p-6 space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Review Your Business Information
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Please review your business details before submitting.
+                </p>
+              </div>
+
+              <!-- Business Summary -->
+              <div class="bg-gray-50 rounded-lg p-6 space-y-4">
+                <div class="border-b border-gray-200 pb-4">
+                  <h4 class="font-medium text-gray-900 mb-2">Business Information</h4>
+                  <div class="space-y-2">
+                    <div>
+                      <span class="text-sm font-medium text-gray-600">Name:</span>
+                      <span class="ml-2 text-gray-900">{{ businessInfoForm.get('name')?.value }}</span>
+                    </div>
+                    <div>
+                      <span class="text-sm font-medium text-gray-600">Type:</span>
+                      <span class="ml-2 text-gray-900">{{ businessInfoForm.get('business_type')?.value }}</span>
+                    </div>
+                    <div>
+                      <span class="text-sm font-medium text-gray-600">Description:</span>
+                      <div class="ml-2 text-gray-900 mt-1 text-sm">
+                        {{ businessInfoForm.get('description')?.value }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="border-b border-gray-200 pb-4">
+                  <h4 class="font-medium text-gray-900 mb-2">Location & Contact</h4>
+                  <div class="space-y-2">
+                    <div>
+                      <span class="text-sm font-medium text-gray-600">Location:</span>
+                      <span class="ml-2 text-gray-900">
+                        {{ businessDetailsForm.get('city')?.value }}, {{ businessDetailsForm.get('country')?.value }}
+                      </span>
+                    </div>
+                    @if (businessDetailsForm.get('contact_email')?.value) {
+                      <div>
+                        <span class="text-sm font-medium text-gray-600">Email:</span>
+                        <span class="ml-2 text-gray-900">{{ businessDetailsForm.get('contact_email')?.value }}</span>
+                      </div>
+                    }
+                    @if (businessDetailsForm.get('contact_phone')?.value) {
+                      <div>
+                        <span class="text-sm font-medium text-gray-600">Phone:</span>
+                        <span class="ml-2 text-gray-900">{{ businessDetailsForm.get('contact_phone')?.value }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <div>
+                  <h4 class="font-medium text-gray-900 mb-2">Next Steps</h4>
+                  <div class="text-sm text-gray-600 space-y-1">
+                    <div class="flex items-center">
+                      <mat-icon class="text-green-600 mr-2 text-base">check_circle</mat-icon>
+                      Your business profile will be created
+                    </div>
+                    <div class="flex items-center">
+                      <mat-icon class="text-green-600 mr-2 text-base">check_circle</mat-icon>
+                      You can add services and showcase your work
+                    </div>
+                    <div class="flex items-center">
+                      <mat-icon class="text-green-600 mr-2 text-base">check_circle</mat-icon>
+                      Customers can find and contact you
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-between">
+                <button 
+                  type="button"
+                  mat-button 
+                  color="primary"
+                  (click)="previousStep(stepper)">
+                  <mat-icon class="mr-2">arrow_back</mat-icon>
+                  Previous
+                </button>
+                <button 
+                  type="button"
+                  mat-flat-button 
+                  color="primary"
+                  (click)="submitBusiness()"
+                  [disabled]="submitting()">
+                  @if (submitting()) {
+                    <ng-container>
+                      <mat-icon class="mr-2 animate-spin">refresh</mat-icon>
+                      Creating Business...
+                    </ng-container>
+                  } @else {
+                    <ng-container>
+                      <mat-icon class="mr-2">business</mat-icon>
+                      Create Business
+                    </ng-container>
+                  }
+                </button>
+              </div>
+            </div>
+          </mat-step>
+        </mat-stepper>
+      </div>
+    </div>
+  }
+</div>

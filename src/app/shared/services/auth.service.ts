@@ -57,16 +57,30 @@ export class AuthService {
 
       if (error) throw error;
 
-      // Create profile after successful signup
-      if (data.user) {
-        await this.supabaseService.createProfile({
-          id: data.user.id,
-          full_name: fullName
-        });
+      // If signup is successful, the profile should be created automatically by database triggers
+      // If not, we can create it manually as a fallback
+      if (data.user && data.user.email_confirmed_at) {
+        // User is immediately confirmed, check if profile exists
+        try {
+          const { data: profileData, error: profileError } = await this.supabaseService.getProfile(data.user.id);
+          if (profileError || !profileData) {
+            // Profile doesn't exist, create it
+            await this.supabaseService.createProfile({
+              id: data.user.id,
+              full_name: fullName,
+              is_buyer: true,
+              is_seller: false
+            });
+          }
+        } catch (profileError: any) {
+          console.log('Profile check/creation error:', profileError);
+          // Don't throw error here, as the user was successfully created
+        }
       }
 
       return { data, error: null };
     } catch (error: any) {
+      console.error('SignUp error:', error);
       return { data: null, error };
     } finally {
       this.loading.set(false);
@@ -85,9 +99,6 @@ export class AuthService {
       if (data.user) {
         await this.userService.loadUserProfile(data.user.id);
       }
-      
-      // Redirect to dashboard or intended route after successful login
-      this.router.navigate(['/dashboard']);
       
       return { data, error: null };
     } catch (error: any) {
@@ -165,6 +176,10 @@ export class AuthService {
     const user = this.currentUser;
     if (!user) return null;
 
+    console.log('Getting profile for user:', user);
+    console.log('User ID:', user.id);
+    console.log('User ID type:', typeof user.id);
+
     const { data, error } = await this.supabaseService.getProfile(user.id);
     
     if (error) {
@@ -172,6 +187,7 @@ export class AuthService {
       return null;
     }
     
+    console.log('Profile data retrieved:', data);
     return data;
   }
 

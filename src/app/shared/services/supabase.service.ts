@@ -197,11 +197,11 @@ export class SupabaseService {
     return await query;
   }
 
-  async getBusinessById(businessId: number) {
+  async getBusinessById(businessId: string) {
     return await this.supabase
       .from('businesses')
       .select('*')
-      .eq('id', businessId)
+      .eq('id', businessId as any)
       .single();
   }
 
@@ -213,11 +213,11 @@ export class SupabaseService {
       .single();
   }
 
-  async updateBusiness(businessId: number, updates: TablesUpdate<'businesses'>) {
+  async updateBusiness(businessId: string, updates: TablesUpdate<'businesses'>) {
     return await this.supabase
       .from('businesses')
       .update(updates)
-      .eq('id', businessId)
+      .eq('id', businessId as any)
       .select()
       .single();
   }

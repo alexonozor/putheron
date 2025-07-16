@@ -1,7 +1,7 @@
-import { Component, signal, inject, computed, effect } from '@angular/core';
+import { Component, signal, inject, computed, effect, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../shared/services/auth.service';
 
 @Component({
@@ -11,15 +11,17 @@ import { AuthService } from '../shared/services/auth.service';
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss']
 })
-export class AuthComponent {
+export class AuthComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
 
   // Signals for component state
   readonly isSignUp = signal(false);
   readonly error = signal('');
   readonly successMessage = signal('');
+  readonly authMessage = signal('');
 
   // Reactive form
   readonly authForm: FormGroup;
@@ -32,7 +34,33 @@ export class AuthComponent {
     this.authForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      fullName: ['']
+      fullName: [''] // Will be required conditionally
+    });
+
+    // Update fullName validation based on isSignUp
+    effect(() => {
+      const fullNameControl = this.authForm.get('fullName');
+      if (this.isSignUp()) {
+        fullNameControl?.setValidators([Validators.required]);
+      } else {
+        fullNameControl?.clearValidators();
+      }
+      fullNameControl?.updateValueAndValidity();
+    });
+  }
+
+  ngOnInit() {
+    // Check for query parameters
+    this.route.queryParams.subscribe(params => {
+      if (params['action'] === 'login') {
+        this.isSignUp.set(false);
+      } else if (params['action'] === 'signup') {
+        this.isSignUp.set(true);
+      }
+      
+      if (params['message']) {
+        this.authMessage.set(params['message']);
+      }
     });
   }
 
@@ -67,7 +95,14 @@ export class AuthComponent {
         if (error) {
           this.error.set(error.message);
         } else {
-          this.router.navigate(['/dashboard']);
+          // Check for return URL
+          const returnUrl = sessionStorage.getItem('returnUrl');
+          if (returnUrl) {
+            sessionStorage.removeItem('returnUrl');
+            this.router.navigate([returnUrl]);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
         }
       }
     } catch (err: any) {

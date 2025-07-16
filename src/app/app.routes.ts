@@ -5,6 +5,9 @@ import { ProfileComponent } from './profile/profile.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { SearchComponent } from './search/search.component';
 import { BusinessProfileComponent } from './business-profile/business-profile.component';
+import { CreateProjectComponent } from './create-project/create-project.component';
+import { CreateBusinessComponent } from './create-business/create-business.component';
+import { ChatComponent } from './chat/chat.component';
 import { AuthGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
@@ -22,7 +25,22 @@ export const routes: Routes = [
     component: DashboardComponent,
     canActivate: [AuthGuard]
   },
+  { 
+    path: 'create-business', 
+    component: CreateBusinessComponent,
+    canActivate: [AuthGuard]
+  },
   { path: 'search', component: SearchComponent },
   { path: 'business/:id', component: BusinessProfileComponent },
+  { 
+    path: 'create-project/:businessId', 
+    component: CreateProjectComponent,
+    canActivate: [AuthGuard]
+  },
+  { 
+    path: 'chat/:conversationId', 
+    component: ChatComponent,
+    canActivate: [AuthGuard]
+  },
   { path: '**', redirectTo: '' }
 ];

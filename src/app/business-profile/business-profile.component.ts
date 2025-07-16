@@ -138,17 +138,15 @@ export class BusinessProfileComponent implements OnInit {
       this.loading.set(true);
       this.error.set(null);
 
-      console.log('Loading business with ID:', id, 'parsed as:', parseInt(id));
+      console.log('Loading business with ID:', id);
+      console.log('ID type:', typeof id);
+      console.log('ID length:', id.length);
 
-      // First, let's check if any businesses exist
-      const { data: allBusinesses, error: allError } = await this.supabaseService.getClient()
-        .from('businesses')
-        .select('id, name, logo_url')
-        .limit(5);
-      
-      console.log('All businesses in database:', allBusinesses);
-      console.log('All businesses error:', allError);
+      // The business ID is actually a UUID string, not a number
+      // So we use it directly without parsing to integer
+      console.log('Using business ID as UUID:', id);
 
+      // Query business by ID (UUID)
       const { data, error } = await this.supabaseService.getClient()
         .from('businesses')
         .select(`
@@ -168,7 +166,7 @@ export class BusinessProfileComponent implements OnInit {
             name
           )
         `)
-        .eq('id', parseInt(id))
+        .eq('id', id as any)
         .single();
 
       console.log('Business query result:', data);
@@ -194,10 +192,10 @@ export class BusinessProfileComponent implements OnInit {
 
         this.business.set(business);
         
-        // Load services, projects, and reviews for this business
-        await this.loadServices(parseInt(id));
-        await this.loadProjects(parseInt(id));
-        await this.loadReviewsAndStats(parseInt(id));
+        // Load services, projects, and reviews for this business using the actual business ID
+        await this.loadServices(business.id);
+        await this.loadProjects(business.id);
+        await this.loadReviewsAndStats(business.id);
       }
 
     } catch (err: any) {
@@ -208,14 +206,14 @@ export class BusinessProfileComponent implements OnInit {
     }
   }
 
-  async loadServices(businessId: number) {
+  async loadServices(businessId: string) {
     try {
       this.servicesLoading.set(true);
 
       const { data, error } = await this.supabaseService.getClient()
         .from('services')
         .select('*')
-        .eq('business_id', businessId)
+        .eq('business_id', businessId as any)
         .order('created_at', { ascending: false });
 
       console.log('Services query result:', data);
@@ -242,14 +240,14 @@ export class BusinessProfileComponent implements OnInit {
     }
   }
 
-  async loadProjects(businessId: number) {
+  async loadProjects(businessId: string) {
     try {
       this.projectsLoading.set(true);
 
       const { data, error } = await this.supabaseService.getClient()
         .from('projects')
         .select('*')
-        .eq('business_id', businessId)
+        .eq('business_id', businessId as any)
         .order('completion_date', { ascending: false });
 
       console.log('Projects query result:', data);
@@ -276,7 +274,7 @@ export class BusinessProfileComponent implements OnInit {
     }
   }
 
-  async loadReviewsAndStats(businessId: number) {
+  async loadReviewsAndStats(businessId: string) {
     try {
       this.reviewsLoading.set(true);
 
@@ -425,6 +423,30 @@ export class BusinessProfileComponent implements OnInit {
     } else if (business?.contact_phone) {
       window.location.href = `tel:${business.contact_phone}`;
     }
+  }
+
+  startProject() {
+    const business = this.business();
+    if (!business) return;
+
+    // Check if user is authenticated
+    if (!this.authService.isAuthenticated()) {
+      // Store the current business profile URL for return after login
+      const returnUrl = `/business/${business.id}`;
+      sessionStorage.setItem('returnUrl', returnUrl);
+      
+      // Redirect to auth page
+      this.router.navigate(['/auth'], { 
+        queryParams: { 
+          action: 'login',
+          message: 'Please log in to start a project with this business'
+        }
+      });
+      return;
+    }
+
+    // User is authenticated, navigate to project creation
+    this.router.navigate(['/create-project', business.id]);
   }
 
   callBusiness() {
