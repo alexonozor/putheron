@@ -201,4 +201,30 @@ export class ChatService {
     const response = await firstValueFrom(this.getUnreadMessageCount());
     return response.data.count;
   }
+
+  // Get chat by project ID
+  getChatByProjectId(projectId: string): Observable<{ success: boolean; data: Chat | null; message: string }> {
+    return this.http.get<{ success: boolean; data: Chat | null; message: string }>(
+      `${this.apiUrl}/project/${projectId}`
+    );
+  }
+
+  // Get chat by project ID async
+  async getChatByProjectIdAsync(projectId: string): Promise<Chat | null> {
+    const response = await firstValueFrom(this.getChatByProjectId(projectId));
+    return response.data;
+  }
+
+  // Get chat unread count
+  getChatUnreadCount(chatId: string): Observable<{ success: boolean; data: { count: number }; message: string }> {
+    return this.http.get<{ success: boolean; data: { count: number }; message: string }>(
+      `${this.apiUrl}/${chatId}/unread-count`
+    );
+  }
+
+  // Get chat unread count async
+  async getChatUnreadCountAsync(chatId: string): Promise<number> {
+    const response = await firstValueFrom(this.getChatUnreadCount(chatId));
+    return response.data.count;
+  }
 }

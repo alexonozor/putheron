@@ -19,14 +19,65 @@
       <div class="flex items-center space-x-3">
         <!-- Chat Button -->
         @if (project() && (project()!.status === 'accepted' || project()!.status === 'in_progress' || project()!.status === 'completed')) {
-          <button 
-            mat-raised-button 
-            color="primary" 
-            class="px-6 py-3 text-base font-semibold rounded-lg"
-            (click)="startChat()">
-            <mat-icon class="mr-2">chat</mat-icon>
-            Start Chat
-          </button>
+          @if (loadingChat()) {
+            <button 
+              mat-raised-button 
+              disabled
+              class="px-6 py-3 text-base font-semibold rounded-lg">
+              <mat-icon class="mr-2">hourglass_empty</mat-icon>
+              Loading...
+            </button>
+          } @else if (existingChat()) {
+            <button 
+              mat-raised-button 
+              color="primary" 
+              class="px-6 py-3 text-base font-semibold rounded-lg relative"
+              (click)="goToExistingChat()">
+              <mat-icon class="mr-2">chat</mat-icon>
+              Open Chat
+              @if (chatUnreadCount() > 0) {
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                  {{ chatUnreadCount() }}
+                </span>
+              }
+            </button>
+          } @else {
+                    <!-- Chat Button -->
+        @if (project() && (project()!.status === 'accepted' || project()!.status === 'in_progress' || project()!.status === 'completed')) {
+          @if (loadingChat()) {
+            <button 
+              mat-raised-button 
+              disabled
+              class="px-6 py-3 text-base font-semibold rounded-lg">
+              <mat-icon class="mr-2">hourglass_empty</mat-icon>
+              Loading...
+            </button>
+          } @else if (existingChat()) {
+            <button 
+              mat-raised-button 
+              color="primary" 
+              class="px-6 py-3 text-base font-semibold rounded-lg relative"
+              (click)="goToExistingChat()">
+              <mat-icon class="mr-2">chat</mat-icon>
+              Open Chat
+              @if (chatUnreadCount() > 0) {
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                  {{ chatUnreadCount() }}
+                </span>
+              }
+            </button>
+          } @else {
+            <button 
+              mat-raised-button 
+              color="primary" 
+              class="px-6 py-3 text-base font-semibold rounded-lg"
+              (click)="startChat()">
+              <mat-icon class="mr-2">chat</mat-icon>
+              Start Chat
+            </button>
+          }
+        }
+          }
         }
         
         <!-- Business Owner Actions -->

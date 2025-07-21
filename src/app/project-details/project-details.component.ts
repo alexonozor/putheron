@@ -33,6 +33,9 @@ export class ProjectDetailsComponent implements OnInit {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly project = signal<Project | null>(null);
+  readonly existingChat = signal<any | null>(null);
+  readonly chatUnreadCount = signal<number>(0);
+  readonly loadingChat = signal(false);
 
   // Computed signals
   readonly user = this.authService.user;
@@ -83,11 +86,35 @@ export class ProjectDetailsComponent implements OnInit {
     try {
       const project = await this.projectService.getProjectAsync(projectId);
       this.project.set(project);
+      
+      // Check for existing chat if project status allows it
+      if (project.status === 'accepted' || project.status === 'in_progress' || project.status === 'completed') {
+        await this.checkForExistingChat(projectId);
+      }
     } catch (error: any) {
       console.error('Error loading project:', error);
       this.error.set('Failed to load project details');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async checkForExistingChat(projectId: string) {
+    this.loadingChat.set(true);
+    try {
+      const chat = await this.chatService.getChatByProjectIdAsync(projectId);
+      this.existingChat.set(chat);
+      
+      if (chat) {
+        // Get unread count for this chat
+        const unreadCount = await this.chatService.getChatUnreadCountAsync(chat._id);
+        this.chatUnreadCount.set(unreadCount);
+      }
+    } catch (error: any) {
+      console.error('Error checking for existing chat:', error);
+      // Don't show error for this, just keep chat as null
+    } finally {
+      this.loadingChat.set(false);
     }
   }
 
@@ -101,7 +128,7 @@ export class ProjectDetailsComponent implements OnInit {
 
     try {
       await this.projectService.updateProjectAsync(project._id, { status: 'accepted' });
-      this.loadProject(project._id); // Reload to get updated data
+      this.loadProject(project._id); // Reload to get updated data and check for chat
       this.dashboardRefreshService.triggerRefresh(); // Refresh dashboard counters
     } catch (error: any) {
       console.error('Error accepting project:', error);
@@ -121,7 +148,7 @@ export class ProjectDetailsComponent implements OnInit {
         status: 'rejected',
         rejection_reason: reason 
       });
-      this.loadProject(project._id); // Reload to get updated data
+      this.loadProject(project._id); // Reload to get updated data and check for chat
       this.dashboardRefreshService.triggerRefresh(); // Refresh dashboard counters
     } catch (error: any) {
       console.error('Error rejecting project:', error);
@@ -135,7 +162,7 @@ export class ProjectDetailsComponent implements OnInit {
 
     try {
       await this.projectService.updateProjectAsync(project._id, { status: 'in_progress' });
-      this.loadProject(project._id); // Reload to get updated data
+      this.loadProject(project._id); // Reload to get updated data and check for chat
       this.dashboardRefreshService.triggerRefresh(); // Refresh dashboard counters
     } catch (error: any) {
       console.error('Error marking project as in progress:', error);
@@ -149,7 +176,7 @@ export class ProjectDetailsComponent implements OnInit {
 
     try {
       await this.projectService.updateProjectAsync(project._id, { status: 'completed' });
-      this.loadProject(project._id); // Reload to get updated data
+      this.loadProject(project._id); // Reload to get updated data and check for chat
       this.dashboardRefreshService.triggerRefresh(); // Refresh dashboard counters
     } catch (error: any) {
       console.error('Error marking project as completed:', error);
@@ -163,11 +190,18 @@ export class ProjectDetailsComponent implements OnInit {
 
     try {
       const chat = await this.chatService.createOrGetChatAsync({ project_id: project._id });
-      this.router.navigate(['/messages/chat', chat._id]);
+      this.router.navigate(['/dashboard/messages/chat', chat._id]);
     } catch (error: any) {
       console.error('Error starting chat:', error);
       alert('Failed to start chat. Please try again.');
     }
+  }
+
+  async goToExistingChat() {
+    const chat = this.existingChat();
+    if (!chat) return;
+
+    this.router.navigate(['/dashboard/messages/chat', chat._id]);
   }
 
   getStatusColor(status: string): string {
