@@ -1,87 +1,119 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
-import { SupabaseService } from './supabase.service';
-import { UserService } from './user.service';
-import { Tables, TablesUpdate } from '../types/database.types';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
+import { 
+  User, 
+  AuthResponse, 
+  LoginRequest, 
+  RegisterRequest, 
+  UpdateUserRequest,
+  UserResponse 
+} from '../../models/user.model';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly supabaseService = inject(SupabaseService);
-  private readonly userService = inject(UserService);
+  private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly config = inject(ConfigService);
+  
+  private readonly API_URL = this.config.apiBaseUrl;
+  private readonly TOKEN_KEY = this.config.tokenKey;
+  private readonly USER_KEY = this.config.userKey;
   
   // Signals for state management
   readonly loading = signal<boolean>(false);
   
-  // Convert observables to signals
-  readonly authState = toSignal(this.supabaseService.authState$, { initialValue: { user: null, session: null } });
-  readonly user = computed(() => this.authState().user);
-  readonly isAuthenticated = computed(() => !!this.authState().user);
+  // User state
+  private userSubject = new BehaviorSubject<User | null>(this.getUserFromStorage());
+  private tokenSubject = new BehaviorSubject<string | null>(this.getTokenFromStorage());
   
-  // Legacy observables for backward compatibility
-  get loading$() {
-    return this.supabaseService.authState$.pipe(
-      map(() => this.loading())
-    );
-  }
-
-  get user$() {
-    return this.supabaseService.authState$.pipe(
-      map(state => state.user)
-    );
-  }
-
-  get isAuthenticated$() {
-    return this.supabaseService.authState$.pipe(
-      map(state => !!state.user)
-    );
-  }
-
+  readonly user$ = this.userSubject.asObservable();
+  readonly token$ = this.tokenSubject.asObservable();
+  readonly isAuthenticated$ = this.user$.pipe(map(user => !!user));
+  
+  // Computed signals
+  readonly user = computed(() => this.userSubject.value);
+  readonly isAuthenticated = computed(() => !!this.userSubject.value);
+  
+  // Legacy properties for backward compatibility
   get currentUser() {
-    return this.supabaseService.user;
+    return this.userSubject.value;
   }
 
-  async signUp(email: string, password: string, fullName?: string) {
+  get loading$() {
+    return of(this.loading());
+  }
+
+  private getTokenFromStorage(): string | null {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(this.TOKEN_KEY);
+    }
+    return null;
+  }
+
+  private getUserFromStorage(): User | null {
+    if (typeof window !== 'undefined') {
+      const userStr = localStorage.getItem(this.USER_KEY);
+      return userStr ? JSON.parse(userStr) : null;
+    }
+    return null;
+  }
+
+  private setAuthData(token: string, user: User): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.TOKEN_KEY, token);
+      localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    }
+    this.tokenSubject.next(token);
+    this.userSubject.next(user);
+  }
+
+  private clearAuthData(): void {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.USER_KEY);
+    }
+    this.tokenSubject.next(null);
+    this.userSubject.next(null);
+  }
+
+  getAuthToken(): string | null {
+    return this.tokenSubject.value;
+  }
+
+  getAuthHeaders(): HttpHeaders | Record<string, string> {
+    const token = this.getAuthToken();
+    if (token) {
+      return { Authorization: `Bearer ${token}` };
+    }
+    return {};
+  }
+
+  async signUp(registerData: RegisterRequest) {
     try {
       this.loading.set(true);
       
-      const { data, error } = await this.supabaseService.signUp(
-        email, 
-        password,
-        { full_name: fullName }
-      );
+      const response = await this.http.post<AuthResponse>(
+        `${this.API_URL}/auth/register`,
+        registerData
+      ).toPromise();
 
-      if (error) throw error;
-
-      // If signup is successful, the profile should be created automatically by database triggers
-      // If not, we can create it manually as a fallback
-      if (data.user && data.user.email_confirmed_at) {
-        // User is immediately confirmed, check if profile exists
-        try {
-          const { data: profileData, error: profileError } = await this.supabaseService.getProfile(data.user.id);
-          if (profileError || !profileData) {
-            // Profile doesn't exist, create it
-            await this.supabaseService.createProfile({
-              id: data.user.id,
-              full_name: fullName,
-              is_buyer: true,
-              is_seller: false
-            });
-          }
-        } catch (profileError: any) {
-          console.log('Profile check/creation error:', profileError);
-          // Don't throw error here, as the user was successfully created
-        }
+      if (response?.success && response.data) {
+        this.setAuthData(response.data.access_token, response.data.user);
+        this.config.logIfEnabled('User registered successfully:', response.data.user.email);
+        return { data: response.data, error: null };
       }
 
-      return { data, error: null };
+      return { data: null, error: new Error('Registration failed') };
     } catch (error: any) {
-      console.error('SignUp error:', error);
-      return { data: null, error };
+      this.config.errorIfEnabled('SignUp error:', error);
+      const errorMessage = error.error?.message || error.message || 'Registration failed';
+      return { data: null, error: new Error(errorMessage) };
     } finally {
       this.loading.set(false);
     }
@@ -91,18 +123,22 @@ export class AuthService {
     try {
       this.loading.set(true);
       
-      const { data, error } = await this.supabaseService.signIn(email, password);
-      
-      if (error) throw error;
-      
-      // Load user profile after successful login
-      if (data.user) {
-        await this.userService.loadUserProfile(data.user.id);
+      const response = await this.http.post<AuthResponse>(
+        `${this.API_URL}/auth/login`,
+        { email, password }
+      ).toPromise();
+
+      if (response?.success && response.data) {
+        this.setAuthData(response.data.access_token, response.data.user);
+        this.config.logIfEnabled('User signed in successfully:', response.data.user.email);
+        return { data: response.data, error: null };
       }
-      
-      return { data, error: null };
+
+      return { data: null, error: new Error('Login failed') };
     } catch (error: any) {
-      return { data: null, error };
+      this.config.errorIfEnabled('SignIn error:', error);
+      const errorMessage = error.error?.message || error.message || 'Login failed';
+      return { data: null, error: new Error(errorMessage) };
     } finally {
       this.loading.set(false);
     }
@@ -111,100 +147,97 @@ export class AuthService {
   async signOut() {
     try {
       this.loading.set(true);
-      
-      const { error } = await this.supabaseService.signOut();
-      
-      if (error) throw error;
-      
-      // Clear user data when signing out
-      this.userService.clearUserData();
-      
-      // Redirect to home page after logout
-      this.router.navigate(['/']);
-      
+      this.clearAuthData();
+      this.config.logIfEnabled('User signed out successfully');
+      await this.router.navigate(['/auth']);
       return { error: null };
     } catch (error: any) {
+      this.config.errorIfEnabled('SignOut error:', error);
       return { error };
     } finally {
       this.loading.set(false);
     }
   }
 
-  async signInWithGoogle() {
+  // async getProfile(): Promise<{ data: User | null; error: any }> {
+  //   try {
+  //     const response = await this.http.get<{ success: boolean; data: User; message: string }>(
+  //       `${this.API_URL}/users/profile`,
+  //       { headers: this.getAuthHeaders() }
+  //     ).toPromise();
+
+  //     if (response?.success && response.data) {
+  //       this.userSubject.next(response.data);
+  //       if (typeof window !== 'undefined') {
+  //         localStorage.setItem(this.USER_KEY, JSON.stringify(response.data));
+  //       }
+  //       return { data: response.data, error: null };
+  //     }
+
+  //     return { data: null, error: new Error('Failed to get profile') };
+  //   } catch (error: any) {
+  //     console.error('Get profile error:', error);
+  //     return { data: null, error };
+  //   }
+  // }
+
+  async updateProfile(updateData: UpdateUserRequest): Promise<{ data: User | null; error: any }> {
     try {
-      this.loading.set(true);
-      
-      const { data, error } = await this.supabaseService.signInWithGoogle();
-      
-      return { data, error };
+      if (!this.currentUser) {
+        return { data: null, error: new Error('User not authenticated') };
+      }
+
+      const response = await this.http.put<UserResponse>(
+        `${this.API_URL}/users/${this.currentUser._id}`,
+        updateData,
+        { headers: this.getAuthHeaders() }
+      ).toPromise();
+
+      if (response?.success && response.data) {
+        this.userSubject.next(response.data);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(this.USER_KEY, JSON.stringify(response.data));
+        }
+        this.config.logIfEnabled('Profile updated successfully');
+        return { data: response.data, error: null };
+      }
+
+      return { data: null, error: new Error('Failed to update profile') };
     } catch (error: any) {
+      this.config.errorIfEnabled('Update profile error:', error);
       return { data: null, error };
-    } finally {
-      this.loading.set(false);
     }
   }
 
-  async resetPassword(email: string) {
-    try {
-      this.loading.set(true);
-      
-      const { data, error } = await this.supabaseService.resetPassword(email);
-      
-      return { data, error };
-    } catch (error: any) {
-      return { data: null, error };
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
-  async updatePassword(password: string) {
-    try {
-      this.loading.set(true);
-      
-      const { data, error } = await this.supabaseService.updatePassword(password);
-      
-      return { data, error };
-    } catch (error: any) {
-      return { data: null, error };
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
-  async getCurrentProfile(): Promise<Tables<'profiles'> | null> {
-    const user = this.currentUser;
-    if (!user) return null;
-
-    console.log('Getting profile for user:', user);
-    console.log('User ID:', user.id);
-    console.log('User ID type:', typeof user.id);
-
-    const { data, error } = await this.supabaseService.getProfile(user.id);
+  logout(): void {
+    // Clear user and token from memory
+    this.userSubject.next(null);
+    this.tokenSubject.next(null);
     
-    if (error) {
-      console.error('Error fetching profile:', error);
+    // Clear from storage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.USER_KEY);
+    }
+    
+    this.config.logIfEnabled('User logged out successfully');
+  }
+
+  async getUserById(userId: string): Promise<User | null> {
+    try {
+      const response = await this.http.get<UserResponse>(
+        `${this.API_URL}/users/${userId}`,
+        { headers: this.getAuthHeaders() }
+      ).toPromise();
+
+      if (response?.success && response.data) {
+        return response.data;
+      }
+      return null;
+    } catch (error: any) {
+      this.config.errorIfEnabled('Get user by ID error:', error);
       return null;
     }
-    
-    console.log('Profile data retrieved:', data);
-    return data;
   }
 
-  async updateProfile(updates: TablesUpdate<'profiles'>) {
-    const user = this.currentUser;
-    if (!user) throw new Error('No authenticated user');
-
-    try {
-      this.loading.set(true);
-      
-      const { data, error } = await this.supabaseService.updateProfile(user.id, updates);
-      
-      return { data, error };
-    } catch (error: any) {
-      return { data: null, error };
-    } finally {
-      this.loading.set(false);
-    }
-  }
 }

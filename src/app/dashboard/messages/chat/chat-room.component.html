@@ -1,0 +1,291 @@
+<div class="flex flex-col h-screen bg-gray-50">
+  <!-- Fixed Header -->
+  <div class="bg-white border-b border-gray-200 px-4 py-3 shadow-sm sticky top-0 z-10">
+    <div class="flex items-center justify-between w-full max-w-4xl mx-auto">
+      <!-- Left side - Back button and Project info -->
+      <div class="flex items-center space-x-3 min-w-0 flex-1">
+        <button 
+          (click)="navigateBack()"
+          class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 flex-shrink-0">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        
+        @if (chat(); as currentChat) {
+          <div class="flex items-center space-x-3 min-w-0 flex-1">
+            <!-- Business Logo -->
+            @if (currentChat.project_id.business_id.logo_url) {
+              <img 
+                [src]="currentChat.project_id.business_id.logo_url" 
+                [alt]="currentChat.project_id.business_id.name"
+                class="w-10 h-10 rounded-full object-cover border-2 border-gray-200 flex-shrink-0">
+            } @else {
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+              </div>
+            }
+            
+            <div class="min-w-0 flex-1">
+              <h1 class="text-lg font-semibold text-gray-900 truncate">{{ currentChat.title }}</h1>
+              <div class="flex items-center space-x-2 text-sm text-gray-600">
+                <span class="truncate">{{ otherParticipant()?.last_name || 'Unknown User' }}</span>
+                <span class="text-gray-400 hidden sm:inline">•</span>
+                
+                <!-- Connection Status -->
+                <div class="flex items-center space-x-1">
+                  <div 
+                    class="w-2 h-2 rounded-full"
+                    [class]="isConnected() ? 'bg-green-500' : 'bg-red-500'">
+                  </div>
+                  <span class="text-xs">{{ isConnected() ? 'Connected' : 'Offline' }}</span>
+                </div>
+                
+                <span class="text-gray-400 hidden sm:inline">•</span>
+                <span 
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap"
+                  [class]="getProjectStatusColor(currentChat.project_id.status)">
+                  {{ currentChat.project_id.status | titlecase }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+      
+      <!-- Right side - Actions -->
+      <div class="flex items-center space-x-2 flex-shrink-0">
+        @if (chat(); as currentChat) {
+          <!-- Mobile: Show only one primary action -->
+          <div class="md:hidden">
+            @if (canPerformAction('accept')) {
+              <button 
+                (click)="handleProjectAction('accept')"
+                class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200">
+                Accept
+              </button>
+            } @else if (canPerformAction('start')) {
+              <button 
+                (click)="handleProjectAction('start')"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200">
+                Start
+              </button>
+            } @else if (canPerformAction('complete')) {
+              <button 
+                (click)="handleProjectAction('complete')"
+                class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200">
+                Complete
+              </button>
+            }
+          </div>
+          
+          <!-- Desktop: Show all actions -->
+          <div class="hidden md:flex items-center space-x-2">
+            @if (canPerformAction('accept')) {
+              <button 
+                (click)="handleProjectAction('accept')"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                Accept Project
+              </button>
+            }
+            @if (canPerformAction('reject')) {
+              <button 
+                (click)="handleProjectAction('reject')"
+                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                Reject
+              </button>
+            }
+            @if (canPerformAction('start')) {
+              <button 
+                (click)="handleProjectAction('start')"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                Start Project
+              </button>
+            }
+            @if (canPerformAction('complete')) {
+              <button 
+                (click)="handleProjectAction('complete')"
+                class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                Mark Complete
+              </button>
+            }
+          </div>
+        }
+        
+        <button 
+          (click)="goToProjectDetails()"
+          class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages Area - Scrollable -->
+  <div class="flex-1 overflow-hidden bg-gray-50">
+    <!-- Loading State -->
+    @if (loading() || messagesLoading()) {
+      <div class="flex items-center justify-center h-full">
+        <div class="flex flex-col items-center space-y-4">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p class="text-gray-500">Loading conversation...</p>
+        </div>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error() && !loading()) {
+      <div class="flex items-center justify-center h-full p-6">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-6 max-w-md mx-auto">
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-red-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="text-red-800 font-medium">{{ error() }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Messages Container - Only this scrolls -->
+    @if (!loading() && !messagesLoading() && !error()) {
+      <div 
+        #messagesContainer
+        class="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
+        
+        <div class="w-full max-w-4xl mx-auto px-4 py-6">
+          @if (hasMessages()) {
+            <div class="space-y-4">
+              @for (message of messages(); track message._id; let i = $index) {
+                <!-- Date Divider -->
+                @if (shouldShowDateDivider(i)) {
+                  <div class="flex justify-center my-8">
+                    <span class="bg-white text-gray-500 text-sm px-4 py-2 rounded-full shadow-sm border border-gray-200">
+                      {{ formatMessageDate(message.createdAt) }}
+                    </span>
+                  </div>
+                }
+
+                <!-- Message -->
+                <div class="flex" [class]="isMyMessage(message) ? 'justify-end' : 'justify-start'">
+                  <div class="flex items-end space-x-2 max-w-xs sm:max-w-sm lg:max-w-md" 
+                       [class]="isMyMessage(message) ? 'flex-row-reverse space-x-reverse' : ''">
+                    
+                    <!-- Avatar (for other user's messages) -->
+                    @if (!isMyMessage(message)) {
+                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <span class="text-white text-xs font-medium">
+                          {{ message.sender_id.email.charAt(0).toUpperCase() }}{{ message.sender_id.last_name.charAt(0).toUpperCase() }}
+                        </span>
+                      </div>
+                    }
+
+                    <!-- Message Bubble -->
+                    <div class="relative group">
+                      <!-- System/Project Update Message -->
+                      @if (message.message_type === 'project_update') {
+                        <div class="bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-xl text-sm text-center shadow-sm max-w-xs">
+                          <svg class="w-4 h-4 text-yellow-600 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          {{ message.content }}
+                        </div>
+                      } @else {
+                        <!-- Regular Message -->
+                        <div 
+                          class="px-4 py-3 rounded-2xl text-sm break-words shadow-sm relative"
+                          [class]="isMyMessage(message) 
+                            ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-br-md' 
+                            : 'bg-white border border-gray-200 text-gray-900 rounded-bl-md'">
+                          <p class="leading-relaxed">{{ message.content }}</p>
+                          
+                          @if (message.is_edited) {
+                            <span class="text-xs opacity-75 ml-2 italic">(edited)</span>
+                          }
+                          
+                          <!-- Message time at bottom right -->
+                          <div 
+                            class="text-xs mt-1 opacity-70"
+                            [class]="isMyMessage(message) ? 'text-blue-100 text-right' : 'text-gray-500 text-right'">
+                            {{ formatMessageTime(message.createdAt) }}
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <!-- Empty State -->
+            <div class="flex flex-col items-center justify-center h-full text-center py-12 min-h-96">
+              <div class="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mb-6">
+                <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 mb-2">Start the conversation</h3>
+              <p class="text-gray-500 mb-6 max-w-md px-4">
+                No messages yet. Send the first message to start discussing your project 
+                <span class="font-medium">"{{ chat()?.title }}"</span>
+              </p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Fixed Message Input at Bottom -->
+  @if (!loading() && !error()) {
+    <div class="bg-white border-t border-gray-200 px-4 py-4 sticky bottom-0">
+      <!-- Typing Indicator -->
+      @if (typingUsers().length > 0) {
+        <div class="w-full max-w-4xl mx-auto mb-3">
+          <div class="flex items-center space-x-2 text-sm text-gray-500 px-4">
+            <div class="flex space-x-1">
+              <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+              <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+              <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+            </div>
+            <span>{{ getTypingText() }}</span>
+          </div>
+        </div>
+      }
+      
+      <div class="w-full max-w-4xl mx-auto">
+        <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="flex items-end space-x-3">
+          <div class="flex-1">
+            <div class="relative">
+              <textarea 
+                formControlName="content"
+                placeholder="Type your message..."
+                (input)="onTextareaInput()"
+                (keydown)="onTextareaKeydown($event)"
+                rows="1"
+                class="w-full resize-none rounded-2xl border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all duration-200 max-h-32 bg-gray-50 focus:bg-white"
+                style="min-height: 44px;"></textarea>
+            </div>
+          </div>
+          
+          <button 
+            type="submit"
+            [disabled]="!messageForm.valid || sendingMessage()"
+            class="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-sm transform hover:scale-105 disabled:scale-100">
+            @if (sendingMessage()) {
+              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            } @else {
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+              </svg>
+            }
+          </button>
+        </form>
+      </div>
+    </div>
+  }
+</div>

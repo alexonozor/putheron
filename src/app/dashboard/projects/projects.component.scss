@@ -1,0 +1,91 @@
+.projects-tabs {
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    padding-top: 0;
+  }
+}
+
+.project-card {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  .mat-mdc-card-header {
+    padding-bottom: 8px;
+  }
+  
+  .mat-mdc-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  
+  .mat-mdc-card-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: 4px;
+  }
+  
+  .mat-mdc-card-content {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  
+  .mat-mdc-card-actions {
+    padding-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    &.action-buttons {
+      flex-wrap: wrap;
+      
+      button {
+        flex: 1;
+        min-width: 80px;
+      }
+    }
+  }
+  
+  &.pending-request {
+    border-left: 4px solid #f59e0b;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  }
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Status badge colors (complementing Tailwind classes)
+.status-badge {
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .project-card {
+    .mat-mdc-card-actions {
+      &.action-buttons {
+        flex-direction: column;
+        
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// Empty state styling
+.empty-state {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px dashed #e2e8f0;
+}

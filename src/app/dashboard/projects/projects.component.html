@@ -1,0 +1,288 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Projects</h1>
+      <p class="text-gray-600">Manage your project requests and business inquiries</p>
+    </div>
+
+    <!-- Error Display -->
+    @if (error()) {
+      <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+        <div class="flex">
+          <mat-icon class="text-red-400 mr-3">error</mat-icon>
+          <div>
+            <h3 class="text-sm font-medium text-red-800">Error</h3>
+            <p class="mt-1 text-sm text-red-700">{{ error() }}</p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex items-center justify-center py-12">
+        <mat-spinner diameter="40"></mat-spinner>
+        <span class="ml-3 text-gray-600">Loading projects...</span>
+      </div>
+    } @else {
+      <!-- Tabs -->
+      <mat-tab-group (selectedTabChange)="onTabChange($event.index)" class="projects-tabs">
+        <!-- My Projects Tab -->
+        <mat-tab label="My Project Requests">
+          <div class="py-6">
+            @if (myProjects().length === 0) {
+              <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
+                <div class="p-4 bg-gray-50 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                  <mat-icon class="text-gray-400 text-4xl">assignment</mat-icon>
+                </div>
+                <h3 class="text-xl font-medium text-gray-900 mb-2">No project requests yet</h3>
+                <p class="text-gray-500 mb-6">Start by browsing businesses and creating your first project request.</p>
+                <button 
+                  mat-raised-button 
+                  color="primary"
+                  (click)="navigateToHome()">
+                  Browse Businesses
+                </button>
+              </div>
+            } @else {
+              <!-- Project Status Sections -->
+              
+              <!-- Pending Projects -->
+              @if (pendingMyProjects().length > 0) {
+                <div class="mb-8">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Pending Approval</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @for (project of pendingMyProjects(); track project._id) {
+                      <mat-card class="project-card">
+                        <mat-card-header>
+                          <mat-card-title class="text-base">{{ project.title }}</mat-card-title>
+                          <mat-card-subtitle>{{ getBusinessName(project) }}</mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content>
+                          <div class="mb-3">
+                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                              {{ getStatusText(project.status) }}
+                            </span>
+                          </div>
+                          <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ project.description || 'No description' }}</p>
+                          <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between">
+                              <span class="text-gray-500">Budget:</span>
+                              <span class="font-semibold">{{ formatPrice(project.offered_price) }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                              <span class="text-gray-500">Submitted:</span>
+                              <span>{{ formatDate(project.createdAt) }}</span>
+                            </div>
+                          </div>
+                        </mat-card-content>
+                        <mat-card-actions>
+                          <button mat-button (click)="viewProject(project)">
+                            <mat-icon>visibility</mat-icon>
+                            View Details
+                          </button>
+                        </mat-card-actions>
+                      </mat-card>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Active Projects -->
+              @if (activeMyProjects().length > 0) {
+                <div class="mb-8">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Active Projects</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @for (project of activeMyProjects(); track project._id) {
+                      <mat-card class="project-card">
+                        <mat-card-header>
+                          <mat-card-title class="text-base">{{ project.title }}</mat-card-title>
+                          <mat-card-subtitle>{{ getBusinessName(project) }}</mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content>
+                          <div class="mb-3">
+                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                              {{ getStatusText(project.status) }}
+                            </span>
+                          </div>
+                          <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ project.description || 'No description' }}</p>
+                          <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between">
+                              <span class="text-gray-500">Budget:</span>
+                              <span class="font-semibold">{{ formatPrice(project.offered_price) }}</span>
+                            </div>
+                            @if (project.deadline) {
+                              <div class="flex items-center justify-between">
+                                <span class="text-gray-500">Deadline:</span>
+                                <span>{{ formatDate(project.deadline) }}</span>
+                              </div>
+                            }
+                          </div>
+                        </mat-card-content>
+                        <mat-card-actions>
+                          <button mat-button (click)="viewProject(project)">
+                            <mat-icon>visibility</mat-icon>
+                            View Details
+                          </button>
+                        </mat-card-actions>
+                      </mat-card>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Completed Projects -->
+              @if (completedMyProjects().length > 0) {
+                <div class="mb-8">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Completed Projects</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @for (project of completedMyProjects(); track project._id) {
+                      <mat-card class="project-card">
+                        <mat-card-header>
+                          <mat-card-title class="text-base">{{ project.title }}</mat-card-title>
+                          <mat-card-subtitle>{{ getBusinessName(project) }}</mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content>
+                          <div class="mb-3">
+                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                              {{ getStatusText(project.status) }}
+                            </span>
+                          </div>
+                          <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ project.description || 'No description' }}</p>
+                          <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between">
+                              <span class="text-gray-500">Budget:</span>
+                              <span class="font-semibold">{{ formatPrice(project.offered_price) }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                              <span class="text-gray-500">Completed:</span>
+                              <span>{{ formatDate(project.completed_at || project.updatedAt) }}</span>
+                            </div>
+                          </div>
+                        </mat-card-content>
+                        <mat-card-actions>
+                          <button mat-button (click)="viewProject(project)">
+                            <mat-icon>visibility</mat-icon>
+                            View Details
+                          </button>
+                        </mat-card-actions>
+                      </mat-card>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Business Projects Tab -->
+        <mat-tab label="Business Inquiries">
+          <div class="py-6">
+            @if (businessProjects().length === 0) {
+              <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
+                <div class="p-4 bg-gray-50 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                  <mat-icon class="text-gray-400 text-4xl">business_center</mat-icon>
+                </div>
+                <h3 class="text-xl font-medium text-gray-900 mb-2">No project inquiries yet</h3>
+                <p class="text-gray-500 mb-6">When clients are interested in your services, their project requests will appear here.</p>
+              </div>
+            } @else {
+              <!-- Pending Business Projects -->
+              @if (pendingBusinessProjects().length > 0) {
+                <div class="mb-8">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Pending Requests</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @for (project of pendingBusinessProjects(); track project._id) {
+                      <mat-card class="project-card pending-request">
+                        <mat-card-header>
+                          <mat-card-title class="text-base">{{ project.title }}</mat-card-title>
+                          <mat-card-subtitle>{{ getClientName(project) }}</mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content>
+                          <div class="mb-3">
+                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                              {{ getStatusText(project.status) }}
+                            </span>
+                          </div>
+                          <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ project.description || 'No description' }}</p>
+                          <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between">
+                              <span class="text-gray-500">Client Budget:</span>
+                              <span class="font-semibold">{{ formatPrice(project.offered_price) }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                              <span class="text-gray-500">Received:</span>
+                              <span>{{ formatDate(project.createdAt) }}</span>
+                            </div>
+                          </div>
+                        </mat-card-content>
+                        <mat-card-actions class="action-buttons">
+                          <button mat-button (click)="viewProject(project)">
+                            <mat-icon>visibility</mat-icon>
+                            View
+                          </button>
+                          <button mat-raised-button color="primary" (click)="acceptProject(project)">
+                            <mat-icon>check</mat-icon>
+                            Accept
+                          </button>
+                          <button mat-button color="warn" (click)="rejectProject(project)">
+                            <mat-icon>close</mat-icon>
+                            Reject
+                          </button>
+                        </mat-card-actions>
+                      </mat-card>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Active Business Projects -->
+              @if (activeBusinessProjects().length > 0) {
+                <div class="mb-8">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Active Projects</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @for (project of activeBusinessProjects(); track project._id) {
+                      <mat-card class="project-card">
+                        <mat-card-header>
+                          <mat-card-title class="text-base">{{ project.title }}</mat-card-title>
+                          <mat-card-subtitle>{{ getClientName(project) }}</mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content>
+                          <div class="mb-3">
+                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                              {{ getStatusText(project.status) }}
+                            </span>
+                          </div>
+                          <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ project.description || 'No description' }}</p>
+                          <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between">
+                              <span class="text-gray-500">Budget:</span>
+                              <span class="font-semibold">{{ formatPrice(project.offered_price) }}</span>
+                            </div>
+                            @if (project.deadline) {
+                              <div class="flex items-center justify-between">
+                                <span class="text-gray-500">Deadline:</span>
+                                <span>{{ formatDate(project.deadline) }}</span>
+                              </div>
+                            }
+                          </div>
+                        </mat-card-content>
+                        <mat-card-actions>
+                          <button mat-button (click)="viewProject(project)">
+                            <mat-icon>visibility</mat-icon>
+                            View Details
+                          </button>
+                        </mat-card-actions>
+                      </mat-card>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    }
+  </div>
+</div>

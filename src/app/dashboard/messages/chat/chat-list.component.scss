@@ -1,0 +1,19 @@
+// Chat list specific styles
+.chat-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.chat-item:hover {
+  transform: translateY(-1px);
+}
+
+.unread-indicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  border: 2px solid white;
+}

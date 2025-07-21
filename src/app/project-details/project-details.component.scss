@@ -1,0 +1,24 @@
+// Only include Material Design overrides that can't be achieved with Tailwind
+
+// Material button customizations for better integration with Tailwind
+::ng-deep .mat-mdc-raised-button {
+  &.mat-primary {
+    border-radius: 0.5rem !important; // rounded-lg
+  }
+}
+
+::ng-deep .mat-mdc-outlined-button {
+  border-radius: 0.5rem !important; // rounded-lg
+}
+
+// Ensure Material icons inherit proper sizing from Tailwind
+::ng-deep .mat-icon {
+  width: auto !important;
+  height: auto !important;
+  font-size: inherit !important;
+}
+
+// Material spinner color override
+::ng-deep .mat-mdc-progress-spinner circle {
+  stroke: #3b82f6; // blue-500
+}

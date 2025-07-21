@@ -1,85 +1,79 @@
-import { Tables, TablesInsert, TablesUpdate } from '../shared/types/database.types';
-
-// Base profile type from database
-export type Profile = Tables<'profiles'>;
-export type ProfileInsert = TablesInsert<'profiles'>;
-export type ProfileUpdate = TablesUpdate<'profiles'>;
-
-// Extended user profile with additional computed fields
-export interface UserProfile extends Profile {
-  businesses_count?: number;
-  businesses?: any[]; // Will be typed more specifically when needed
-  favorites_count?: number;
-  posts_count?: number;
-}
-
-// User roles
-export const USER_ROLES = ['user', 'admin', 'consultant', 'reviewer'] as const;
-export type UserRole = typeof USER_ROLES[number];
-
-// Legacy User interface for backward compatibility (to be phased out)
+// User interface matching the backend MongoDB schema
 export interface User {
-  id: string;
+  _id: string;
   email: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  bio?: string | null;
-  location?: string | null;
-  website?: string | null;
-  phone?: string | null;
-  date_of_birth?: string | null;
-  gender?: string | null;
-  profession?: string | null;
-  skills?: string[] | null;
-  social_links?: Record<string, any> | null;
-  is_verified?: boolean;
-  is_featured?: boolean;
-  rating?: number | null;
-  total_reviews?: number;
-  created_at: string;
-  updated_at?: string;
+  password?: string; // Not usually sent to frontend
+  full_name?: string;
+  last_name?: string;
+  avatar_url?: string;
+  bio?: string;
+  city?: string;
+  country?: string;
+  country_of_origin?: string;
+  is_buyer?: boolean;
+  is_seller?: boolean;
+  is_active?: boolean;
+  phone?: string;
+  date_of_birth?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export interface UserInsert {
-  id: string;
+// Request interfaces for API calls
+export interface LoginRequest {
   email: string;
-  full_name?: string | null;
-  avatar_url?: string | null;
-  bio?: string | null;
-  location?: string | null;
-  website?: string | null;
-  phone?: string | null;
-  date_of_birth?: string | null;
-  gender?: string | null;
-  profession?: string | null;
-  skills?: string[] | null;
-  social_links?: Record<string, any> | null;
-  is_verified?: boolean;
-  is_featured?: boolean;
-  rating?: number | null;
-  total_reviews?: number;
-  created_at?: string;
-  updated_at?: string;
+  password: string;
 }
 
-export interface UserUpdate {
-  full_name?: string | null;
-  avatar_url?: string | null;
-  consultant_services?: string | null;
-  open_to_consulting?: boolean | null;
-  role?: string | null;
-  amount_paid?: number | null;
-  payment_status?: string | null;
-  coupon_code?: string | null;
-  email?: string | null;
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  full_name?: string;
+  last_name?: string;
+  is_buyer?: boolean;
+  is_seller?: boolean;
+  bio?: string;
+  city?: string;
+  country?: string;
+  phone?: string;
 }
 
+export interface UpdateUserRequest {
+  full_name?: string;
+  last_name?: string;
+  avatar_url?: string;
+  bio?: string;
+  city?: string;
+  country?: string;
+  country_of_origin?: string;
+  is_buyer?: boolean;
+  is_seller?: boolean;
+  phone?: string;
+  date_of_birth?: Date;
+}
+
+// Response interfaces
+export interface AuthResponse {
+  success: boolean;
+  data: {
+    access_token: string;
+    user: User;
+  };
+  message: string;
+}
+
+export interface UserResponse {
+  success: boolean;
+  data: User;
+  message: string;
+}
+
+// Legacy interfaces for backward compatibility
 export interface AuthUser {
-  id: string;
+  _id: string;
   email: string;
-  email_confirmed_at?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface UserSession {

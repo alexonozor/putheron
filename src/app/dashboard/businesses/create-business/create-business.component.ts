@@ -10,16 +10,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { HeaderComponent } from '../shared/components/header/header.component';
-import { AuthService } from '../shared/services/auth.service';
-import { SupabaseService } from '../shared/services/supabase.service';
-import { Tables, TablesInsert } from '../shared/types/database.types';
-
-interface Category extends Tables<'categories'> {}
-interface Subcategory extends Tables<'subcategories'> {}
+import { AuthService } from '../../../shared/services/auth.service';
+import { BusinessService, Category, Subcategory, CreateBusinessDto } from '../../../shared/services/business.service';
 
 @Component({
   selector: 'app-create-business',
+  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -30,8 +26,7 @@ interface Subcategory extends Tables<'subcategories'> {}
     MatIconModule,
     MatCardModule,
     MatStepperModule,
-    MatCheckboxModule,
-    HeaderComponent
+    MatCheckboxModule
   ],
   templateUrl: './create-business.component.html',
   styleUrl: './create-business.component.scss'
@@ -40,7 +35,7 @@ export class CreateBusinessComponent implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
-  private supabaseService = inject(SupabaseService);
+  private businessService = inject(BusinessService);
 
   // Signals
   public categories = signal<Category[]>([]);
@@ -57,6 +52,7 @@ export class CreateBusinessComponent implements OnInit {
     this.businessInfoForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
+      short_description: [''],
       business_type: ['service', Validators.required],
       category_id: ['', Validators.required],
       subcategory_id: ['']
@@ -64,9 +60,9 @@ export class CreateBusinessComponent implements OnInit {
 
     this.businessDetailsForm = this.fb.group({
       address: [''],
-      city: ['', Validators.required],
+      city: [''],
       state: [''],
-      country: ['', Validators.required],
+      country: [''],
       postal_code: [''],
       contact_email: ['', [Validators.email]],
       contact_phone: [''],
@@ -80,7 +76,6 @@ export class CreateBusinessComponent implements OnInit {
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/auth'], {
         queryParams: { 
-          action: 'login',
           message: 'Please log in to create a business'
         }
       });
@@ -93,22 +88,13 @@ export class CreateBusinessComponent implements OnInit {
   async loadCategories() {
     try {
       this.loading.set(true);
+      this.error.set(null);
 
-      const { data, error } = await this.supabaseService.getClient()
-        .from('categories')
-        .select('*')
-        .order('name');
-
-      if (error) {
-        console.error('Error loading categories:', error);
-        this.error.set('Failed to load categories');
-        return;
-      }
-
-      this.categories.set(data || []);
-    } catch (err) {
+      const categories = await this.businessService.getCategoriesAsync();
+      this.categories.set(categories);
+    } catch (err: any) {
       console.error('Error loading categories:', err);
-      this.error.set('Failed to load categories');
+      this.error.set('Failed to load categories. Please try again.');
     } finally {
       this.loading.set(false);
     }
@@ -117,24 +103,16 @@ export class CreateBusinessComponent implements OnInit {
   async onCategoryChange(categoryId: string) {
     if (!categoryId) {
       this.subcategories.set([]);
+      this.businessInfoForm.patchValue({ subcategory_id: '' });
       return;
     }
 
     try {
-      const { data, error } = await this.supabaseService.getClient()
-        .from('subcategories')
-        .select('*')
-        .eq('category_id', categoryId)
-        .order('name');
-
-      if (error) {
-        console.error('Error loading subcategories:', error);
-        return;
-      }
-
-      this.subcategories.set(data || []);
-    } catch (err) {
+      const subcategories = await this.businessService.getSubcategoriesAsync(categoryId);
+      this.subcategories.set(subcategories);
+    } catch (err: any) {
       console.error('Error loading subcategories:', err);
+      this.error.set('Failed to load subcategories. Please try again.');
     }
   }
 
@@ -142,65 +120,56 @@ export class CreateBusinessComponent implements OnInit {
     if (this.businessInfoForm.invalid || this.businessDetailsForm.invalid) {
       this.businessInfoForm.markAllAsTouched();
       this.businessDetailsForm.markAllAsTouched();
+      this.error.set('Please fill in all required fields.');
       return;
     }
 
-    const currentUser = this.authService.currentUser;
+    const currentUser = this.authService.user();
     if (!currentUser) {
       this.router.navigate(['/auth']);
       return;
     }
-
-    // Debug logging
-    console.log('Current user:', currentUser);
-    console.log('Current user ID:', currentUser.id);
-    console.log('User ID type:', typeof currentUser.id);
-    console.log('User ID length:', currentUser.id?.length);
 
     try {
       this.submitting.set(true);
       this.error.set(null);
 
       // Combine form data
-      const businessData: TablesInsert<'businesses'> = {
+      const businessData: CreateBusinessDto = {
         ...this.businessInfoForm.value,
-        ...this.businessDetailsForm.value,
-        profile_id: currentUser.id,
-        is_active: true
+        ...this.businessDetailsForm.value
       };
 
-      console.log('Business data being submitted:', businessData);
-      console.log('Profile ID in business data:', businessData.profile_id);
-
-      const { data, error } = await this.supabaseService.getClient()
-        .from('businesses')
-        .insert(businessData)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating business:', error);
-        this.error.set('Failed to create business. Please try again.');
-        return;
+      // Remove empty subcategory_id if not selected
+      if (!businessData.subcategory_id) {
+        delete businessData.subcategory_id;
       }
 
-      // Success! Navigate to the business profile or dashboard
-      this.router.navigate(['/business', data.id], {
+      console.log('Creating business with data:', businessData);
+
+      const createdBusiness = await this.businessService.createBusinessAsync(businessData);
+
+      // Success! Navigate to the dashboard with success message
+      this.router.navigate(['/dashboard'], {
         queryParams: { 
-          message: 'Business created successfully!' 
+          message: 'Business created successfully! It is now pending approval.'
         }
       });
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error creating business:', err);
-      this.error.set('Failed to create business. Please try again.');
+      this.error.set(err?.message || 'Failed to create business. Please try again.');
     } finally {
       this.submitting.set(false);
     }
   }
 
-  // Stepper navigation
+  // Stepper navigation helpers
   nextStep(stepper: any) {
+    if (stepper.selectedIndex === 0 && this.businessInfoForm.invalid) {
+      this.businessInfoForm.markAllAsTouched();
+      return;
+    }
     stepper.next();
   }
 
@@ -209,7 +178,7 @@ export class CreateBusinessComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/dashboard/businesses']);
   }
 
   loadData() {
@@ -223,5 +192,25 @@ export class CreateBusinessComponent implements OnInit {
 
   isBusinessDetailsValid(): boolean {
     return this.businessDetailsForm.valid;
+  }
+
+  // Utility methods
+  getFieldError(formGroup: FormGroup, fieldName: string): string | null {
+    const field = formGroup.get(fieldName);
+    if (!field || !field.touched || !field.errors) {
+      return null;
+    }
+
+    if (field.errors['required']) {
+      return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
+    }
+    if (field.errors['minlength']) {
+      return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} must be at least ${field.errors['minlength'].requiredLength} characters`;
+    }
+    if (field.errors['email']) {
+      return 'Please enter a valid email address';
+    }
+
+    return 'This field is invalid';
   }
 }

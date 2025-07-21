@@ -1,361 +1,429 @@
-<app-header />
-
 <div class="min-h-screen bg-gray-50">
+  <!-- Header with Business Info -->
   @if (loading()) {
-    <div class="flex justify-center items-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <div class="bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex justify-center items-center h-32">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <span class="ml-3 text-gray-600">Loading business profile...</span>
+        </div>
+      </div>
     </div>
   } @else if (error()) {
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
-        <div class="text-red-400 mb-4">
-          <mat-icon class="text-6xl">error_outline</mat-icon>
-        </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ error() }}</h3>
-        <div class="space-x-4">
-          <button 
-            (click)="goBack()"
-            class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-            Go Back
-          </button>
-          <button 
-            (click)="loadBusiness(businessId())"
-            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            Try Again
-          </button>
+    <div class="bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-r-lg">
+          <div class="flex items-center">
+            <svg class="w-6 h-6 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            <div>
+              <h3 class="text-lg font-medium text-red-900 mb-2">Error Loading Business</h3>
+              <p class="text-red-700 mb-4">{{ error() }}</p>
+              <button 
+                (click)="goBack()"
+                class="inline-flex items-center px-4 py-2 bg-red-100 text-red-800 rounded-lg hover:bg-red-200 transition-colors">
+                Go Back
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   } @else if (business()) {
     <!-- Business Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Back Button -->
-        <button 
-          (click)="goBack()"
-          class="mb-6 flex items-center text-gray-600 hover:text-gray-800 transition-colors">
-          <mat-icon class="mr-2">arrow_back</mat-icon>
-          Back to Search
-        </button>
-
-        <div class="flex flex-col md:flex-row gap-8">
-          <!-- Business Image -->
-          <div class="md:w-1/3">
-            <img 
-              [src]="getBusinessImageUrl()"
-              [alt]="business()?.name"
-              (error)="handleImageError($event)"
-              class="w-full h-64 object-cover rounded-lg shadow-lg">
+    <div class="bg-white shadow">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="py-6">
+          <!-- Back Button -->
+          <div class="mb-4">
+            <button 
+              (click)="goBack()"
+              class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+              <span>Back</span>
+            </button>
           </div>
 
-          <!-- Business Info -->
-          <div class="md:w-2/3">
-            <div class="flex items-start justify-between mb-4">
-              <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                  {{ business()?.name }}
-                </h1>
-                <div class="flex items-center text-gray-600 mb-2">
-                  <mat-icon class="mr-1 text-sm">place</mat-icon>
-                  <span>{{ getBusinessLocation() }}</span>
+          <!-- Business Header Info -->
+          <div class="flex flex-col lg:flex-row lg:items-start lg:space-x-8">
+            <!-- Business Logo -->
+            <div class="flex-shrink-0 mb-4 lg:mb-0">
+              @if (business()?.logo_url) {
+                <img 
+                  class="h-24 w-24 rounded-lg object-cover border-2 border-gray-200" 
+                  [src]="business()!.logo_url!" 
+                  [alt]="business()!.name + ' logo'">
+              } @else {
+                <div class="h-24 w-24 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-gray-200">
+                  <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                  </svg>
                 </div>
-                @if (business()?.category) {
-                  <div class="flex items-center text-gray-600 mb-2">
-                    <mat-icon class="mr-1 text-sm">category</mat-icon>
-                    <span>{{ business()?.category?.name }}</span>
-                    @if (business()?.subcategory) {
-                      <span class="mx-2">•</span>
-                      <span>{{ business()?.subcategory?.name }}</span>
-                    }
-                  </div>
-                }
-              </div>
-              
-              @if (business()?.is_active) {
-                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                  Active
-                </span>
               }
             </div>
 
-            <!-- Business Description -->
-            @if (business()?.description) {
-              <p class="text-gray-700 mb-4 leading-relaxed">
-                {{ business()?.description }}
-              </p>
-            }
-
-            <!-- Rating Display -->
-            @if (averageRating() > 0) {
-              <div class="flex items-center mb-6">
-                <div class="flex items-center mr-4">
-                  @for (star of getStarArray(averageRating()); track $index) {
-                    <mat-icon class="text-yellow-400">
-                      {{ star ? 'star' : 'star_border' }}
-                    </mat-icon>
+            <!-- Business Details -->
+            <div class="flex-1 min-w-0">
+              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex-1">
+                  <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">{{ business()?.name }}</h1>
+                  <p class="mt-1 text-lg text-gray-600">{{ getBusinessTypeDisplay(business()?.business_type || '') }}</p>
+                  
+                  @if (business()?.short_description) {
+                    <p class="mt-2 text-gray-700">{{ business()?.short_description }}</p>
                   }
                 </div>
-                <div class="text-sm text-gray-600">
-                  <span class="font-semibold">{{ formatRating(averageRating()) }}</span>
-                  <span class="mx-1">•</span>
-                  <span>{{ totalReviews() }} review{{ totalReviews() !== 1 ? 's' : '' }}</span>
-                  <span class="mx-1">•</span>
-                  <span>{{ getRatingLabel(averageRating()) }}</span>
+
+                <!-- Owner Actions -->
+                @if (isOwner()) {
+                  <div class="mt-4 sm:mt-0 sm:ml-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                    <button 
+                      (click)="editBusiness()"
+                      class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                      Edit Business
+                    </button>
+                    <button 
+                      (click)="addService()"
+                      class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      Add Service
+                    </button>
+                  </div>
+                }
+              </div>
+
+              <!-- Business Stats & Info -->
+              <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-lg p-4 text-center border border-gray-200 shadow-sm">
+                  <div class="text-2xl font-bold text-blue-600">{{ business()?.rating || 0 }}/5</div>
+                  <div class="text-sm text-gray-500">Rating</div>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center border border-gray-200 shadow-sm">
+                  <div class="text-2xl font-bold text-green-600">{{ business()?.review_count || 0 }}</div>
+                  <div class="text-sm text-gray-500">Reviews</div>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center border border-gray-200 shadow-sm">
+                  <div class="text-2xl font-bold text-purple-600">{{ business()?.view_count || 0 }}</div>
+                  <div class="text-sm text-gray-500">Views</div>
+                </div>
+                <div class="bg-white rounded-lg p-4 text-center border border-gray-200 shadow-sm">
+                  <div class="text-2xl font-bold text-indigo-600">{{ activeServices().length }}</div>
+                  <div class="text-sm text-gray-500">Services</div>
                 </div>
               </div>
-            }
 
-            <!-- Contact Actions -->
-            <div class="flex flex-wrap gap-3">
-              <!-- Primary CTA: Start a Project -->
-              <button 
-                (click)="startProject()"
-                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center font-medium">
-                <mat-icon class="mr-2">add_circle</mat-icon>
-                Start a Project
-              </button>
-
-              @if (business()?.contact_email || business()?.contact_phone) {
-                <button 
-                  (click)="contactBusiness()"
-                  class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center">
-                  <mat-icon class="mr-2">contact_mail</mat-icon>
-                  Contact Business
-                </button>
-              }
-              
-              @if (business()?.website_url) {
-                <button 
-                  (click)="visitWebsite()"
-                  class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center">
-                  <mat-icon class="mr-2">language</mat-icon>
-                  Visit Website
-                </button>
-              }
-
-              @if (canWriteReview()) {
-                <button 
-                  (click)="openReviewDialog()"
-                  class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center">
-                  <mat-icon class="mr-2">rate_review</mat-icon>
-                  Write Review
-                </button>
-              }
+              <!-- Contact Actions -->
+              <div class="mt-6 flex flex-wrap gap-3">
+                @if (!isOwner() && business()?.email) {
+                  <button 
+                    (click)="startProject()"
+                    class="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <span>Start a Project</span>
+                  </button>
+                }
+                @if (business()?.website) {
+                  <button 
+                    (click)="visitWebsite()"
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                    </svg>
+                    <span>Visit Website</span>
+                  </button>
+                }
+                @if (business()?.phone) {
+                  <button 
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                    <span>{{ business()?.phone }}</span>
+                  </button>
+                }
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Tabs Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <mat-tab-group>
-        <!-- Overview Tab -->
-        <mat-tab label="Overview">
+        <!-- About Tab -->
+        <mat-tab label="About">
           <div class="py-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <!-- Business Details -->
-              <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Business Details</h3>
-                
-                <div class="space-y-4">
-                  @if (business()?.business_type) {
-                    <div class="flex items-center">
-                      <mat-icon class="text-gray-400 mr-3">business</mat-icon>
-                      <div>
-                        <p class="text-sm text-gray-500">Business Type</p>
-                        <p class="text-gray-900">{{ business()?.business_type }}</p>
-                      </div>
-                    </div>
-                  }
-                  
-                  @if (business()?.address) {
-                    <div class="flex items-start">
-                      <mat-icon class="text-gray-400 mr-3 mt-1">location_on</mat-icon>
-                      <div>
-                        <p class="text-sm text-gray-500">Address</p>
-                        <p class="text-gray-900">{{ business()?.address }}</p>
-                      </div>
-                    </div>
-                  }
-                  
-                  @if (business()?.contact_phone) {
-                    <div class="flex items-center">
-                      <mat-icon class="text-gray-400 mr-3">phone</mat-icon>
-                      <div>
-                        <p class="text-sm text-gray-500">Phone</p>
-                        <p class="text-gray-900">{{ business()?.contact_phone }}</p>
-                      </div>
-                    </div>
-                  }
-                  
-                  @if (business()?.contact_email) {
-                    <div class="flex items-center">
-                      <mat-icon class="text-gray-400 mr-3">email</mat-icon>
-                      <div>
-                        <p class="text-sm text-gray-500">Email</p>
-                        <p class="text-gray-900">{{ business()?.contact_email }}</p>
-                      </div>
-                    </div>
-                  }
-                  
-                  @if (averageRating() > 0) {
-                    <div class="flex items-center">
-                      <mat-icon class="text-gray-400 mr-3">star</mat-icon>
-                      <div>
-                        <p class="text-sm text-gray-500">Rating</p>
-                        <div class="flex items-center">
-                          <span class="text-gray-900 font-medium">{{ formatRating(averageRating()) }}</span>
-                          <span class="text-gray-500 ml-2">({{ totalReviews() }} reviews)</span>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <!-- Description -->
+              <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                  <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">About This Business</h3>
+                  </div>
+                  <div class="p-6">
+                    @if (business()?.description) {
+                      <p class="text-gray-700 leading-relaxed">{{ business()?.description }}</p>
+                    } @else {
+                      <p class="text-gray-500 italic">No description provided.</p>
+                    }
+
+                    @if (businessTags().length > 0) {
+                      <div class="mt-6">
+                        <h4 class="text-sm font-medium text-gray-900 mb-3">Tags</h4>
+                        <div class="flex flex-wrap gap-2">
+                          @for (tag of businessTags(); track tag) {
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800">
+                              {{ tag }}
+                            </span>
+                          }
                         </div>
                       </div>
-                    </div>
-                  }
+                    }
+                  </div>
                 </div>
               </div>
 
-              <!-- Owner Information -->
-              @if (business()?.profile) {
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Owner Information</h3>
-                  
-                  <div class="flex items-center mb-4">
-                    <img 
-                      [src]="getOwnerAvatar()"
-                      [alt]="business()?.profile?.full_name"
-                      (error)="handleImageError($event)"
-                      class="w-12 h-12 rounded-full object-cover mr-4">
-                    <div>
-                      <h4 class="font-medium text-gray-900">{{ business()?.profile?.full_name }}</h4>
-                      <p class="text-sm text-gray-500">{{ getOwnerLocation() }}</p>
+              <!-- Business Info & Owner Details -->
+              <div class="space-y-6">
+                <!-- Business Information -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                  <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Business Information</h3>
+                  </div>
+                  <div class="p-6">
+                    <div class="space-y-4">
+                      @if (business()?.address) {
+                        <div class="flex items-start space-x-3">
+                          <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          </svg>
+                          <div>
+                            <div class="text-sm text-gray-900">{{ business()?.address }}</div>
+                            @if (business()?.city || business()?.state) {
+                              <div class="text-sm text-gray-500">
+                                {{ business()?.city }}{{ business()?.city && business()?.state ? ', ' : '' }}{{ business()?.state }}
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+
+                      @if (business()?.email) {
+                        <div class="flex items-center space-x-3">
+                          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                          </svg>
+                          <span class="text-sm text-gray-900">{{ business()?.email }}</span>
+                        </div>
+                      }
+
+                      @if (business()?.phone) {
+                        <div class="flex items-center space-x-3">
+                          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                          </svg>
+                          <span class="text-sm text-gray-900">{{ business()?.phone }}</span>
+                        </div>
+                      }
+
+                      @if (business()?.website) {
+                        <div class="flex items-center space-x-3">
+                          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                          </svg>
+                          <a 
+                            [href]="business()?.website" 
+                            target="_blank" 
+                            class="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+                            {{ business()?.website }}
+                          </a>
+                        </div>
+                      }
                     </div>
                   </div>
-                  
-                  @if (business()?.profile?.bio) {
-                    <p class="text-gray-700 text-sm">{{ business()?.profile?.bio }}</p>
-                  }
                 </div>
-              }
+
+                <!-- Owner Information -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                  <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Business Owner</h3>
+                  </div>
+                  <div class="p-6">
+                    @if (ownerLoading()) {
+                      <div class="flex items-center justify-center py-4">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-600"></div>
+                        <span class="ml-2 text-gray-600 text-sm">Loading owner...</span>
+                      </div>
+                    } @else if (owner()) {
+                      <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                          @if (owner()?.avatar_url) {
+                            <img 
+                              class="h-12 w-12 rounded-full object-cover" 
+                              [src]="owner()!.avatar_url!" 
+                              [alt]="owner()!.full_name + ' profile'">
+                          } @else {
+                            <div class="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
+                              <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                              </svg>
+                            </div>
+                          }
+                          <div>
+                            <h4 class="text-sm font-medium text-gray-900">{{ owner()?.full_name }}</h4>
+                            <p class="text-sm text-gray-500">Business Owner</p>
+                          </div>
+                        </div>
+
+                        @if (owner()?.bio) {
+                          <p class="text-sm text-gray-700">{{ owner()?.bio }}</p>
+                        }
+
+                        @if (owner()?.city || owner()?.country) {
+                          <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="text-sm text-gray-600">
+                              {{ owner()?.city }}{{ owner()?.city && owner()?.country ? ', ' : '' }}{{ owner()?.country }}
+                            </span>
+                          </div>
+                        }
+
+                        @if (!isOwner()) {
+                          <button 
+                            (click)="contactOwner()"
+                            class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            Contact Owner
+                          </button>
+                        }
+                      </div>
+                    } @else {
+                      <p class="text-gray-500 text-sm">Owner information not available</p>
+                    }
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </mat-tab>
 
         <!-- Services Tab -->
-        <mat-tab label="Services">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <span>Services ({{ activeServices().length }})</span>
+          </ng-template>
+
           <div class="py-6">
             @if (servicesLoading()) {
-              <div class="flex justify-center items-center py-12">
+              <div class="flex justify-center items-center h-32">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span class="ml-3 text-gray-600">Loading services...</span>
               </div>
-            } @else if (hasServices()) {
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @for (service of activeServices(); track service.id) {
-                  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                    <!-- Service Image (always show) -->
-                    <img 
-                      [src]="getServiceImageUrl(service)"
-                      [alt]="service.name"
-                      (error)="handleServiceImageError($event)"
-                      class="w-full h-48 object-cover">
-                    
-                    <div class="p-6">
-                      <div class="flex items-center justify-between mb-4">
-                        <h4 class="text-lg font-semibold text-gray-900">{{ service.name }}</h4>
-                        <div class="text-right">
-                          <div class="text-lg font-semibold text-blue-600">
-                            {{ formatPrice(service.price) }}
+            } @else if (activeServices().length === 0) {
+              <div class="text-center py-16">
+                <div class="p-4 bg-gray-50 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                  <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                </div>
+                <h3 class="text-xl font-medium text-gray-900 mb-2">No Services Yet</h3>
+                <p class="text-gray-500 mb-6">This business hasn't added any services yet.</p>
+                @if (isOwner()) {
+                  <button 
+                    (click)="addService()"
+                    class="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Your First Service
+                  </button>
+                }
+              </div>
+            } @else {
+              <!-- Featured Services -->
+              @if (featuredServices().length > 0) {
+                <div class="mb-10">
+                  <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-gray-900">Featured Services</h3>
+                    <span class="text-sm text-gray-500">{{ featuredServices().length }} service(s)</span>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @for (service of featuredServices(); track service._id) {
+                      <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all overflow-hidden">
+                        <div class="p-6 pb-3">
+                          <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-lg font-semibold text-gray-900">{{ service.name }}</h4>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              Featured
+                            </span>
                           </div>
-                          @if (service.duration_minutes) {
-                            <div class="text-sm text-gray-500">
-                              {{ formatDuration(service.duration_minutes) }}
+                        </div>
+                        <div class="px-6 pb-6">
+                          @if (service.short_description) {
+                            <p class="text-gray-600 mb-4 text-sm leading-relaxed">{{ service.short_description }}</p>
+                          }
+                          
+                          <div class="flex items-center justify-between mb-4">
+                            <span class="text-lg font-semibold text-gray-900">
+                              {{ formatPrice(service.price, service.pricing_type) }}
+                            </span>
+                            @if (service.duration) {
+                              <span class="text-sm text-gray-500">{{ formatDuration(service.duration) }}</span>
+                            }
+                          </div>
+
+                          @if (service.features && service.features.length > 0) {
+                            <div class="border-t border-gray-100 pt-3">
+                              <ul class="text-sm text-gray-600 space-y-2">
+                                @for (feature of service.features.slice(0, 3); track feature) {
+                                  <li class="flex items-center">
+                                    <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    {{ feature }}
+                                  </li>
+                                }
+                              </ul>
                             </div>
                           }
                         </div>
-                      </div>
-                      
-                      @if (service.description) {
-                        <p class="text-gray-700 mb-4">{{ service.description }}</p>
-                      }
-                      
-                      <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                          @if (service.is_active) {
-                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                              Available
-                            </span>
+                        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50">
+                          @if (isOwner()) {
+                            <button 
+                              (click)="editService(service._id)"
+                              class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                              </svg>
+                              Edit Service
+                            </button>
                           } @else {
-                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">
-                              Unavailable
-                            </span>
+                            <button 
+                              class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+                              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                              </svg>
+                              Get Quote
+                            </button>
                           }
-                        </div>
-                        
-                        <button 
-                          (click)="contactBusiness()"
-                          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                          Book Service
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-            } @else {
-              <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
-                <mat-icon class="text-gray-400 text-6xl mb-4">business_center</mat-icon>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No Services Available</h3>
-                <p class="text-gray-500">This business hasn't added any services yet.</p>
-              </div>
-            }
-          </div>
-        </mat-tab>
-
-        <!-- Portfolio Tab -->
-        <mat-tab label="Portfolio">
-          <div class="py-6">
-            @if (projectsLoading()) {
-              <div class="flex justify-center items-center py-12">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            } @else if (hasProjects()) {
-              <!-- Featured Projects Section -->
-              @if (featuredProjects().length > 0) {
-                <div class="mb-8">
-                  <h3 class="text-xl font-semibold text-gray-900 mb-6">Featured Projects</h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    @for (project of featuredProjects(); track project.id) {
-                      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                           (click)="openProjectGallery(project)">
-                        <img 
-                          [src]="getProjectImageUrl(project)"
-                          [alt]="project.title"
-                          (error)="handleProjectImageError($event)"
-                          class="w-full h-48 object-cover">
-                        
-                        <div class="p-4">
-                          <div class="flex items-center justify-between mb-2">
-                            <h4 class="font-semibold text-gray-900">{{ project.title }}</h4>
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                              Featured
-                            </span>
-                          </div>
-                          
-                          @if (project.category) {
-                            <p class="text-sm text-blue-600 mb-2">{{ project.category }}</p>
-                          }
-                          
-                          @if (project.description) {
-                            <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ project.description }}</p>
-                          }
-                          
-                          <div class="flex items-center justify-between text-sm text-gray-500">
-                            @if (project.client_name) {
-                              <span>Client: {{ project.client_name }}</span>
-                            }
-                            @if (project.completion_date) {
-                              <span>{{ formatCompletionDate(project.completion_date) }}</span>
-                            }
-                          </div>
                         </div>
                       </div>
                     }
@@ -363,240 +431,115 @@
                 </div>
               }
 
-              <!-- All Projects Section -->
+              <!-- All Services -->
               <div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-6">All Projects</h3>
+                <div class="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 class="text-xl font-semibold text-gray-900">All Services</h3>
+                    <p class="text-sm text-gray-500 mt-1">{{ activeServices().length }} service(s) available</p>
+                  </div>
+                  @if (isOwner()) {
+                    <button 
+                      (click)="addService()"
+                      class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      Add Service
+                    </button>
+                  }
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  @for (project of allProjects(); track project.id) {
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                         (click)="openProjectGallery(project)">
-                      <img 
-                        [src]="getProjectImageUrl(project)"
-                        [alt]="project.title"
-                        (error)="handleProjectImageError($event)"
-                        class="w-full h-48 object-cover">
-                      
-                      <div class="p-4">
-                        <div class="flex items-center justify-between mb-2">
-                          <h4 class="font-semibold text-gray-900">{{ project.title }}</h4>
-                          @if (project.is_featured) {
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                              Featured
-                            </span>
-                          }
-                        </div>
-                        
-                        @if (project.category) {
-                          <p class="text-sm text-blue-600 mb-2">{{ project.category }}</p>
+                  @for (service of activeServices(); track service._id) {
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all overflow-hidden">
+                      <div class="p-6 pb-3">
+                        <h4 class="text-lg font-semibold text-gray-900">{{ service.name }}</h4>
+                      </div>
+                      <div class="px-6 pb-6">
+                        @if (service.short_description) {
+                          <p class="text-gray-600 mb-4 text-sm leading-relaxed">{{ service.short_description }}</p>
                         }
                         
-                        @if (project.description) {
-                          <p class="text-gray-600 text-sm mb-3 line-clamp-2">{{ project.description }}</p>
-                        }
-                        
-                        <div class="flex items-center justify-between text-sm text-gray-500">
-                          @if (project.client_name) {
-                            <span>Client: {{ project.client_name }}</span>
-                          }
-                          @if (project.completion_date) {
-                            <span>{{ formatCompletionDate(project.completion_date) }}</span>
+                        <div class="flex items-center justify-between mb-4">
+                          <span class="text-lg font-semibold text-gray-900">
+                            {{ formatPrice(service.price, service.pricing_type) }}
+                          </span>
+                          @if (service.duration) {
+                            <span class="text-sm text-gray-500">{{ formatDuration(service.duration) }}</span>
                           }
                         </div>
 
-                        @if (project.testimonial) {
-                          <div class="mt-3 p-3 bg-gray-50 rounded-lg">
-                            <p class="text-sm text-gray-700 italic">"{{ project.testimonial }}"</p>
+                        @if (service.features && service.features.length > 0) {
+                          <div class="border-t border-gray-100 pt-3">
+                            <ul class="text-sm text-gray-600 space-y-2">
+                              @for (feature of service.features.slice(0, 3); track feature) {
+                                <li class="flex items-center">
+                                  <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                  </svg>
+                                  {{ feature }}
+                                </li>
+                              }
+                            </ul>
                           </div>
+                        }
+                      </div>
+                      <div class="px-6 py-4 border-t border-gray-100 bg-gray-50">
+                        @if (isOwner()) {
+                          <button 
+                            (click)="editService(service._id)"
+                            class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Edit Service
+                          </button>
+                        } @else {
+                          <button 
+                            class="w-full inline-flex items-center justify-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            Get Quote
+                          </button>
                         }
                       </div>
                     </div>
                   }
                 </div>
-              </div>
-            } @else {
-              <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
-                <mat-icon class="text-gray-400 text-6xl mb-4">work</mat-icon>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No Projects Available</h3>
-                <p class="text-gray-500">This business hasn't showcased any projects yet.</p>
               </div>
             }
           </div>
         </mat-tab>
 
-        <!-- Reviews Tab -->
-        <mat-tab label="Reviews">
+        <!-- Portfolio Tab (Future) -->
+        <mat-tab label="Portfolio" disabled>
           <div class="py-6">
-            @if (reviewsLoading()) {
-              <div class="flex justify-center items-center py-12">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div class="text-center py-12">
+              <div class="p-4 bg-gray-50 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
+                </svg>
               </div>
-            } @else if (hasReviews()) {
-              <!-- Review Statistics -->
-              @if (reviewStats()) {
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4">Review Summary</h3>
-                  
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Overall Rating -->
-                    <div class="text-center">
-                      <div class="text-4xl font-bold text-gray-900 mb-2">
-                        {{ formatRating(reviewStats()!.average_rating) }}
-                      </div>
-                      <div class="flex justify-center mb-2">
-                        @for (star of getStarArray(reviewStats()!.average_rating); track $index) {
-                          <mat-icon class="text-yellow-400">
-                            {{ star ? 'star' : 'star_border' }}
-                          </mat-icon>
-                        }
-                      </div>
-                      <div class="text-sm text-gray-600">
-                        {{ getRatingLabel(reviewStats()!.average_rating) }}
-                      </div>
-                      <div class="text-sm text-gray-500 mt-1">
-                        Based on {{ reviewStats()!.review_count }} review{{ reviewStats()!.review_count !== 1 ? 's' : '' }}
-                      </div>
-                    </div>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">Portfolio Coming Soon</h3>
+              <p class="text-gray-500">Portfolio functionality will be available in a future update.</p>
+            </div>
+          </div>
+        </mat-tab>
 
-                    <!-- Rating Breakdown -->
-                    @if (reviewStats()) {
-                      <div class="space-y-2">
-                        @for (rating of [5, 4, 3, 2, 1]; track rating) {
-                          <div class="flex items-center">
-                            <div class="w-8 text-sm text-gray-600">{{ rating }}</div>
-                            <mat-icon class="text-yellow-400 mx-1">star</mat-icon>
-                            <div class="flex-1 mx-2">
-                              <mat-progress-bar 
-                                mode="determinate" 
-                                [value]="getRatingPercentage(rating)"
-                                class="h-2">
-                              </mat-progress-bar>
-                            </div>
-                            <div class="w-12 text-sm text-gray-600 text-right">
-                              {{ getRatingPercentage(rating).toFixed(0) }}%
-                            </div>
-                          </div>
-                        }
-                      </div>
-                    } @else {
-                      <div class="text-center text-gray-500 text-sm">
-                        Detailed breakdown not available
-                      </div>
-                    }
-                  </div>
-
-                  <!-- Detailed Metrics -->
-                  @if (reviewStats()) {
-                    <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div class="text-center">
-                        <div class="text-lg font-semibold text-gray-900">
-                          {{ formatRating(reviewStats()!.avg_service_quality) }}
-                        </div>
-                        <div class="text-sm text-gray-600">Service Quality</div>
-                      </div>
-                      <div class="text-center">
-                        <div class="text-lg font-semibold text-gray-900">
-                          {{ formatRating(reviewStats()!.avg_communication) }}
-                        </div>
-                        <div class="text-sm text-gray-600">Communication</div>
-                      </div>
-                      <div class="text-center">
-                        <div class="text-lg font-semibold text-gray-900">
-                          {{ formatRating(reviewStats()!.avg_timeliness) }}
-                        </div>
-                        <div class="text-sm text-gray-600">Timeliness</div>
-                      </div>
-                      <div class="text-center">
-                        <div class="text-lg font-semibold text-gray-900">
-                          {{ formatRating(reviewStats()!.avg_value) }}
-                        </div>
-                        <div class="text-sm text-gray-600">Value</div>
-                      </div>
-                    </div>
-                  }
-                </div>
-              }
-
-              <!-- Individual Reviews -->
-              <div class="space-y-6">
-                @for (review of reviews(); track review.id) {
-                  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <!-- Review Header -->
-                    <div class="flex items-start justify-between mb-4">
-                      <div class="flex items-center">
-                        <img 
-                          [src]="getReviewerAvatar(review)"
-                          [alt]="review.reviewer_name"
-                          (error)="handleReviewerAvatarError($event)"
-                          class="w-10 h-10 rounded-full object-cover mr-3">
-                        <div>
-                          <h4 class="font-semibold text-gray-900">{{ review.reviewer_name || 'Anonymous' }}</h4>
-                          <div class="flex items-center">
-                            @for (star of getStarArray(review.rating); track $index) {
-                              <mat-icon class="text-yellow-400 text-sm">
-                                {{ star ? 'star' : 'star_border' }}
-                              </mat-icon>
-                            }
-                            <span class="ml-2 text-sm text-gray-600">{{ review.rating }}/5</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div class="text-right">
-                        <div class="text-sm text-gray-600">
-                          {{ formatReviewDate(review.created_at) }}
-                        </div>
-                        @if (review.project_title) {
-                          <div class="text-xs text-blue-600 mt-1">
-                            Project: {{ review.project_title }}
-                          </div>
-                        }
-                      </div>
-                    </div>
-
-                    <!-- Review Text -->
-                    @if (review.review_text) {
-                      <p class="text-gray-700 mb-4 leading-relaxed">{{ review.review_text }}</p>
-                    }
-
-                    <!-- Detailed Ratings -->
-                    @if (review.service_quality || review.communication || review.timeliness || review.value) {
-                      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
-                        @if (review.service_quality) {
-                          <div class="text-center">
-                            <div class="text-sm font-medium text-gray-900">{{ review.service_quality }}/5</div>
-                            <div class="text-xs text-gray-600">Service Quality</div>
-                          </div>
-                        }
-                        @if (review.communication) {
-                          <div class="text-center">
-                            <div class="text-sm font-medium text-gray-900">{{ review.communication }}/5</div>
-                            <div class="text-xs text-gray-600">Communication</div>
-                          </div>
-                        }
-                        @if (review.timeliness) {
-                          <div class="text-center">
-                            <div class="text-sm font-medium text-gray-900">{{ review.timeliness }}/5</div>
-                            <div class="text-xs text-gray-600">Timeliness</div>
-                          </div>
-                        }
-                        @if (review.value) {
-                          <div class="text-center">
-                            <div class="text-sm font-medium text-gray-900">{{ review.value }}/5</div>
-                            <div class="text-xs text-gray-600">Value</div>
-                          </div>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
+        <!-- Reviews Tab (Future) -->
+        <mat-tab label="Reviews" disabled>
+          <div class="py-6">
+            <div class="text-center py-12">
+              <div class="p-4 bg-gray-50 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                </svg>
               </div>
-            } @else {
-              <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
-                <mat-icon class="text-gray-400 text-6xl mb-4">rate_review</mat-icon>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No Reviews Yet</h3>
-                <p class="text-gray-500">This business hasn't received any reviews yet. Be the first to work with them and leave a review!</p>
-              </div>
-            }
+              <h3 class="text-lg font-medium text-gray-900 mb-2">Reviews Coming Soon</h3>
+              <p class="text-gray-500">Review functionality will be available in a future update.</p>
+            </div>
           </div>
         </mat-tab>
       </mat-tab-group>

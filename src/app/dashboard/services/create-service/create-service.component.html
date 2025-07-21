@@ -1,0 +1,406 @@
+<div class="min-h-screen bg-gray-50">
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  } @else if (error()) {
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="text-red-400 mb-4">
+          <mat-icon class="text-6xl">error_outline</mat-icon>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ error() }}</h3>
+        <div class="space-x-4">
+          <button 
+            (click)="goBack()"
+            class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+            Go Back
+          </button>
+          <button 
+            (click)="loadData()"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            Try Again
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else if (!hasBusinesses()) {
+    <!-- No Businesses State -->
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="mx-auto h-12 w-12 text-gray-400 mb-4">
+          <mat-icon style="font-size: 48px; height: 48px; width: 48px;">business</mat-icon>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No businesses found</h3>
+        <p class="text-sm text-gray-500 mb-6">You need to create a business before adding services.</p>
+        <button
+          mat-raised-button
+          color="primary"
+          routerLink="/dashboard/businesses/create-business"
+        >
+          <mat-icon>add</mat-icon>
+          Create Business
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Header -->
+      <div class="mb-8">
+        <button 
+          (click)="goBack()"
+          class="mb-4 flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+          <mat-icon class="mr-2">arrow_back</mat-icon>
+          Back to Services
+        </button>
+        
+        <div class="text-center">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">
+            {{ pageTitle() }}
+          </h1>
+          <p class="text-gray-600">
+            @if (isEditMode()) {
+              Update your service information and settings
+            } @else {
+              Create a new service for your business
+            }
+          </p>
+        </div>
+      </div>
+
+      <!-- Service Creation/Edit Form -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <mat-stepper #stepper [linear]="true" class="service-stepper">
+          
+          <!-- Step 1: Service Information -->
+          <mat-step [stepControl]="serviceInfoForm" label="Service Information">
+            <form [formGroup]="serviceInfoForm" class="p-6 space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Service Details
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Provide basic information about your service.
+                </p>
+              </div>
+
+              <!-- Business Selection (only for create mode) -->
+              @if (!isEditMode()) {
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Business</mat-label>
+                  <mat-select formControlName="business_id" required>
+                    @for (business of userBusinesses(); track business._id) {
+                      <mat-option [value]="business._id">
+                        {{ business.name }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                  @if (business_id?.hasError('required') && business_id?.touched) {
+                    <mat-error>Please select a business</mat-error>
+                  }
+                </mat-form-field>
+              }
+
+              <!-- Service Name -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Service Name</mat-label>
+                <input 
+                  matInput 
+                  formControlName="name" 
+                  placeholder="e.g., Web Design, Logo Creation"
+                  required>
+                @if (name?.hasError('required') && name?.touched) {
+                  <mat-error>Service name is required</mat-error>
+                }
+                @if (name?.hasError('minlength') && name?.touched) {
+                  <mat-error>Service name must be at least 2 characters</mat-error>
+                }
+                @if (name?.hasError('maxlength') && name?.touched) {
+                  <mat-error>Service name cannot exceed 100 characters</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Slug -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>URL Slug</mat-label>
+                <input
+                  matInput
+                  formControlName="slug"
+                  placeholder="auto-generated from service name"
+                />
+                <mat-hint>Used in URLs. Auto-generated if left blank.</mat-hint>
+              </mat-form-field>
+
+              <!-- Short Description -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Short Description</mat-label>
+                <textarea
+                  matInput
+                  formControlName="short_description"
+                  rows="2"
+                  placeholder="Brief description for search results and previews"
+                  maxlength="160"
+                ></textarea>
+                <mat-hint align="end">{{ (short_description?.value || '').length }}/160 characters</mat-hint>
+                @if (short_description?.hasError('maxlength') && short_description?.touched) {
+                  <mat-error>Short description cannot exceed 160 characters</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Description -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Full Description</mat-label>
+                <textarea
+                  matInput
+                  formControlName="description"
+                  rows="4"
+                  placeholder="Detailed description of your service"
+                ></textarea>
+              </mat-form-field>
+
+              <!-- Category -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Category</mat-label>
+                <input
+                  matInput
+                  formControlName="category"
+                  placeholder="e.g., Design, Development, Marketing"
+                />
+              </mat-form-field>
+
+              <div class="flex justify-end">
+                <button 
+                  type="button"
+                  mat-flat-button 
+                  color="primary"
+                  (click)="nextStep(stepper)"
+                  [disabled]="!isServiceInfoValid()">
+                  Next
+                  <mat-icon class="ml-2">arrow_forward</mat-icon>
+                </button>
+              </div>
+            </form>
+          </mat-step>
+
+          <!-- Step 2: Pricing & Features -->
+          <mat-step [stepControl]="servicePricingForm" label="Pricing & Features">
+            <form [formGroup]="servicePricingForm" class="p-6 space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Pricing & Service Features
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Set your pricing and define what's included in your service.
+                </p>
+              </div>
+
+              <!-- Pricing Section -->
+              <div>
+                <h4 class="text-md font-medium text-gray-900 mb-3">Pricing Information</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Price</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      formControlName="price"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                    />
+                    @if (price?.hasError('min') && price?.touched) {
+                      <mat-error>Price cannot be negative</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Pricing Type</mat-label>
+                    <mat-select formControlName="pricing_type">
+                      @for (type of pricingTypes; track type) {
+                        <mat-option [value]="type">
+                          {{ type | titlecase }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <!-- Duration -->
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Duration</mat-label>
+                  <input
+                    matInput
+                    formControlName="duration"
+                    placeholder="e.g., 2-3 weeks, 1 hour"
+                  />
+                </mat-form-field>
+              </div>
+
+              <!-- Features & Tags Section -->
+              <div>
+                <h4 class="text-md font-medium text-gray-900 mb-3">Service Details</h4>
+                
+                <!-- Features -->
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Features</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="features"
+                    rows="3"
+                    placeholder="Feature 1, Feature 2, Feature 3"
+                  ></textarea>
+                  <mat-hint>Separate features with commas</mat-hint>
+                </mat-form-field>
+
+                <!-- Tags (moved from serviceInfoForm) -->
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Tags</mat-label>
+                  <input
+                    matInput
+                    formControlName="tags"
+                    placeholder="tag1, tag2, tag3"
+                  />
+                  <mat-hint>Separate tags with commas</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <!-- Status Toggles -->
+              <div>
+                <h4 class="text-md font-medium text-gray-900 mb-3">Service Status</h4>
+                <div class="space-y-4">
+                  <mat-checkbox formControlName="is_active">
+                    Active (visible to customers)
+                  </mat-checkbox>
+
+                  <mat-checkbox formControlName="is_featured">
+                    Featured service
+                  </mat-checkbox>
+                </div>
+              </div>
+
+              <div class="flex justify-between">
+                <button 
+                  type="button"
+                  mat-button
+                  (click)="previousStep(stepper)">
+                  <mat-icon class="mr-2">arrow_back</mat-icon>
+                  Previous
+                </button>
+                <button 
+                  type="button"
+                  mat-flat-button 
+                  color="primary"
+                  (click)="nextStep(stepper)"
+                  [disabled]="!isServicePricingValid()">
+                  Next
+                  <mat-icon class="ml-2">arrow_forward</mat-icon>
+                </button>
+              </div>
+            </form>
+          </mat-step>
+
+          <!-- Step 3: SEO & Settings -->
+          <mat-step [stepControl]="serviceSeoForm" label="SEO & Finish">
+            <form [formGroup]="serviceSeoForm" class="p-6 space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  SEO Settings (Optional)
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Optimize your service for search engines to improve visibility.
+                </p>
+              </div>
+
+              <!-- Meta Title -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Meta Title</mat-label>
+                <input
+                  matInput
+                  formControlName="meta_title"
+                  placeholder="Custom title for search engines"
+                />
+                <mat-hint>If left blank, service name will be used</mat-hint>
+              </mat-form-field>
+
+              <!-- Meta Description -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Meta Description</mat-label>
+                <textarea
+                  matInput
+                  formControlName="meta_description"
+                  rows="3"
+                  placeholder="Custom description for search engines"
+                  maxlength="160"
+                ></textarea>
+                <mat-hint align="end">{{ (meta_description?.value || '').length }}/160 characters</mat-hint>
+              </mat-form-field>
+
+              <!-- Review Section -->
+              <div class="bg-gray-50 rounded-lg p-4">
+                <h4 class="text-md font-medium text-gray-900 mb-3">Review Your Service</h4>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Service Name:</span>
+                    <span class="font-medium">{{ name?.value || 'Not specified' }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Price:</span>
+                    <span class="font-medium">
+                      @if (price?.value) {
+                        ${{ price?.value }} ({{ pricing_type?.value | titlecase }})
+                      } @else {
+                        Not specified
+                      }
+                    </span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Status:</span>
+                    <span class="font-medium">
+                      @if (is_active?.value) {
+                        <span class="text-green-600">Active</span>
+                      } @else {
+                        <span class="text-gray-600">Inactive</span>
+                      }
+                      @if (is_featured?.value) {
+                        <span class="text-blue-600 ml-2">• Featured</span>
+                      }
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-between">
+                <button 
+                  type="button"
+                  mat-button
+                  (click)="previousStep(stepper)">
+                  <mat-icon class="mr-2">arrow_back</mat-icon>
+                  Previous
+                </button>
+                <button 
+                  type="button"
+                  mat-flat-button 
+                  color="primary"
+                  (click)="onSubmit()"
+                  [disabled]="!canSubmitService()">
+                  @if (submitting()) {
+                    <ng-container>
+                      <mat-icon class="animate-spin mr-2">hourglass_empty</mat-icon>
+                      {{ isEditMode() ? 'Updating...' : 'Creating...' }}
+                    </ng-container>
+                  } @else {
+                    <ng-container>
+                      <mat-icon class="mr-2">{{ isEditMode() ? 'save' : 'add' }}</mat-icon>
+                      {{ submitButtonText() }}
+                    </ng-container>
+                  }
+                </button>
+              </div>
+            </form>
+          </mat-step>
+
+        </mat-stepper>
+      </div>
+    </div>
+  }
+</div>

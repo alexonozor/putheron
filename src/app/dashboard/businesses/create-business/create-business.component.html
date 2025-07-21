@@ -1,5 +1,3 @@
-<app-header />
-
 <div class="min-h-screen bg-gray-50">
   @if (loading()) {
     <div class="flex justify-center items-center py-20">
@@ -99,10 +97,7 @@
                   <mat-select formControlName="business_type" required>
                     <mat-option value="service">Service Business</mat-option>
                     <mat-option value="product">Product Business</mat-option>
-                    <mat-option value="consulting">Consulting</mat-option>
-                    <mat-option value="retail">Retail</mat-option>
-                    <mat-option value="online">Online Business</mat-option>
-                    <mat-option value="other">Other</mat-option>
+                    <mat-option value="both">Both Service & Product</mat-option>
                   </mat-select>
                   @if (businessInfoForm.get('business_type')?.hasError('required') && businessInfoForm.get('business_type')?.touched) {
                     <mat-error>Please select a business type</mat-error>
@@ -115,8 +110,8 @@
                     formControlName="category_id" 
                     (selectionChange)="onCategoryChange($event.value)"
                     required>
-                    @for (category of categories(); track category.id) {
-                      <mat-option [value]="category.id">
+                    @for (category of categories(); track category._id) {
+                      <mat-option [value]="category._id">
                         {{ category.name }}
                       </mat-option>
                     }
@@ -132,8 +127,8 @@
                   <mat-label>Subcategory (Optional)</mat-label>
                   <mat-select formControlName="subcategory_id">
                     <mat-option value="">None</mat-option>
-                    @for (subcategory of subcategories(); track subcategory.id) {
-                      <mat-option [value]="subcategory.id">
+                    @for (subcategory of subcategories(); track subcategory._id) {
+                      <mat-option [value]="subcategory._id">
                         {{ subcategory.name }}
                       </mat-option>
                     }

@@ -2,7 +2,8 @@ import { Component, signal, inject, computed, effect, OnInit } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AuthService } from '../shared/services/auth.service';
+import { AuthService } from '../shared/services';
+import { RegisterRequest } from '../models';
 
 @Component({
   selector: 'app-auth',
@@ -34,7 +35,10 @@ export class AuthComponent implements OnInit {
     this.authForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      fullName: [''] // Will be required conditionally
+      fullName: [''], // Will be required conditionally
+      lastName: [''], // Optional
+      isBuyer: [true], // Default to buyer
+      isSeller: [false]
     });
 
     // Update fullName validation based on isSignUp
@@ -78,16 +82,27 @@ export class AuthComponent implements OnInit {
       return;
     }
 
-    const { email, password, fullName } = this.authForm.value;
+    const { email, password, fullName, lastName, isBuyer, isSeller } = this.authForm.value;
 
     try {
       if (this.isSignUp()) {
-        const { data, error } = await this.authService.signUp(email, password, fullName);
+        const registerData: RegisterRequest = {
+          email,
+          password,
+          full_name: fullName,
+          last_name: lastName,
+          is_buyer: isBuyer || true,
+          is_seller: isSeller || false
+        };
+        
+        const { data, error } = await this.authService.signUp(registerData);
         
         if (error) {
           this.error.set(error.message);
         } else {
-          this.successMessage.set('Account created successfully! Please check your email to verify your account.');
+          this.successMessage.set('Account created successfully! You are now logged in.');
+          // Redirect to dashboard after successful registration
+          this.router.navigate(['/dashboard']);
         }
       } else {
         const { data, error } = await this.authService.signIn(email, password);
@@ -119,16 +134,8 @@ export class AuthComponent implements OnInit {
       return;
     }
 
-    try {
-      const { error } = await this.authService.resetPassword(email);
-      if (error) {
-        this.error.set(error.message);
-      } else {
-        this.successMessage.set('Password reset email sent! Check your inbox.');
-      }
-    } catch (err: any) {
-      this.error.set(err?.message || 'An unexpected error occurred');
-    }
+    // For now, just show a message that password reset is not implemented
+    this.successMessage.set('Password reset functionality will be available soon. Please contact support if needed.');
   }
 
   private clearMessages() {

@@ -1,0 +1,134 @@
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center space-x-4">
+        <button 
+          mat-icon-button 
+          (click)="navigateBack()"
+          class="flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors">
+          <mat-icon class="text-gray-600">arrow_back</mat-icon>
+        </button>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Messages</h1>
+          <p class="text-gray-600 mt-1">Communicate with your project partners</p>
+        </div>
+      </div>
+      
+      <button 
+        mat-raised-button 
+        color="primary"
+        (click)="refreshChats()"
+        [disabled]="loading()"
+        class="px-6 py-3 text-base font-semibold rounded-lg">
+        <mat-icon class="mr-2">refresh</mat-icon>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex justify-center items-center py-12">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error() && !loading()) {
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center">
+          <mat-icon class="text-red-600 mr-2">error</mat-icon>
+          <span class="text-red-800 font-medium">{{ error() }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- Chat List -->
+    @if (hasChats() && !loading()) {
+      <div class="space-y-4">
+        @for (chat of chats(); track chat._id) {
+          <div 
+            class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-md transition-all duration-200"
+            (click)="openChat(chat)">
+            
+            <div class="flex items-start space-x-4">
+              <!-- Avatar/Business Logo -->
+              <div class="flex-shrink-0">
+                @if (chat.project_id.business_id.logo_url) {
+                  <img 
+                    [src]="chat.project_id.business_id.logo_url" 
+                    [alt]="chat.project_id.business_id.name"
+                    class="w-12 h-12 rounded-full object-cover border border-gray-200">
+                } @else {
+                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                    <mat-icon class="text-white">business</mat-icon>
+                  </div>
+                }
+              </div>
+
+              <!-- Chat Info -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <!-- Project Title -->
+                    <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ chat.title }}</h3>
+                    
+                    <!-- Participant Info -->
+                    <div class="flex items-center space-x-2 mb-2">
+                      <span class="text-sm text-gray-600">
+                        With {{ getOtherParticipant(chat).last_name || 'Unknown User' }}
+                      </span>
+                      <span class="text-gray-400">•</span>
+                      <span class="text-sm text-gray-600">{{ chat.project_id.business_id.name }}</span>
+                    </div>
+
+                    <!-- Project Status -->
+                    <div class="flex items-center space-x-3">
+                      <span 
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                        [class]="getProjectStatusColor(chat.project_id.status)">
+                        {{ chat.project_id.status | titlecase }}
+                      </span>
+                      <span class="text-xs text-gray-500">{{ formatDate(chat.last_message_at) }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex items-center space-x-2">
+                    <button 
+                      mat-icon-button
+                      (click)="viewProject(chat.project_id._id, $event)"
+                      class="text-gray-400 hover:text-gray-600">
+                      <mat-icon>open_in_new</mat-icon>
+                    </button>
+                    <mat-icon class="text-gray-400">chevron_right</mat-icon>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!hasChats() && !loading() && !error()) {
+      <div class="text-center py-12">
+        <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+          <mat-icon class="text-gray-400 w-12 h-12">chat_bubble_outline</mat-icon>
+        </div>
+        <h3 class="text-xl font-medium text-gray-900 mb-2">No conversations yet</h3>
+        <p class="text-gray-500 mb-6">
+          Start a conversation by creating a project or accepting project requests.
+        </p>
+        <button 
+          mat-raised-button 
+          color="primary"
+          (click)="navigateToProjects()"
+          class="px-6 py-3 text-base font-semibold rounded-lg">
+          View Projects
+        </button>
+      </div>
+    }
+  </div>
+</div>
