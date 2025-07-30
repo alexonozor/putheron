@@ -108,7 +108,8 @@ export class ListBusinessesComponent implements OnInit {
   }
 
   editBusiness(businessId: string) {
-    this.router.navigate(['edit', businessId], { relativeTo: this.route });
+    console.log('Editing business with ID:', businessId);
+    this.router.navigate(['../edit', businessId], { relativeTo: this.route });
   }
 
   viewBusiness(businessId: string) {

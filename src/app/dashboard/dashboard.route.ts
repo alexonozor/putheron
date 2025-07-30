@@ -3,6 +3,8 @@ import { OverviewsComponent } from './overviews/overviews.component';
 import { ProjectsComponent } from './projects/projects.component';
 import { ProjectDetailsComponent } from '../project-details/project-details.component';
 import { TestNotificationsComponent } from '../test-notifications.component';
+import { ProfileComponent } from './profile/profile.component';
+import { SettingsComponent } from './settings/settings.component';
 
 
 export const DASHBOARD_ROUTES: Routes = [
@@ -27,6 +29,8 @@ export const DASHBOARD_ROUTES: Routes = [
     },
   { path: 'projects', component: ProjectsComponent },
   { path: 'projects/:id', component: ProjectDetailsComponent },
+  { path: 'profile', component: ProfileComponent },
+  { path: 'settings', component: SettingsComponent },
   { path: 'test-notifications', component: TestNotificationsComponent },
  
   { path: '**', redirectTo: '' }

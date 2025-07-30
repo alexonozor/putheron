@@ -47,6 +47,10 @@ export class CreateServiceComponent implements OnInit {
   readonly submitting = signal(false);
   readonly isEditMode = signal(false);
   readonly serviceId = signal<string>('');
+  readonly uploadingImages = signal(false);
+  readonly selectedImages = signal<File[]>([]);
+  readonly imagePreviewUrls = signal<string[]>([]);
+  readonly existingImages = signal<string[]>([]);
 
   // Forms
   serviceInfoForm: FormGroup;
@@ -185,6 +189,11 @@ export class CreateServiceComponent implements OnInit {
       meta_title: service.meta_title || '',
       meta_description: service.meta_description || ''
     });
+
+    // Handle existing images
+    if (service.images && service.images.length > 0) {
+      this.existingImages.set([...service.images]);
+    }
   }
 
   private generateSlug(name: string): string {
@@ -248,6 +257,9 @@ export class CreateServiceComponent implements OnInit {
       const servicePricingData = this.servicePricingForm.value;
       const serviceSeoData = this.serviceSeoForm.value;
 
+      let serviceResult: any;
+      let serviceId: string;
+
       const serviceData = {
         name: serviceInfoData.name,
         slug: serviceInfoData.slug || this.generateSlug(serviceInfoData.name),
@@ -266,9 +278,43 @@ export class CreateServiceComponent implements OnInit {
       };
 
       if (this.isEditMode()) {
-        await this.businessService.updateServiceAsync(this.serviceId(), serviceData as UpdateServiceDto);
+        serviceId = this.serviceId();
+        serviceResult = await this.businessService.updateServiceAsync(serviceId, serviceData as UpdateServiceDto);
       } else {
-        await this.businessService.createServiceAsync(serviceInfoData.business_id, serviceData as CreateServiceDto);
+        serviceResult = await this.businessService.createServiceAsync(serviceInfoData.business_id, serviceData as CreateServiceDto);
+        serviceId = serviceResult._id;
+      }
+
+      // Handle image uploads if any
+      try {
+        const imageUrls = await this.uploadImages(serviceId);
+        
+        // Update service with image URLs if we have images
+        if (imageUrls.length > 0) {
+          await this.businessService.updateServiceAsync(serviceId, { 
+            images: imageUrls 
+          } as UpdateServiceDto);
+        }
+
+        // Handle removal of existing images in edit mode
+        if (this.isEditMode()) {
+          const currentService = this.currentService();
+          const originalImages = currentService?.images || [];
+          const removedImages = originalImages.filter(img => !this.existingImages().includes(img));
+          
+          // Delete removed images
+          for (const imageUrl of removedImages) {
+            try {
+              await this.businessService.deleteServiceImageAsync(serviceId, imageUrl);
+            } catch (deleteError) {
+              console.warn('Failed to delete image:', deleteError);
+            }
+          }
+        }
+      } catch (imageError: any) {
+        console.error('Error handling images:', imageError);
+        // Continue even if image upload fails, but show warning
+        this.error.set(`Service saved but image upload failed: ${imageError.message}`);
       }
       
       // Navigate back to services list
@@ -323,6 +369,96 @@ export class CreateServiceComponent implements OnInit {
   get tags() { return this.servicePricingForm.get('tags'); }
   get is_active() { return this.servicePricingForm.get('is_active'); }
   get is_featured() { return this.servicePricingForm.get('is_featured'); }
+
+  // Image handling methods
+  onImageSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const files = Array.from(input.files);
+      
+      // Validate file types and sizes
+      const validFiles = files.filter(file => {
+        const isValidType = file.type.startsWith('image/');
+        const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB limit
+        return isValidType && isValidSize;
+      });
+
+      if (validFiles.length !== files.length) {
+        this.error.set('Some files were rejected. Please ensure all files are images under 5MB.');
+      }
+
+      // Update selected images
+      const currentImages = this.selectedImages();
+      const newImages = [...currentImages, ...validFiles];
+      
+      // Limit to 5 images total
+      if (newImages.length > 5) {
+        this.selectedImages.set(newImages.slice(0, 5));
+        this.error.set('Maximum 5 images allowed. Some images were not added.');
+      } else {
+        this.selectedImages.set(newImages);
+      }
+
+      // Generate preview URLs
+      this.generateImagePreviews();
+    }
+  }
+
+  removeImage(index: number): void {
+    const currentImages = this.selectedImages();
+    const newImages = currentImages.filter((_, i) => i !== index);
+    this.selectedImages.set(newImages);
+    this.generateImagePreviews();
+  }
+
+  removeExistingImage(imageUrl: string): void {
+    const currentImages = this.existingImages();
+    const newImages = currentImages.filter(url => url !== imageUrl);
+    this.existingImages.set(newImages);
+  }
+
+  private generateImagePreviews(): void {
+    const files = this.selectedImages();
+    const previews: string[] = [];
+    
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        previews.push(result);
+        
+        // Update signal when all previews are ready
+        if (previews.length === files.length) {
+          this.imagePreviewUrls.set(previews);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // If no files, clear previews
+    if (files.length === 0) {
+      this.imagePreviewUrls.set([]);
+    }
+  }
+
+  private async uploadImages(serviceId: string): Promise<string[]> {
+    const files = this.selectedImages();
+    if (files.length === 0) {
+      return this.existingImages();
+    }
+
+    this.uploadingImages.set(true);
+    try {
+      const result = await this.businessService.uploadServiceImagesAsync(serviceId, files);
+      const allImages = [...this.existingImages(), ...result.images];
+      return allImages;
+    } catch (error: any) {
+      console.error('Error uploading images:', error);
+      throw new Error('Failed to upload images');
+    } finally {
+      this.uploadingImages.set(false);
+    }
+  }
   get meta_title() { return this.serviceSeoForm.get('meta_title'); }
   get meta_description() { return this.serviceSeoForm.get('meta_description'); }
 }

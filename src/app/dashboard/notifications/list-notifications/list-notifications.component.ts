@@ -179,11 +179,23 @@ export class ListNotificationsComponent implements OnInit {
         }
         break;
       
+      case NotificationType.PAYMENT_REQUEST:
+      case NotificationType.PAYMENT_APPROVED:
+      case NotificationType.PAYMENT_REJECTED:
+      case NotificationType.COMPLETION_REQUEST:
+      case NotificationType.COMPLETION_APPROVED:
+      case NotificationType.COMPLETION_REJECTED:
+        // These should navigate to the chat or project details
+        if (notification.metadata?.['chatId']) {
+          this.router.navigate(['/dashboard/messages/chat', notification.metadata['chatId']]);
+        } else if (notification.project_id) {
+          this.router.navigate(['/dashboard/projects', notification.project_id._id]);
+        }
+        break;
+      
       case NotificationType.MESSAGE_RECEIVED:
         if (notification.metadata?.['chatId']) {
-          this.router.navigate(['/dashboard/messages'], { 
-            queryParams: { chat: notification.metadata['chatId'] } 
-          });
+          this.router.navigate(['/dashboard/messages/chat', notification.metadata['chatId']]);
         }
         break;
       
@@ -222,12 +234,18 @@ export class ListNotificationsComponent implements OnInit {
   }
 
   getTypeLabel(type: NotificationType): string {
-    const labels = {
+    const labels:any = {
       [NotificationType.PROJECT_CREATED]: 'Project Created',
       [NotificationType.PROJECT_ACCEPTED]: 'Project Accepted',
       [NotificationType.PROJECT_REJECTED]: 'Project Rejected',
       [NotificationType.PROJECT_STARTED]: 'Project Started',
       [NotificationType.PROJECT_COMPLETED]: 'Project Completed',
+      [NotificationType.PAYMENT_REQUEST]: 'Payment Request',
+      [NotificationType.PAYMENT_APPROVED]: 'Payment Approved',
+      [NotificationType.PAYMENT_REJECTED]: 'Payment Rejected',
+      [NotificationType.COMPLETION_REQUEST]: 'Completion Request',
+      [NotificationType.COMPLETION_APPROVED]: 'Completion Approved',
+      [NotificationType.COMPLETION_REJECTED]: 'Completion Rejected',
       [NotificationType.PROMOTION]: 'Promotion',
       [NotificationType.SYSTEM_ANNOUNCEMENT]: 'Announcement',
       [NotificationType.MESSAGE_RECEIVED]: 'Message',

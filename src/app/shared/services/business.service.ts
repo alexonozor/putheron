@@ -87,6 +87,7 @@ export interface Business {
   subcategory_id?: Subcategory | string;
   owner_id: string | any; // Can be string ID or populated user object
   logo_url?: string;
+  banner_url?: string;
   cover_image_url?: string;
   images?: string[];
   website?: string;
@@ -728,5 +729,65 @@ export class BusinessService {
 //     this.userBusinesses.set([]);
 //     this.error.set(null);
 //   }
+
+  // Image upload methods
+  uploadLogo(businessId: string, file: File): Observable<{ success: boolean; data: { logo_url: string }; message: string }> {
+    const formData = new FormData();
+    formData.append('logo', file);
+    
+    return this.http.post<{ success: boolean; data: { logo_url: string }; message: string }>(
+      `${this.apiUrl}/${businessId}/upload-logo`,
+      formData
+    );
+  }
+
+  async uploadLogoAsync(businessId: string, file: File): Promise<{ logo_url: string }> {
+    const response = await firstValueFrom(this.uploadLogo(businessId, file));
+    return response.data;
+  }
+
+  uploadBanner(businessId: string, file: File): Observable<{ success: boolean; data: { banner_url: string }; message: string }> {
+    const formData = new FormData();
+    formData.append('banner', file);
+    
+    return this.http.post<{ success: boolean; data: { banner_url: string }; message: string }>(
+      `${this.apiUrl}/${businessId}/upload-banner`,
+      formData
+    );
+  }
+
+  async uploadBannerAsync(businessId: string, file: File): Promise<{ banner_url: string }> {
+    const response = await firstValueFrom(this.uploadBanner(businessId, file));
+    return response.data;
+  }
+
+  // Service image upload methods
+  uploadServiceImages(serviceId: string, files: File[]): Observable<{ success: boolean; data: { images: string[] }; message: string }> {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('images', file);
+    });
+
+    return this.http.post<{ success: boolean; data: { images: string[] }; message: string }>(
+      `${this.config.apiBaseUrl}/services/${serviceId}/upload-images`,
+      formData
+    );
+  }
+
+  async uploadServiceImagesAsync(serviceId: string, files: File[]): Promise<{ images: string[] }> {
+    const response = await firstValueFrom(this.uploadServiceImages(serviceId, files));
+    return response.data;
+  }
+
+  deleteServiceImage(serviceId: string, imageUrl: string): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(
+      `${this.config.apiBaseUrl}/services/${serviceId}/delete-image`,
+      { body: { imageUrl } }
+    );
+  }
+
+  async deleteServiceImageAsync(serviceId: string, imageUrl: string): Promise<void> {
+    await firstValueFrom(this.deleteServiceImage(serviceId, imageUrl));
+  }
 // }
 }

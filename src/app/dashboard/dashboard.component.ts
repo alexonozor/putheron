@@ -8,6 +8,8 @@ import { BusinessService } from '../shared/services/business.service';
 import { ProjectService } from '../shared/services/project.service';
 import { NotificationNavComponent } from '../shared/components/notification-nav.component';
 import { SocketService } from '../shared/services/socket.service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -24,15 +26,17 @@ import { SocketService } from '../shared/services/socket.service';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly businessService = inject(BusinessService);
   private readonly projectService = inject(ProjectService);
   private readonly socketService = inject(SocketService);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   // Signals for parent container state
-  readonly sidenavOpened = signal<boolean>(true);
+  readonly sidenavOpened = signal<boolean>(false); // Default to false for mobile-first
+  readonly isMobile = signal<boolean>(false);
   readonly userBusinessCount = signal<number>(0);
   readonly totalServices = signal<number>(0);
   readonly totalProjects = signal<number>(0);
@@ -40,10 +44,34 @@ export class DashboardComponent implements OnInit {
   // Computed signals
   readonly user = this.authService.user;
 
+  private mobileSubscription?: Subscription;
+
   ngOnInit() {
+    this.setupMobileDetection();
     this.loadDashboardCounts();
     // Initialize socket connection for real-time features
     this.socketService.connect();
+  }
+
+  ngOnDestroy() {
+    if (this.mobileSubscription) {
+      this.mobileSubscription.unsubscribe();
+    }
+  }
+
+  private setupMobileDetection() {
+    this.mobileSubscription = this.breakpointObserver
+      .observe([Breakpoints.Handset])
+      .subscribe(result => {
+        this.isMobile.set(result.matches);
+        // On desktop, keep sidebar open by default
+        if (!result.matches) {
+          this.sidenavOpened.set(true);
+        } else {
+          // On mobile, keep sidebar closed by default
+          this.sidenavOpened.set(false);
+        }
+      });
   }
 
   async loadDashboardCounts() {
@@ -81,6 +109,13 @@ export class DashboardComponent implements OnInit {
     this.sidenavOpened.set(!this.sidenavOpened());
   }
 
+  onNavigationClick() {
+    // Close sidebar on mobile when a navigation link is clicked
+    if (this.isMobile()) {
+      this.sidenavOpened.set(false);
+    }
+  }
+
   navigateToCreateBusiness() {
     this.router.navigate(['/dashboard/businesses/create-business']);
   }
@@ -108,6 +143,10 @@ export class DashboardComponent implements OnInit {
         return 'My Projects';
       case 'notifications':
         return 'Notifications';
+      case 'profile':
+        return 'Profile';
+      case 'settings':
+        return 'Settings';
       default: 
         // Check if we're in messages route
         if (this.router.url.includes('/messages')) {
@@ -117,9 +156,34 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  getUserInitials(): string {
+    const user = this.user();
+    if (!user) return '';
+    
+    if (user.full_name) {
+      const names = user.full_name.split(' ');
+      const firstInitial = names[0]?.charAt(0).toUpperCase() || '';
+      const lastInitial = names[names.length - 1]?.charAt(0).toUpperCase() || '';
+      return firstInitial + lastInitial;
+    }
+    
+    return user.email.charAt(0).toUpperCase();
+  }
+
+  navigateToDashboard() {
+    this.router.navigate(['/dashboard']);
+  }
+
+  navigateToProfile() {
+    this.router.navigate(['/dashboard/profile']);
+  }
+
+  navigateToSettings() {
+    this.router.navigate(['/dashboard/settings']);
+  }
+
   viewProfile() {
-    // TODO: Navigate to profile page
-    alert('Profile page will be available soon!');
+    this.navigateToProfile();
   }
 
   logout() {

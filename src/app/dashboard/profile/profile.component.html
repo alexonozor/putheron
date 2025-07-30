@@ -1,0 +1,163 @@
+<div class="max-w-4xl mx-auto p-6">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
+    <p class="text-gray-600">Manage your account information and settings</p>
+  </div>
+
+  <mat-tab-group class="profile-tabs">
+    <!-- Profile Information Tab -->
+    <mat-tab label="Profile Information">
+      <div class="tab-content">
+        <mat-card class="profile-card">
+          <mat-card-header>
+            <div class="flex items-center space-x-4 mb-6">
+              <div class="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                {{ getUserInitials() }}
+              </div>
+              <div>
+                <h2 class="text-xl font-semibold">{{ user()?.full_name || user()?.email }}</h2>
+                <p class="text-gray-600">{{ user()?.email }}</p>
+              </div>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Full Name</mat-label>
+                  <input matInput formControlName="full_name" placeholder="Enter your full name">
+                  <mat-icon matSuffix>person</mat-icon>
+                  @if (profileForm.get('full_name')?.hasError('required') && profileForm.get('full_name')?.touched) {
+                    <mat-error>Full name is required</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Email</mat-label>
+                  <input matInput formControlName="email" type="email" placeholder="Enter your email">
+                  <mat-icon matSuffix>email</mat-icon>
+                  @if (profileForm.get('email')?.hasError('required') && profileForm.get('email')?.touched) {
+                    <mat-error>Email is required</mat-error>
+                  }
+                  @if (profileForm.get('email')?.hasError('email') && profileForm.get('email')?.touched) {
+                    <mat-error>Please enter a valid email</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Phone</mat-label>
+                  <input matInput formControlName="phone" placeholder="Enter your phone number">
+                  <mat-icon matSuffix>phone</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>City</mat-label>
+                  <input matInput formControlName="city" placeholder="Enter your city">
+                  <mat-icon matSuffix>location_city</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Country</mat-label>
+                  <input matInput formControlName="country" placeholder="Enter your country">
+                  <mat-icon matSuffix>flag</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Country of Origin</mat-label>
+                  <input matInput formControlName="country_of_origin" placeholder="Enter your country of origin">
+                  <mat-icon matSuffix>home</mat-icon>
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Bio</mat-label>
+                <textarea matInput formControlName="bio" rows="4" placeholder="Tell us about yourself"></textarea>
+                <mat-icon matSuffix>description</mat-icon>
+              </mat-form-field>
+
+              <div class="flex justify-end pt-4">
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  type="submit"
+                  [disabled]="isLoading() || profileForm.invalid"
+                  class="px-8"
+                >
+                  @if (isLoading()) {
+                    <mat-icon class="animate-spin mr-2">refresh</mat-icon>
+                  }
+                  Update Profile
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Change Password Tab -->
+    <mat-tab label="Change Password">
+      <div class="tab-content">
+        <mat-card class="password-card">
+          <mat-card-header>
+            <mat-card-title>Change Password</mat-card-title>
+            <mat-card-subtitle>Update your account password</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()" class="space-y-4">
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Current Password</mat-label>
+                <input matInput formControlName="currentPassword" type="password" placeholder="Enter current password">
+                <mat-icon matSuffix>lock</mat-icon>
+                @if (passwordForm.get('currentPassword')?.hasError('required') && passwordForm.get('currentPassword')?.touched) {
+                  <mat-error>Current password is required</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>New Password</mat-label>
+                <input matInput formControlName="newPassword" type="password" placeholder="Enter new password">
+                <mat-icon matSuffix>lock_outline</mat-icon>
+                @if (passwordForm.get('newPassword')?.hasError('required') && passwordForm.get('newPassword')?.touched) {
+                  <mat-error>New password is required</mat-error>
+                }
+                @if (passwordForm.get('newPassword')?.hasError('minlength') && passwordForm.get('newPassword')?.touched) {
+                  <mat-error>Password must be at least 6 characters</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Confirm New Password</mat-label>
+                <input matInput formControlName="confirmPassword" type="password" placeholder="Confirm new password">
+                <mat-icon matSuffix>lock_outline</mat-icon>
+                @if (passwordForm.get('confirmPassword')?.hasError('required') && passwordForm.get('confirmPassword')?.touched) {
+                  <mat-error>Please confirm your password</mat-error>
+                }
+                @if (passwordForm.get('confirmPassword')?.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched) {
+                  <mat-error>Passwords do not match</mat-error>
+                }
+              </mat-form-field>
+
+              <div class="flex justify-end pt-4">
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  type="submit"
+                  [disabled]="isLoading() || passwordForm.invalid"
+                  class="px-8"
+                >
+                  @if (isLoading()) {
+                    <mat-icon class="animate-spin mr-2">refresh</mat-icon>
+                  }
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

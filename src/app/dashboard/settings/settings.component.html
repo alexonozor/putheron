@@ -1,0 +1,140 @@
+<div class="max-w-4xl mx-auto p-6">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
+    <p class="text-gray-600">Manage your account preferences and notification settings</p>
+  </div>
+
+  <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" class="space-y-6">
+    
+    <!-- Notifications Settings -->
+    <mat-card class="settings-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="mr-2">notifications</mat-icon>
+          Notifications
+        </mat-card-title>
+        <mat-card-subtitle>Choose how you want to be notified about activity</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium text-gray-900">Email Notifications</h3>
+              <p class="text-sm text-gray-600">Receive notifications via email</p>
+            </div>
+            <mat-slide-toggle formControlName="emailNotifications" color="primary"></mat-slide-toggle>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium text-gray-900">Push Notifications</h3>
+              <p class="text-sm text-gray-600">Receive push notifications in your browser</p>
+            </div>
+            <mat-slide-toggle formControlName="pushNotifications" color="primary"></mat-slide-toggle>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium text-gray-900">Marketing Emails</h3>
+              <p class="text-sm text-gray-600">Receive promotional and marketing emails</p>
+            </div>
+            <mat-slide-toggle formControlName="marketingEmails" color="primary"></mat-slide-toggle>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium text-gray-900">Project Updates</h3>
+              <p class="text-sm text-gray-600">Get notified about project status changes</p>
+            </div>
+            <mat-slide-toggle formControlName="projectUpdates" color="primary"></mat-slide-toggle>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-medium text-gray-900">Message Notifications</h3>
+              <p class="text-sm text-gray-600">Get notified when you receive new messages</p>
+            </div>
+            <mat-slide-toggle formControlName="messageNotifications" color="primary"></mat-slide-toggle>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Preferences Settings -->
+    <mat-card class="settings-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="mr-2">tune</mat-icon>
+          Preferences
+        </mat-card-title>
+        <mat-card-subtitle>Customize your experience</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <mat-form-field appearance="outline">
+            <mat-label>Language</mat-label>
+            <mat-select formControlName="language">
+              <mat-option value="en">English</mat-option>
+              <mat-option value="es">Spanish</mat-option>
+              <mat-option value="fr">French</mat-option>
+              <mat-option value="de">German</mat-option>
+            </mat-select>
+            <mat-icon matSuffix>language</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Timezone</mat-label>
+            <mat-select formControlName="timezone">
+              <mat-option value="UTC">UTC</mat-option>
+              <mat-option value="America/New_York">Eastern Time</mat-option>
+              <mat-option value="America/Chicago">Central Time</mat-option>
+              <mat-option value="America/Denver">Mountain Time</mat-option>
+              <mat-option value="America/Los_Angeles">Pacific Time</mat-option>
+              <mat-option value="Europe/London">London</mat-option>
+              <mat-option value="Europe/Paris">Paris</mat-option>
+            </mat-select>
+            <mat-icon matSuffix>schedule</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Theme</mat-label>
+            <mat-select formControlName="theme">
+              <mat-option value="light">Light</mat-option>
+              <mat-option value="dark">Dark</mat-option>
+              <mat-option value="auto">Auto</mat-option>
+            </mat-select>
+            <mat-icon matSuffix>palette</mat-icon>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-between pt-6">
+      <button 
+        mat-stroked-button 
+        type="button"
+        (click)="resetSettings()"
+        [disabled]="isLoading()"
+        class="px-6"
+      >
+        Reset to Default
+      </button>
+
+      <button 
+        mat-raised-button 
+        color="primary" 
+        type="submit"
+        [disabled]="isLoading() || settingsForm.invalid"
+        class="px-8"
+      >
+        @if (isLoading()) {
+          <mat-icon class="animate-spin mr-2">refresh</mat-icon>
+        }
+        Save Settings
+      </button>
+    </div>
+  </form>
+</div>

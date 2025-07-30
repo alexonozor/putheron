@@ -17,6 +17,10 @@ export const BUSINESSES_ROUTES: Routes = [
         component: CreateBusinessComponent,
       },
       {
+        path: 'edit/:id',
+        component: CreateBusinessComponent,
+      },
+      {
         path: '',
         redirectTo: 'list',
         pathMatch: 'full'

@@ -1,0 +1,95 @@
+.settings-card {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+
+  mat-card-header {
+    margin-bottom: 1rem;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    mat-card-subtitle {
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+  }
+
+  mat-card-content {
+    padding-top: 0;
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Custom styles for better Material Design integration
+::ng-deep {
+  .mat-mdc-slide-toggle {
+    .mdc-switch {
+      &.mdc-switch--selected {
+        .mdc-switch__track {
+          background-color: #2563eb;
+        }
+        
+        .mdc-switch__handle {
+          .mdc-switch__ripple {
+            background-color: #2563eb;
+          }
+        }
+      }
+    }
+  }
+
+  .mat-mdc-form-field {
+    .mat-mdc-form-field-flex {
+      border-radius: 8px;
+    }
+  }
+
+  .mat-mdc-raised-button.mat-primary {
+    background-color: #2563eb;
+    
+    &:hover:not([disabled]) {
+      background-color: #1d4ed8;
+    }
+  }
+
+  .mat-mdc-outlined-button {
+    border-color: #d1d5db;
+    color: #374151;
+    
+    &:hover:not([disabled]) {
+      background-color: #f9fafb;
+      border-color: #9ca3af;
+    }
+  }
+
+  // Error styling
+  .error-snackbar {
+    background-color: #dc2626 !important;
+    color: white !important;
+  }
+
+  // Success styling
+  .success-snackbar {
+    background-color: #059669 !important;
+    color: white !important;
+  }
+}

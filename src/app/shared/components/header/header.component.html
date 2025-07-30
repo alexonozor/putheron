@@ -17,26 +17,59 @@
                 @if (isAuthenticated(); as authenticated) {
                     <!-- Authenticated User -->
                     <div class="flex items-center space-x-4">
-                        <a routerLink="/dashboard" class="text-gray-700 hover:text-blue-600 transition-colors">
-                            Dashboard
-                        </a>
-                        <a routerLink="/messages" class="text-gray-700 hover:text-blue-600 transition-colors">
-                            Messages
-                        </a>
-                        
-                        <!-- Notifications -->
+                        <!-- Messages Icon -->
+                        <button 
+                            mat-icon-button 
+                            (click)="navigateToMessages()"
+                            class="relative text-gray-700 hover:text-blue-600 transition-colors"
+                        >
+                            <mat-icon 
+                                [matBadge]="messageCount()"
+                                [matBadgeHidden]="messageCount() === 0"
+                                matBadgeColor="warn"
+                                matBadgeSize="small"
+                            >
+                                mail
+                            </mat-icon>
+                        </button>
+
+                        <!-- Notifications Component -->
                         <app-notification-nav></app-notification-nav>
-                        
-                        <a routerLink="/profile" class="text-gray-700 hover:text-blue-600 transition-colors">
-                            Profile
-                        </a>
+
+                        <!-- User Dropdown -->
                         <div class="relative">
                             <button 
-                                (click)="signOut()"
-                                class="text-gray-700 hover:text-red-600 transition-colors"
+                                mat-button
+                                [matMenuTriggerFor]="userMenu"
+                                class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
                             >
-                                Sign Out
+                                <!-- User Avatar/Initials -->
+                                <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                                    {{ getUserInitials() }}
+                                </div>
+                                <mat-icon>expand_more</mat-icon>
                             </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <mat-menu #userMenu="matMenu">
+                                <button mat-menu-item (click)="navigateToDashboard()">
+                                    <mat-icon>dashboard</mat-icon>
+                                    <span>Dashboard</span>
+                                </button>
+                                <button mat-menu-item (click)="navigateToProfile()">
+                                    <mat-icon>person</mat-icon>
+                                    <span>Profile</span>
+                                </button>
+                                <button mat-menu-item (click)="navigateToSettings()">
+                                    <mat-icon>settings</mat-icon>
+                                    <span>Settings</span>
+                                </button>
+                                <mat-divider></mat-divider>
+                                <button mat-menu-item (click)="signOut()" class="text-red-600">
+                                    <mat-icon>logout</mat-icon>
+                                    <span>Sign Out</span>
+                                </button>
+                            </mat-menu>
                         </div>
                     </div>
                 } @else {

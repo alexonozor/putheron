@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { AuthComponent } from './auth/auth.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { CreateProjectComponent } from './create-project/create-project.component';
+import { CreateProjectStepsComponent } from './create-project-steps/create-project-steps.component';
 import { AuthGuard } from './shared/guards/auth.guard';
 import { BusinessProfileComponent } from './business-profile/business-profile.component';
 
@@ -21,7 +21,7 @@ export const routes: Routes = [
   { path: 'business/:id', component: BusinessProfileComponent },
   { 
     path: 'create-project/:businessId', 
-    component: CreateProjectComponent,
+    component: CreateProjectStepsComponent,
     canActivate: [AuthGuard]
   },
   { path: '**', redirectTo: '' }

@@ -1,0 +1,88 @@
+.profile-tabs {
+  margin-top: 2rem;
+
+  .tab-content {
+    padding: 2rem 0;
+  }
+
+  .profile-card,
+  .password-card {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+  }
+
+  mat-card-header {
+    margin-bottom: 1.5rem;
+  }
+
+  mat-form-field {
+    margin-bottom: 1rem;
+  }
+
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+// Custom styles for better Material Design integration
+::ng-deep {
+  .mat-mdc-tab-group {
+    .mat-mdc-tab-header {
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .mat-mdc-tab {
+      font-weight: 500;
+    }
+  }
+
+  .mat-mdc-card {
+    .mat-mdc-card-header {
+      .mat-mdc-card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #111827;
+      }
+      
+      .mat-mdc-card-subtitle {
+        color: #6b7280;
+      }
+    }
+  }
+
+  .mat-mdc-form-field {
+    .mat-mdc-form-field-flex {
+      border-radius: 8px;
+    }
+  }
+
+  .mat-mdc-raised-button.mat-primary {
+    background-color: #2563eb;
+    
+    &:hover:not([disabled]) {
+      background-color: #1d4ed8;
+    }
+  }
+
+  // Error styling
+  .error-snackbar {
+    background-color: #dc2626 !important;
+    color: white !important;
+  }
+
+  // Success styling
+  .success-snackbar {
+    background-color: #059669 !important;
+    color: white !important;
+  }
+}

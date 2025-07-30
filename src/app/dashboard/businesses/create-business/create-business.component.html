@@ -37,10 +37,10 @@
         
         <div class="text-center">
           <h1 class="text-3xl font-bold text-gray-900 mb-2">
-            Create Your Business
+            {{ isEditMode() ? 'Edit Your Business' : 'Create Your Business' }}
           </h1>
           <p class="text-gray-600">
-            Set up your business profile and start connecting with customers
+            {{ isEditMode() ? 'Update your business profile and information' : 'Set up your business profile and start connecting with customers' }}
           </p>
         </div>
       </div>
@@ -255,16 +255,95 @@
                       formControlName="website_url" 
                       placeholder="https://your-website.com">
                   </mat-form-field>
+                </div>
+              </div>
 
-                  <mat-form-field appearance="outline" class="w-full">
-                    <mat-label>Logo URL (Optional)</mat-label>
-                    <input 
-                      matInput 
-                      type="url"
-                      formControlName="logo_url" 
-                      placeholder="https://example.com/logo.jpg">
-                    <mat-hint>You can upload a logo later from your business profile</mat-hint>
-                  </mat-form-field>
+              <!-- Image Upload Section -->
+              <div>
+                <h4 class="text-md font-medium text-gray-900 mb-3">Business Images</h4>
+                <div class="space-y-6">
+                  <!-- Logo Upload -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Business Logo (Optional)
+                    </label>
+                    <div class="flex items-center space-x-4">
+                      @if (logoPreview()) {
+                        <div class="relative">
+                          <img [src]="logoPreview()!" alt="Logo preview" class="w-20 h-20 object-cover rounded-lg border">
+                          <button 
+                            type="button"
+                            (click)="removeLogoPreview()"
+                            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
+                            <mat-icon class="text-sm">close</mat-icon>
+                          </button>
+                        </div>
+                      } @else {
+                        <div class="w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                          <mat-icon class="text-gray-400">image</mat-icon>
+                        </div>
+                      }
+                      <div class="flex-1">
+                        <input 
+                          type="file" 
+                          #logoInput
+                          (change)="onLogoSelected($event)"
+                          accept="image/*"
+                          class="hidden">
+                        <button 
+                          type="button"
+                          mat-stroked-button
+                          (click)="logoInput.click()">
+                          <mat-icon class="mr-2">upload</mat-icon>
+                          Choose Logo
+                        </button>
+                        <p class="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Banner Upload -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Banner Image (Optional)
+                    </label>
+                    <div class="space-y-4">
+                      @if (bannerPreview()) {
+                        <div class="relative">
+                          <img [src]="bannerPreview()!" alt="Banner preview" class="w-full h-32 object-cover rounded-lg border">
+                          <button 
+                            type="button"
+                            (click)="removeBannerPreview()"
+                            class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600">
+                            <mat-icon class="text-sm">close</mat-icon>
+                          </button>
+                        </div>
+                      } @else {
+                        <div class="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                          <div class="text-center">
+                            <mat-icon class="text-gray-400 text-4xl mb-2">image</mat-icon>
+                            <p class="text-gray-500">Banner Image</p>
+                          </div>
+                        </div>
+                      }
+                      <div>
+                        <input 
+                          type="file" 
+                          #bannerInput
+                          (change)="onBannerSelected($event)"
+                          accept="image/*"
+                          class="hidden">
+                        <button 
+                          type="button"
+                          mat-stroked-button
+                          (click)="bannerInput.click()">
+                          <mat-icon class="mr-2">upload</mat-icon>
+                          Choose Banner
+                        </button>
+                        <p class="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB. Recommended: 1200x400px</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -385,12 +464,12 @@
                   @if (submitting()) {
                     <ng-container>
                       <mat-icon class="mr-2 animate-spin">refresh</mat-icon>
-                      Creating Business...
+                      {{ isEditMode() ? 'Updating Business...' : 'Creating Business...' }}
                     </ng-container>
                   } @else {
                     <ng-container>
                       <mat-icon class="mr-2">business</mat-icon>
-                      Create Business
+                      {{ isEditMode() ? 'Update Business' : 'Create Business' }}
                     </ng-container>
                   }
                 </button>

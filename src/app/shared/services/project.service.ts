@@ -30,11 +30,23 @@ export interface Project {
     name: string;
     price?: number;
     pricing_type?: string;
+    description?: string;
+    short_description?: string;
+    duration?: number;
+    features?: string[];
   }[];
   offered_price: number;
-  status: 'pending' | 'accepted' | 'rejected' | 'in_progress' | 'completed' | 'cancelled';
+  status: 'pending' | 'accepted' | 'rejected' | 'in_progress' | 'awaiting_client_approval' | 'completed' | 'cancelled';
   deadline?: Date | string;
   additional_notes?: string;
+  image_url?: string;
+  attachments?: Array<{
+    name: string;
+    url: string;
+    type: string;
+    size: number;
+    public_id: string;
+  }>;
   accepted_at?: Date | string;
   rejected_at?: Date | string;
   completed_at?: Date | string;
@@ -50,7 +62,7 @@ export interface CreateProjectDto {
   description?: string;
   business_id: string;
   selected_services: string[];
-  offered_price: number;
+  offered_price?: number;
   deadline?: string;
   additional_notes?: string;
 }
@@ -138,6 +150,19 @@ export class ProjectService {
     return response.data;
   }
 
+  // Get business portfolio (completed projects for public viewing)
+  getBusinessPortfolio(businessId: string): Observable<{ success: boolean; data: Project[]; message: string }> {
+    return this.http.get<{ success: boolean; data: Project[]; message: string }>(
+      `${this.apiUrl}/business/${businessId}/portfolio`
+    );
+  }
+
+  // Get business portfolio async
+  async getBusinessPortfolioAsync(businessId: string): Promise<Project[]> {
+    const response = await firstValueFrom(this.getBusinessPortfolio(businessId));
+    return response.data;
+  }
+
   // Get projects by status
   getProjectsByStatus(status: string, role: 'client' | 'business_owner' = 'client'): Observable<{ success: boolean; data: Project[]; message: string }> {
     return this.http.get<{ success: boolean; data: Project[]; message: string }>(
@@ -154,7 +179,7 @@ export class ProjectService {
   // Get single project
   getProject(id: string): Observable<{ success: boolean; data: Project; message: string }> {
     return this.http.get<{ success: boolean; data: Project; message: string }>(
-      `${this.apiUrl}/${id}`
+      `${this.apiUrl}/${id}?populate=selected_services,business_id,client_id,business_owner_id`
     );
   }
 
@@ -188,5 +213,95 @@ export class ProjectService {
   // Delete project async
   async deleteProjectAsync(id: string): Promise<void> {
     await firstValueFrom(this.deleteProject(id));
+  }
+
+  // Calculate payment intent for service selection
+  calculatePaymentIntent(serviceIds: string[]): Observable<{ success: boolean; data: { clientSecret: string; paymentIntentId: string; totalAmount: number }; message: string }> {
+    return this.http.post<{ success: boolean; data: { clientSecret: string; paymentIntentId: string; totalAmount: number }; message: string }>(
+      `${this.apiUrl}/calculate-payment-intent`,
+      { serviceIds }
+    );
+  }
+
+  // Calculate payment intent async
+  async calculatePaymentIntentAsync(serviceIds: string[]): Promise<{ clientSecret: string; paymentIntentId: string; totalAmount: number }> {
+    const response = await firstValueFrom(this.calculatePaymentIntent(serviceIds));
+    return response.data;
+  }
+
+  // Create project after payment
+  createProjectAfterPayment(createProjectDto: CreateProjectDto, paymentIntentId: string): Observable<{ success: boolean; data: Project; message: string }> {
+    return this.http.post<{ success: boolean; data: Project; message: string }>(
+      `${this.apiUrl}/create-after-payment`,
+      { ...createProjectDto, paymentIntentId }
+    );
+  }
+
+  // Create project after payment async
+  async createProjectAfterPaymentAsync(createProjectDto: CreateProjectDto, paymentIntentId: string): Promise<Project> {
+    try {
+      console.log('ProjectService: Creating project after payment');
+      console.log('Project Data:', createProjectDto);
+      console.log('Payment Intent ID:', paymentIntentId);
+      
+      const response = await firstValueFrom(this.createProjectAfterPayment(createProjectDto, paymentIntentId));
+      console.log('ProjectService: Project creation response:', response);
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to create project');
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      console.error('ProjectService: Error creating project after payment:', error);
+      
+      // Enhanced error handling
+      if (error.error) {
+        console.error('ProjectService: Server error details:', error.error);
+        throw error; // Preserve the original error structure
+      }
+      
+      throw error;
+    }
+  }
+
+  // Image upload methods
+  uploadProjectImage(projectId: string, file: File): Observable<{ success: boolean; data: any; message: string }> {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    return this.http.post<{ success: boolean; data: any; message: string }>(
+      `${this.apiUrl}/${projectId}/upload-image`,
+      formData
+    );
+  }
+
+  async uploadProjectImageAsync(projectId: string, file: File): Promise<any> {
+    const response = await firstValueFrom(this.uploadProjectImage(projectId, file));
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to upload project image');
+    }
+    return response.data;
+  }
+
+  // File attachments upload methods
+  uploadProjectAttachments(projectId: string, files: File[]): Observable<{ success: boolean; data: any; message: string }> {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('attachments', file);
+    });
+
+    return this.http.post<{ success: boolean; data: any; message: string }>(
+      `${this.apiUrl}/${projectId}/upload-attachments`,
+      formData
+    );
+  }
+
+  async uploadProjectAttachmentsAsync(projectId: string, files: File[]): Promise<any> {
+    const response = await firstValueFrom(this.uploadProjectAttachments(projectId, files));
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to upload project attachments');
+    }
+    return response.data;
   }
 }

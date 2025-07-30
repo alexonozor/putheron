@@ -299,7 +299,125 @@
             </form>
           </mat-step>
 
-          <!-- Step 3: SEO & Settings -->
+          <!-- Step 3: Service Images -->
+          <mat-step label="Service Images">
+            <div class="p-6 space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Service Images
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Add images to showcase your service (optional). You can upload up to 5 images, max 5MB each.
+                </p>
+              </div>
+
+              <!-- Existing Images (for edit mode) -->
+              @if (isEditMode() && existingImages().length > 0) {
+                <div>
+                  <h4 class="text-md font-medium text-gray-900 mb-3">Current Images</h4>
+                  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+                    @for (imageUrl of existingImages(); track imageUrl; let i = $index) {
+                      <div class="relative group">
+                        <img 
+                          [src]="imageUrl" 
+                          [alt]="'Service image ' + (i + 1)"
+                          class="w-full h-32 object-cover rounded-lg border border-gray-200">
+                        <button
+                          type="button"
+                          (click)="removeExistingImage(imageUrl)"
+                          class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <mat-icon class="text-sm">close</mat-icon>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Image Upload Area -->
+              <div class="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                <div class="text-center">
+                  <mat-icon class="text-4xl text-gray-400 mb-4">cloud_upload</mat-icon>
+                  <h4 class="text-lg font-medium text-gray-900 mb-2">Upload Images</h4>
+                  <p class="text-gray-600 mb-4">Drag and drop images here, or click to select files</p>
+                  
+                  <input
+                    type="file"
+                    #fileInput
+                    (change)="onImageSelect($event)"
+                    multiple
+                    accept="image/*"
+                    class="hidden">
+                  
+                  <button
+                    type="button"
+                    mat-raised-button
+                    color="primary"
+                    (click)="fileInput.click()"
+                    [disabled]="selectedImages().length + existingImages().length >= 5">
+                    <mat-icon>add_photo_alternate</mat-icon>
+                    Select Images
+                  </button>
+                  
+                  <p class="text-sm text-gray-500 mt-2">
+                    {{ selectedImages().length + existingImages().length }} of 5 images selected
+                  </p>
+                </div>
+              </div>
+
+              <!-- Selected Images Preview -->
+              @if (selectedImages().length > 0) {
+                <div>
+                  <h4 class="text-md font-medium text-gray-900 mb-3">New Images to Upload</h4>
+                  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    @for (imageUrl of imagePreviewUrls(); track imageUrl; let i = $index) {
+                      <div class="relative group">
+                        <img 
+                          [src]="imageUrl" 
+                          [alt]="'Preview ' + (i + 1)"
+                          class="w-full h-32 object-cover rounded-lg border border-gray-200">
+                        <button
+                          type="button"
+                          (click)="removeImage(i)"
+                          class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <mat-icon class="text-sm">close</mat-icon>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Upload Progress -->
+              @if (uploadingImages()) {
+                <div class="flex items-center justify-center py-4">
+                  <mat-icon class="animate-spin mr-2">refresh</mat-icon>
+                  <span>Uploading images...</span>
+                </div>
+              }
+
+              <!-- Navigation Buttons -->
+              <div class="flex justify-between">
+                <button 
+                  type="button"
+                  mat-button
+                  (click)="previousStep(stepper)">
+                  <mat-icon class="mr-2">arrow_back</mat-icon>
+                  Back
+                </button>
+                <button 
+                  type="button"
+                  mat-flat-button 
+                  color="primary"
+                  (click)="nextStep(stepper)">
+                  Next
+                  <mat-icon class="ml-2">arrow_forward</mat-icon>
+                </button>
+              </div>
+            </div>
+          </mat-step>
+
+          <!-- Step 4: SEO & Settings -->
           <mat-step [stepControl]="serviceSeoForm" label="SEO & Finish">
             <form [formGroup]="serviceSeoForm" class="p-6 space-y-6">
               <div>

@@ -42,10 +42,15 @@ export interface Message {
     email: string;
   };
   content: string;
-  message_type: 'text' | 'file' | 'image' | 'project_update';
+  message_type: 'text' | 'file' | 'image' | 'project_update' | 'payment_request' | 'completion_request';
   file_url?: string;
   file_name?: string;
   file_size?: number;
+  payment_amount?: number;
+  payment_description?: string;
+  payment_status?: 'pending' | 'approved' | 'rejected' | 'payment_pending' | 'paid';
+  payment_intent_id?: string;
+  completion_status?: 'pending' | 'approved' | 'rejected';
   is_edited: boolean;
   edited_at?: Date | string;
   is_deleted: boolean;
@@ -64,7 +69,7 @@ export interface CreateChatDto {
 export interface CreateMessageDto {
   chat_id: string;
   content: string;
-  message_type?: 'text' | 'file' | 'image' | 'project_update';
+  message_type?: 'text' | 'file' | 'image' | 'project_update' | 'payment_request' | 'completion_request';
   file_url?: string;
   file_name?: string;
   file_size?: number;
@@ -72,6 +77,26 @@ export interface CreateMessageDto {
 
 export interface UpdateMessageDto {
   content?: string;
+}
+
+export interface CreatePaymentRequestDto {
+  amount: string;
+  description: string;
+  content: string;
+}
+
+export interface RespondToPaymentRequestDto {
+  status: 'approved' | 'rejected';
+  rejection_reason?: string;
+}
+
+export interface CreateCompletionRequestDto {
+  content: string;
+}
+
+export interface RespondToCompletionRequestDto {
+  status: 'approved' | 'rejected';
+  rejection_reason?: string;
 }
 
 @Injectable({
@@ -226,5 +251,103 @@ export class ChatService {
   async getChatUnreadCountAsync(chatId: string): Promise<number> {
     const response = await firstValueFrom(this.getChatUnreadCount(chatId));
     return response.data.count;
+  }
+
+  // Upload files to chat
+  uploadChatFiles(chatId: string, files: File[], content?: string): Observable<{ success: boolean; data: any; message: string }> {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+    
+    if (content) {
+      formData.append('content', content);
+    }
+
+    return this.http.post<{ success: boolean; data: any; message: string }>(
+      `${this.apiUrl}/${chatId}/upload-files`,
+      formData
+    );
+  }
+
+  // Upload files to chat async
+  async uploadChatFilesAsync(chatId: string, files: File[], content?: string): Promise<any> {
+    const response = await firstValueFrom(this.uploadChatFiles(chatId, files, content));
+    return response.data;
+  }
+
+  // Payment Request Methods
+  requestAdditionalPayment(chatId: string, paymentRequest: CreatePaymentRequestDto): Observable<{ success: boolean; data: Message; message: string }> {
+    return this.http.post<{ success: boolean; data: Message; message: string }>(
+      `${this.apiUrl}/${chatId}/request-payment`,
+      paymentRequest
+    );
+  }
+
+  async requestAdditionalPaymentAsync(chatId: string, paymentRequest: CreatePaymentRequestDto): Promise<Message> {
+    const response = await firstValueFrom(this.requestAdditionalPayment(chatId, paymentRequest));
+    return response.data;
+  }
+
+  respondToPaymentRequest(chatId: string, messageId: string, response: RespondToPaymentRequestDto): Observable<{ success: boolean; data: Message; message: string }> {
+    return this.http.post<{ success: boolean; data: Message; message: string }>(
+      `${this.apiUrl}/${chatId}/respond-payment/${messageId}`,
+      response
+    );
+  }
+
+  async respondToPaymentRequestAsync(chatId: string, messageId: string, response: RespondToPaymentRequestDto): Promise<Message> {
+    const resp = await firstValueFrom(this.respondToPaymentRequest(chatId, messageId, response));
+    return resp.data;
+  }
+
+  // Additional Payment Intent Methods
+  createAdditionalPaymentIntent(chatId: string, messageId: string): Observable<{ success: boolean; data: { clientSecret: string; paymentIntentId: string }; message: string }> {
+    return this.http.post<{ success: boolean; data: { clientSecret: string; paymentIntentId: string }; message: string }>(
+      `${this.apiUrl}/${chatId}/payment-intent/${messageId}`,
+      {}
+    );
+  }
+
+  async createAdditionalPaymentIntentAsync(chatId: string, messageId: string): Promise<{ clientSecret: string; paymentIntentId: string }> {
+    const response = await firstValueFrom(this.createAdditionalPaymentIntent(chatId, messageId));
+    return response.data;
+  }
+
+  confirmAdditionalPayment(chatId: string, messageId: string, paymentIntentId: string): Observable<{ success: boolean; data: Message; message: string }> {
+    return this.http.post<{ success: boolean; data: Message; message: string }>(
+      `${this.apiUrl}/${chatId}/confirm-additional-payment/${messageId}`,
+      { paymentIntentId }
+    );
+  }
+
+  async confirmAdditionalPaymentAsync(chatId: string, messageId: string, paymentIntentId: string): Promise<Message> {
+    const response = await firstValueFrom(this.confirmAdditionalPayment(chatId, messageId, paymentIntentId));
+    return response.data;
+  }
+
+  // Completion Request Methods
+  requestCompletion(chatId: string, completionRequest: CreateCompletionRequestDto): Observable<{ success: boolean; data: Message; message: string }> {
+    return this.http.post<{ success: boolean; data: Message; message: string }>(
+      `${this.apiUrl}/${chatId}/request-completion`,
+      completionRequest
+    );
+  }
+
+  async requestCompletionAsync(chatId: string, completionRequest: CreateCompletionRequestDto): Promise<Message> {
+    const response = await firstValueFrom(this.requestCompletion(chatId, completionRequest));
+    return response.data;
+  }
+
+  respondToCompletionRequest(chatId: string, messageId: string, response: RespondToCompletionRequestDto): Observable<{ success: boolean; data: Message; message: string }> {
+    return this.http.post<{ success: boolean; data: Message; message: string }>(
+      `${this.apiUrl}/${chatId}/respond-completion/${messageId}`,
+      response
+    );
+  }
+
+  async respondToCompletionRequestAsync(chatId: string, messageId: string, response: RespondToCompletionRequestDto): Promise<Message> {
+    const resp = await firstValueFrom(this.respondToCompletionRequest(chatId, messageId, response));
+    return resp.data;
   }
 }

@@ -256,6 +256,23 @@ export class SocketService {
     return fromEvent(this.socket, 'unread-count-updated');
   }
 
+  // Generic emit method for custom events
+  emit(event: string, data?: any): void {
+    if (!this.socket) {
+      console.warn('Socket not connected, cannot emit event:', event);
+      return;
+    }
+    this.socket.emit(event, data);
+  }
+
+  // Generic event listener for custom events
+  onEvent(event: string): Observable<any> {
+    if (!this.socket) {
+      throw new Error('Socket not connected');
+    }
+    return fromEvent(this.socket, event);
+  }
+
   // Cleanup when service is destroyed
   ngOnDestroy() {
     this.disconnect();
