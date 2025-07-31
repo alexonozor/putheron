@@ -1,0 +1,233 @@
+<div class="earnings-container p-6 space-y-6 bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Earnings & Payments</h1>
+      <p class="text-gray-600 mt-1">Manage your earnings, track payments, and request withdrawals</p>
+    </div>
+    @if (canWithdraw()) {
+      <button 
+        (click)="requestWithdrawal()"
+        class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+        <mat-icon class="mr-2">account_balance_wallet</mat-icon>
+        Withdraw Balance
+      </button>
+    }
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex items-center justify-center py-12">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span class="ml-3 text-gray-600">Loading earnings data...</span>
+    </div>
+  }
+
+  <!-- Error State -->
+  @else if (error()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+      <mat-icon class="text-red-600 mb-2" style="font-size: 48px; width: 48px; height: 48px;">error</mat-icon>
+      <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Data</h3>
+      <p class="text-red-700 mb-4">{{ error() }}</p>
+      <button 
+        (click)="retryLoad()"
+        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+        <mat-icon class="mr-2">refresh</mat-icon>
+        Try Again
+      </button>
+    </div>
+  }
+
+  <!-- Main Content -->
+  @else if (earningsSummary()) {
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Available Funds -->
+      <mat-card class="p-6 hover:shadow-lg transition-shadow">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Available funds</h3>
+          <mat-icon class="text-green-600">account_balance_wallet</mat-icon>
+        </div>
+        <div class="space-y-2">
+          <p class="text-sm text-gray-600">Balance available for use</p>
+          <p class="text-4xl font-bold text-gray-900">{{ formatCurrency(earningsSummary()!.available_funds) }}</p>
+        </div>
+        @if (earningsSummary()!.available_funds > 0) {
+          <button 
+            (click)="requestWithdrawal()"
+            class="mt-4 w-full bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
+            Withdraw balance
+          </button>
+        }
+        <p class="mt-3 text-xs text-gray-500">Manage payout methods</p>
+      </mat-card>
+
+      <!-- Future Payments -->
+      <mat-card class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Future payments</h3>
+          <mat-icon class="text-blue-600">schedule</mat-icon>
+        </div>
+        
+        <!-- Payments Being Cleared -->
+        <div class="space-y-4">
+          <div>
+            <p class="text-sm text-gray-600">Payments being cleared</p>
+            <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(earningsSummary()!.pending_clearance) }}</p>
+            <p class="text-xs text-gray-500">Your earnings since joining.</p>
+          </div>
+          
+          <!-- Payments for Active Orders -->
+          <div>
+            <p class="text-sm text-gray-600">Payments for active orders</p>
+            <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(earningsSummary()!.active_orders) }}</p>
+            <p class="text-xs text-gray-500">Earnings spent on purchases since joining.</p>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Earnings to Date -->
+      <mat-card class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Earnings to date</h3>
+          <mat-icon class="text-purple-600">trending_up</mat-icon>
+        </div>
+        <p class="text-4xl font-bold text-gray-900">{{ formatCurrency(earningsSummary()!.total_earnings) }}</p>
+        <p class="text-sm text-gray-600 mt-2">Your total earnings since joining.</p>
+      </mat-card>
+
+      <!-- Expenses to Date -->
+      <mat-card class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Expenses to date</h3>
+          <mat-icon class="text-orange-600">money_off</mat-icon>
+        </div>
+        <p class="text-4xl font-bold text-gray-900">{{ formatCurrency(earningsSummary()!.total_withdrawn) }}</p>
+        <p class="text-sm text-gray-600 mt-2">Earnings spent on purchases since joining.</p>
+      </mat-card>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <div class="flex flex-wrap gap-4 items-center">
+        <div class="flex gap-2">
+          <button class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            Date range ▼
+          </button>
+          <button class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            Activity ▼
+          </button>
+        </div>
+        <div class="ml-auto flex gap-2">
+          <button class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <mat-icon>grid_view</mat-icon>
+          </button>
+          <button class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <mat-icon>show_chart</mat-icon>
+          </button>
+        </div>
+        <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+          <mat-icon class="mr-2">email</mat-icon>
+          Email activity report
+        </button>
+      </div>
+    </div>
+
+    <!-- Transaction History -->
+    <mat-card class="overflow-hidden">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Transaction History</h2>
+        <p class="text-gray-600 mt-1">View all your earnings and transactions</p>
+      </div>
+
+      @if (loadingTransactions()) {
+        <div class="p-6 text-center">
+          <mat-spinner diameter="30"></mat-spinner>
+          <p class="mt-2 text-gray-600">Loading transactions...</p>
+        </div>
+      } @else if (transactions().length === 0) {
+        <div class="p-12 text-center">
+          <mat-icon class="text-gray-400 mb-4" style="font-size: 64px; width: 64px; height: 64px;">receipt_long</mat-icon>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">No Transactions Yet</h3>
+          <p class="text-gray-600">Your transaction history will appear here once you start earning.</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table mat-table [dataSource]="transactions()" class="w-full">
+            <!-- Date Column -->
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Date</th>
+              <td mat-cell *matCellDef="let transaction" class="text-gray-600">
+                {{ formatDate(transaction.createdAt) }}
+              </td>
+            </ng-container>
+
+            <!-- Type Column -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Activity</th>
+              <td mat-cell *matCellDef="let transaction">
+                <span [class]="getTransactionTypeColor(transaction.transaction_type)" class="font-medium">
+                  {{ getTransactionTypeLabel(transaction.transaction_type) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Description Column -->
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Description</th>
+              <td mat-cell *matCellDef="let transaction" class="text-gray-600">
+                <div>
+                  <p class="font-medium">{{ transaction.description || 'No description' }}</p>
+                  @if (transaction.project_id) {
+                    <p class="text-sm text-gray-500">Project: {{ transaction.project_id.title }}</p>
+                  }
+                  @if (transaction.business_id) {
+                    <p class="text-sm text-gray-500">From: {{ transaction.business_id.name }}</p>
+                  }
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Amount Column -->
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900 text-right">Amount</th>
+              <td mat-cell *matCellDef="let transaction" class="text-right">
+                <span [class]="transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'" class="font-semibold">
+                  {{ formatCurrency(transaction.amount) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Status</th>
+              <td mat-cell *matCellDef="let transaction">
+                <span [class]="getStatusColor(transaction.status)" class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100">
+                  {{ transaction.status | titlecase }}
+                </span>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
+          </table>
+        </div>
+      }
+    </mat-card>
+
+    <!-- Empty State - only show if user has no transactions -->
+    @if (showEmptyState()) {
+      <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+        <mat-icon class="text-gray-400 mb-4" style="font-size: 64px; width: 64px; height: 64px;">account_balance_wallet</mat-icon>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Start Earning Today</h3>
+        <p class="text-gray-600 mb-6">Complete projects and build your portfolio to start earning money.</p>
+        <button 
+          routerLink="../businesses"
+          class="bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+          <mat-icon class="mr-2">business</mat-icon>
+          Create Your Business Profile
+        </button>
+      </div>
+    }
+  }
+</div>

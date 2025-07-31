@@ -5,6 +5,7 @@ import { ProjectDetailsComponent } from '../project-details/project-details.comp
 import { TestNotificationsComponent } from '../test-notifications.component';
 import { ProfileComponent } from './profile/profile.component';
 import { SettingsComponent } from './settings/settings.component';
+import { EarningsComponent } from './earnings/earnings.component';
 
 
 export const DASHBOARD_ROUTES: Routes = [
@@ -29,6 +30,7 @@ export const DASHBOARD_ROUTES: Routes = [
     },
   { path: 'projects', component: ProjectsComponent },
   { path: 'projects/:id', component: ProjectDetailsComponent },
+  { path: 'earnings', component: EarningsComponent },
   { path: 'profile', component: ProfileComponent },
   { path: 'settings', component: SettingsComponent },
   { path: 'test-notifications', component: TestNotificationsComponent },
