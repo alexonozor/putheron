@@ -160,10 +160,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const user = this.user();
     if (!user) return '';
     
-    if (user.full_name) {
-      const names = user.full_name.split(' ');
-      const firstInitial = names[0]?.charAt(0).toUpperCase() || '';
-      const lastInitial = names[names.length - 1]?.charAt(0).toUpperCase() || '';
+    if (user.first_name || user.last_name) {
+      const firstInitial = user.first_name?.charAt(0).toUpperCase() || '';
+      const lastInitial = user.last_name?.charAt(0).toUpperCase() || '';
       return firstInitial + lastInitial;
     }
     

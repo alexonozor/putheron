@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../shared/services';
 import { RegisterRequest } from '../models';
+import { COUNTRIES } from '../shared/data/countries';
 
 @Component({
   selector: 'app-auth',
@@ -26,6 +27,9 @@ export class AuthComponent implements OnInit {
 
   // Reactive form
   readonly authForm: FormGroup;
+  
+  // Countries list for country selector
+  readonly countries = COUNTRIES;
 
   // Computed signals
   readonly loading = this.authService.loading;
@@ -35,21 +39,27 @@ export class AuthComponent implements OnInit {
     this.authForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      fullName: [''], // Will be required conditionally
+      firstName: [''], // Will be required conditionally
       lastName: [''], // Optional
+      countryOfOrigin: [''], // Will be required conditionally
       isBuyer: [true], // Default to buyer
       isSeller: [false]
     });
 
-    // Update fullName validation based on isSignUp
+    // Update firstName and countryOfOrigin validation based on isSignUp
     effect(() => {
-      const fullNameControl = this.authForm.get('fullName');
+      const firstNameControl = this.authForm.get('firstName');
+      const countryOfOriginControl = this.authForm.get('countryOfOrigin');
+      
       if (this.isSignUp()) {
-        fullNameControl?.setValidators([Validators.required]);
+        firstNameControl?.setValidators([Validators.required]);
+        countryOfOriginControl?.setValidators([Validators.required]);
       } else {
-        fullNameControl?.clearValidators();
+        firstNameControl?.clearValidators();
+        countryOfOriginControl?.clearValidators();
       }
-      fullNameControl?.updateValueAndValidity();
+      firstNameControl?.updateValueAndValidity();
+      countryOfOriginControl?.updateValueAndValidity();
     });
   }
 
@@ -82,15 +92,16 @@ export class AuthComponent implements OnInit {
       return;
     }
 
-    const { email, password, fullName, lastName, isBuyer, isSeller } = this.authForm.value;
+    const { email, password, firstName, lastName, countryOfOrigin, isBuyer, isSeller } = this.authForm.value;
 
     try {
       if (this.isSignUp()) {
         const registerData: RegisterRequest = {
           email,
           password,
-          full_name: fullName,
+          first_name: firstName,
           last_name: lastName,
+          country_of_origin: countryOfOrigin,
           is_buyer: isBuyer || true,
           is_seller: isSeller || false
         };
@@ -146,5 +157,6 @@ export class AuthComponent implements OnInit {
   // Getters for template convenience
   get emailControl() { return this.authForm.get('email'); }
   get passwordControl() { return this.authForm.get('password'); }
-  get fullNameControl() { return this.authForm.get('fullName'); }
+  get firstNameControl() { return this.authForm.get('firstName'); }
+  get countryOfOriginControl() { return this.authForm.get('countryOfOrigin'); }
 }

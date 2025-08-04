@@ -3,13 +3,13 @@ export interface User {
   _id: string;
   email: string;
   password?: string; // Not usually sent to frontend
-  full_name?: string;
+  first_name?: string;
   last_name?: string;
   avatar_url?: string;
   bio?: string;
   city?: string;
   country?: string;
-  country_of_origin?: string;
+  country_of_origin: string; // Required field
   is_buyer?: boolean;
   is_seller?: boolean;
   is_active?: boolean;
@@ -28,18 +28,19 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string;
   password: string;
-  full_name?: string;
+  first_name?: string;
   last_name?: string;
   is_buyer?: boolean;
   is_seller?: boolean;
   bio?: string;
   city?: string;
   country?: string;
+  country_of_origin: string; // Required field
   phone?: string;
 }
 
 export interface UpdateUserRequest {
-  full_name?: string;
+  first_name?: string;
   last_name?: string;
   avatar_url?: string;
   bio?: string;

@@ -1,7 +1,8 @@
 export interface User {
   id: string;
   email: string;
-  full_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
   avatar_url: string | null;
   bio: string | null;
   location: string | null;
@@ -29,7 +30,8 @@ export interface AuthUser {
   id: string;
   email: string;
   user_metadata: {
-    full_name?: string;
+    first_name?: string;
+    last_name?: string;
     avatar_url?: string;
   };
 }

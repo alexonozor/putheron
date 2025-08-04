@@ -47,7 +47,7 @@
                 <img 
                   class="h-8 w-8 rounded-full object-cover border-2 border-gray-200" 
                   [src]="user()!.avatar_url!" 
-                  [alt]="user()!.full_name + ' avatar'">
+                  [alt]="(user()!.first_name + ' ' + (user()!.last_name || '')).trim() + ' avatar'">
               } @else {
                 <div class="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium">
                   {{ getUserInitials() }}
@@ -67,14 +67,14 @@
                     <img 
                       class="h-10 w-10 rounded-full object-cover border-2 border-gray-200" 
                       [src]="user()!.avatar_url!" 
-                      [alt]="user()!.full_name + ' avatar'">
+                      [alt]="(user()!.first_name + ' ' + (user()!.last_name || '')).trim() + ' avatar'">
                   } @else {
                     <div class="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg font-medium">
                       {{ getUserInitials() }}
                     </div>
                   }
                   <div>
-                    <p class="text-sm font-medium text-gray-900">{{ user()?.full_name || 'User' }}</p>
+                    <p class="text-sm font-medium text-gray-900">{{ (user()?.first_name + ' ' + (user()?.last_name || '')).trim() || 'User' }}</p>
                     <p class="text-xs text-gray-500">{{ user()?.email }}</p>
                   </div>
                 </div>
@@ -132,7 +132,7 @@
               {{ getUserInitials() }}
             </div>
             <div class="flex-1">
-              <h3 class="font-semibold text-gray-900">{{ user()?.full_name || user()?.email }}</h3>
+              <h3 class="font-semibold text-gray-900">{{ (user()?.first_name + ' ' + (user()?.last_name || '')).trim() || user()?.email }}</h3>
               <p class="text-sm text-gray-500">{{ user()?.email }}</p>
             </div>
           </div>

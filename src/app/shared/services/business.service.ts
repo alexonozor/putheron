@@ -312,9 +312,54 @@ export class BusinessService {
     return this.http.get<ApiResponse<{ businesses: Business[], total: number, page: number, limit: number }>>(url);
   }
 
-  searchBusinesses(query: string, page = 1, limit = 20): Observable<ApiResponse<{ businesses: Business[], total: number, page: number, limit: number }>> {
-    return this.http.get<ApiResponse<{ businesses: Business[], total: number, page: number, limit: number }>>(
-      `${this.apiUrl}/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`
+  searchBusinesses(
+    query?: string,
+    countries?: string[],
+    page = 1,
+    limit = 20,
+    filters: {
+      category?: string;
+      subcategory?: string;
+      city?: string;
+      state?: string;
+      featured?: boolean;
+    } = {}
+  ): Observable<ApiResponse<{ businesses: Business[], total: number, page: number, totalPages: number }>> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString()
+    });
+
+    if (query?.trim()) {
+      params.append('q', query.trim());
+    }
+
+    if (countries && countries.length > 0) {
+      params.append('countries', countries.join(','));
+    }
+
+    if (filters.category) {
+      params.append('category', filters.category);
+    }
+
+    if (filters.subcategory) {
+      params.append('subcategory', filters.subcategory);
+    }
+
+    if (filters.city) {
+      params.append('city', filters.city);
+    }
+
+    if (filters.state) {
+      params.append('state', filters.state);
+    }
+
+    if (filters.featured !== undefined) {
+      params.append('featured', filters.featured.toString());
+    }
+
+    return this.http.get<ApiResponse<{ businesses: Business[], total: number, page: number, totalPages: number }>>(
+      `${this.apiUrl}/search?${params.toString()}`
     );
   }
 

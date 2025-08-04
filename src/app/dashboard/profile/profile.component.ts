@@ -44,7 +44,8 @@ export class ProfileComponent {
     
     // Profile form
     this.profileForm = this.fb.group({
-      full_name: [currentUser?.full_name || '', [Validators.required]],
+      first_name: [currentUser?.first_name || '', [Validators.required]],
+      last_name: [currentUser?.last_name || ''],
       email: [currentUser?.email || '', [Validators.required, Validators.email]],
       phone: [currentUser?.phone || ''],
       bio: [currentUser?.bio || ''],
@@ -139,10 +140,9 @@ export class ProfileComponent {
     const user = this.user();
     if (!user) return '';
     
-    if (user.full_name) {
-      const names = user.full_name.split(' ');
-      const firstInitial = names[0]?.charAt(0).toUpperCase() || '';
-      const lastInitial = names[names.length - 1]?.charAt(0).toUpperCase() || '';
+    if (user.first_name || user.last_name) {
+      const firstInitial = user.first_name?.charAt(0).toUpperCase() || '';
+      const lastInitial = user.last_name?.charAt(0).toUpperCase() || '';
       return firstInitial + lastInitial;
     }
     

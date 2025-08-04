@@ -32,12 +32,12 @@
                     <div class="mb-6 break-inside-avoid rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
                         <img 
                             [src]="getProfileImageUrl(profile)" 
-                            [alt]="profile.full_name || 'Featured Woman'" 
+                            [alt]="(profile.first_name + ' ' + (profile.last_name || '')).trim() || 'Featured Woman'" 
                             class="w-full h-56 object-cover"
                             (error)="onImageError($event)">
                         <div class="p-6">
                             <h4 class="text-xl font-semibold text-blue-700 mb-1">
-                                {{ profile.full_name || 'Entrepreneur' }}
+                                {{ (profile.first_name + ' ' + (profile.last_name || '')).trim() || 'Entrepreneur' }}
                             </h4>
                             <span class="text-sm text-blue-400 mb-2 block">
                                 {{ getBusinessName(profile) }}

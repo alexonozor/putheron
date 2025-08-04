@@ -1,3 +1,185 @@
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { HeaderComponent } from '../shared/components/header/header.component';
+import { BusinessService, Business } from '../shared/services/business.service';
+import { COUNTRIES } from '../shared/data/countries';
+
+@Component({
+  selector: 'app-search',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatChipsModule,
+    MatIconModule,
+    MatPaginatorModule,
+    MatProgressSpinnerModule,
+    HeaderComponent
+  ],
+  templateUrl: './search.component.html',
+  styleUrls: ['./search.component.scss']
+})
+export class SearchComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private fb = inject(FormBuilder);
+  private businessService = inject(BusinessService);
+  
+  // Signals
+  searchQuery = signal<string>('');
+  selectedCountries = signal<string[]>([]);
+  businesses = signal<Business[]>([]);
+  loading = signal<boolean>(false);
+  error = signal<string | null>(null);
+  total = signal<number>(0);
+  currentPage = signal<number>(1);
+  totalPages = signal<number>(0);
+  
+  // Filter form
+  filterForm!: FormGroup;
+  
+  // Countries list
+  countries = COUNTRIES;
+  
+  // Results computed signal
+  hasResults = computed(() => this.businesses().length > 0);
+  hasSearched = computed(() => this.searchQuery() || this.selectedCountries().length > 0);
+
+  ngOnInit() {
+    this.initializeForm();
+    
+    // Subscribe to route changes
+    this.route.queryParams.subscribe(params => {
+      this.searchQuery.set(params['q'] || '');
+      this.selectedCountries.set(params['countries'] ? params['countries'].split(',') : []);
+      this.currentPage.set(parseInt(params['page']) || 1);
+      
+      // Update form with URL params
+      this.filterForm.patchValue({
+        searchQuery: this.searchQuery(),
+        selectedCountries: this.selectedCountries()
+      }, { emitEvent: false });
+      
+      // Perform search
+      this.performSearch();
+    });
+  }
+
+  private initializeForm() {
+    this.filterForm = this.fb.group({
+      searchQuery: [this.searchQuery()],
+      selectedCountries: [this.selectedCountries()]
+    });
+  }
+
+  async performSearch() {
+    const query = this.searchQuery();
+    const countries = this.selectedCountries();
+    const page = this.currentPage();
+    
+    // Skip search if no query and no countries
+    if (!query && countries.length === 0) {
+      this.businesses.set([]);
+      this.total.set(0);
+      this.totalPages.set(0);
+      return;
+    }
+
+    try {
+      this.loading.set(true);
+      this.error.set(null);
+
+      const response = await this.businessService.searchBusinesses(
+        query || undefined,
+        countries.length > 0 ? countries : undefined,
+        page,
+        12 // Items per page
+      ).toPromise();
+
+      if (response?.success && response.data) {
+        this.businesses.set(response.data.businesses);
+        this.total.set(response.data.total);
+        this.totalPages.set(response.data.totalPages);
+      } else {
+        this.error.set('Failed to search businesses');
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      this.error.set('An error occurred while searching');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  onSearch() {
+    const formValue = this.filterForm.value;
+    const queryParams: any = { page: 1 }; // Reset to first page on new search
+    
+    if (formValue.searchQuery?.trim()) {
+      queryParams.q = formValue.searchQuery.trim();
+    }
+    
+    if (formValue.selectedCountries && formValue.selectedCountries.length > 0) {
+      queryParams.countries = formValue.selectedCountries.join(',');
+    }
+
+    this.router.navigate(['/search'], { queryParams });
+  }
+
+  onPageChange(page: number) {
+    const currentParams = this.route.snapshot.queryParams;
+    this.router.navigate(['/search'], { 
+      queryParams: { ...currentParams, page } 
+    });
+  }
+
+  getOwnerName(business: Business): string {
+    const owner = business.owner_id as any;
+    if (owner?.first_name && owner?.last_name) {
+      return `${owner.first_name} ${owner.last_name}`;
+    }
+    if (owner?.first_name) {
+      return owner.first_name;
+    }
+    if (owner?.email) {
+      return owner.email;
+    }
+    return 'Business Owner';
+  }
+
+  getOwnerCountry(business: Business): string {
+    const owner = business.owner_id as any;
+    return owner?.country_of_origin || 'Unknown';
+  }
+
+  getCategoryName(business: Business): string {
+    const category = business.category_id as any;
+    return category?.name || 'Uncategorized';
+  }
+
+  onBusinessClick(business: Business) {
+    this.router.navigate(['/business', business.slug]);
+  }
+}
+
+// Old commented code - keeping for reference
+/* 
 // import { Component, OnInit, inject, signal, computed } from '@angular/core';
 // import { CommonModule } from '@angular/common';
 // import { ActivatedRoute, Router } from '@angular/router';
@@ -264,3 +446,4 @@
 //     return business.average_rating !== null && business.average_rating > 0;
 //   }
 // }
+*/

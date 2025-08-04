@@ -15,7 +15,7 @@
                 {{ getUserInitials() }}
               </div>
               <div>
-                <h2 class="text-xl font-semibold">{{ user()?.full_name || user()?.email }}</h2>
+                <h2 class="text-xl font-semibold">{{ (user()?.first_name + ' ' + (user()?.last_name || '')).trim() || user()?.email }}</h2>
                 <p class="text-gray-600">{{ user()?.email }}</p>
               </div>
             </div>
@@ -25,12 +25,18 @@
             <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Full Name</mat-label>
-                  <input matInput formControlName="full_name" placeholder="Enter your full name">
+                  <mat-label>First Name</mat-label>
+                  <input matInput formControlName="first_name" placeholder="Enter your first name">
                   <mat-icon matSuffix>person</mat-icon>
-                  @if (profileForm.get('full_name')?.hasError('required') && profileForm.get('full_name')?.touched) {
-                    <mat-error>Full name is required</mat-error>
+                  @if (profileForm.get('first_name')?.hasError('required') && profileForm.get('first_name')?.touched) {
+                    <mat-error>First name is required</mat-error>
                   }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Last Name</mat-label>
+                  <input matInput formControlName="last_name" placeholder="Enter your last name">
+                  <mat-icon matSuffix>person</mat-icon>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="w-full">

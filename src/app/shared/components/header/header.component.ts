@@ -41,21 +41,21 @@ export class HeaderComponent {
     const user = this.user();
     if (!user) return '';
     
-    // Handle full_name (split into first and last) or use individual names
-    if (user.full_name) {
-      const names = user.full_name.split(' ');
-      const firstInitial = names[0]?.charAt(0).toUpperCase() || '';
-      const lastInitial = names[names.length - 1]?.charAt(0).toUpperCase() || '';
-      return firstInitial + lastInitial;
+    // Handle first_name and last_name
+    const firstName = user.first_name || '';
+    const lastName = user.last_name || '';
+    
+    if (firstName && lastName) {
+      return firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
     }
     
-    const lastName = user.last_name || '';
-    const lastInitial = lastName.charAt(0).toUpperCase();
+    if (firstName) {
+      return firstName.charAt(0).toUpperCase() + (user.email.charAt(0).toUpperCase() || '');
+    }
     
-    // If we have last_name, use email first letter + last_name first letter
-    if (lastInitial) {
+    if (lastName) {
       const emailInitial = user.email.charAt(0).toUpperCase();
-      return emailInitial + lastInitial;
+      return emailInitial + lastName.charAt(0).toUpperCase();
     }
     
     // Fallback to just email initial
@@ -66,12 +66,18 @@ export class HeaderComponent {
     const user = this.user();
     if (!user) return '';
     
-    // Use full_name if available, otherwise use last_name or email
-    if (user.full_name) {
-      return user.full_name;
+    // Use first_name and last_name if available
+    const firstName = user.first_name || '';
+    const lastName = user.last_name || '';
+    
+    if (firstName && lastName) {
+      return `${firstName} ${lastName}`;
     }
     
-    const lastName = user.last_name || '';
+    if (firstName) {
+      return firstName;
+    }
+    
     if (lastName) {
       return lastName;
     }

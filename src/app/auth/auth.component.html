@@ -9,19 +9,19 @@
       <!-- Full Name Field (Sign Up Only) -->
       @if (isSignUp()) {
         <div class="space-y-2">
-          <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name</label>
+          <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
           <input
             type="text"
-            id="fullName"
-            formControlName="fullName"
-            placeholder="Enter your full name"
+            id="firstName"
+            formControlName="firstName"
+            placeholder="Enter your first name"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-            [class.border-red-500]="!!(fullNameControl?.invalid && fullNameControl?.touched)"
-            [class.focus:ring-red-500]="!!(fullNameControl?.invalid && fullNameControl?.touched)"
+            [class.border-red-500]="!!(firstNameControl?.invalid && firstNameControl?.touched)"
+            [class.focus:ring-red-500]="!!(firstNameControl?.invalid && firstNameControl?.touched)"
             [disabled]="loading()"
           />
-          @if (fullNameControl?.invalid && fullNameControl?.touched) {
-            <div class="text-red-600 text-xs mt-1">Full name is required</div>
+          @if (firstNameControl?.invalid && firstNameControl?.touched) {
+            <div class="text-red-600 text-xs mt-1">First name is required</div>
           }
         </div>
 
@@ -36,6 +36,27 @@
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
             [disabled]="loading()"
           />
+        </div>
+
+        <!-- Country of Origin Field (Sign Up Only) -->
+        <div class="space-y-2">
+          <label for="countryOfOrigin" class="block text-sm font-medium text-gray-700">Country of Origin *</label>
+          <select
+            id="countryOfOrigin"
+            formControlName="countryOfOrigin"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            [class.border-red-500]="!!(countryOfOriginControl?.invalid && countryOfOriginControl?.touched)"
+            [class.focus:ring-red-500]="!!(countryOfOriginControl?.invalid && countryOfOriginControl?.touched)"
+            [disabled]="loading()"
+          >
+            <option value="">Select your country of origin</option>
+            @for (country of countries; track country.code) {
+              <option [value]="country.name">{{ country.name }}</option>
+            }
+          </select>
+          @if (countryOfOriginControl?.invalid && countryOfOriginControl?.touched) {
+            <div class="text-red-600 text-xs mt-1">Country of origin is required</div>
+          }
         </div>
 
         <!-- User Type Selection -->

@@ -6,7 +6,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { Country } from '../../models';
+import { COUNTRIES, Country } from '../../data/countries';
 
 @Component({
   selector: 'hero-section',
@@ -28,34 +28,21 @@ export class HeroComponent implements OnInit {
 
   searchForm!: FormGroup;
 
-  countries: Country[] = [
-    { code: 'NG', name: 'Nigeria', flag: '🇳🇬' },
-    { code: 'JM', name: 'Jamaica', flag: '🇯🇲' },
-    { code: 'GH', name: 'Ghana', flag: '🇬🇭' },
-    { code: 'KE', name: 'Kenya', flag: '🇰🇪' },
-    { code: 'ZA', name: 'South Africa', flag: '🇿🇦' },
-    { code: 'ET', name: 'Ethiopia', flag: '🇪🇹' },
-    { code: 'HT', name: 'Haiti', flag: '🇭🇹' },
-    { code: 'TT', name: 'Trinidad and Tobago', flag: '🇹🇹' },
-    { code: 'BB', name: 'Barbados', flag: '🇧🇧' },
-    { code: 'MX', name: 'Mexico', flag: '🇲🇽' },
-    { code: 'PR', name: 'Puerto Rico', flag: '🇵🇷' },
-    { code: 'DO', name: 'Dominican Republic', flag: '🇩🇴' },
-    { code: 'IN', name: 'India', flag: '🇮🇳' },
-    { code: 'PH', name: 'Philippines', flag: '🇵🇭' },
-    { code: 'CN', name: 'China', flag: '🇨🇳' },
-    { code: 'VN', name: 'Vietnam', flag: '🇻🇳' }
-  ];
+  // Use the full countries list
+  countries = COUNTRIES;
 
   ngOnInit() {
     this.searchForm = this.fb.group({
-      searchQuery: ['', [Validators.required, Validators.minLength(2)]],
+      searchQuery: [''],
       selectedCountries: [[]]
     });
   }
 
   get isFormValid(): boolean {
-    return this.searchForm.valid;
+    return this.searchForm.valid && (
+      this.searchForm.get('searchQuery')?.value?.trim() || 
+      this.searchForm.get('selectedCountries')?.value?.length > 0
+    );
   }
 
   get searchQueryControl() {
@@ -63,7 +50,8 @@ export class HeroComponent implements OnInit {
   }
 
   onSearch() {
-    if (!this.searchForm.valid) {
+    console.log('Search initiated with form:', this.isFormValid);
+    if (!this.isFormValid) {
       this.searchForm.markAllAsTouched();
       return;
     }
@@ -71,11 +59,12 @@ export class HeroComponent implements OnInit {
     const formValue = this.searchForm.value;
     const queryParams: any = {};
     
-    if (formValue.searchQuery) {
-      queryParams.q = formValue.searchQuery;
+    if (formValue.searchQuery?.trim()) {
+      queryParams.q = formValue.searchQuery.trim();
     }
     
     if (formValue.selectedCountries && formValue.selectedCountries.length > 0) {
+      // Convert country names to the format expected by the backend
       queryParams.countries = formValue.selectedCountries.join(',');
     }
 

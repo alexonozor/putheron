@@ -40,18 +40,7 @@
                                 placeholder="Search businesses, services, or locations."
                                 formControlName="searchQuery"
                                 class="w-full px-6 py-4 text-gray-700 text-lg focus:outline-none"
-                                [class.border-red-300]="searchQueryControl?.invalid && searchQueryControl?.touched"
-                                [class.focus:border-red-500]="searchQueryControl?.invalid && searchQueryControl?.touched"
                             >
-                            @if (searchQueryControl?.invalid && searchQueryControl?.touched) {
-                                <div class="absolute top-full left-0 mt-1 text-red-600 text-xs px-6">
-                                    @if (searchQueryControl?.hasError('required')) {
-                                        Search query is required
-                                    } @else if (searchQueryControl?.hasError('minlength')) {
-                                        Please enter at least 2 characters
-                                    }
-                                </div>
-                            }
                         </div>
                         
                         <!-- Country Selection Dropdown -->
@@ -64,8 +53,8 @@
                                     class="custom-select"
                                 >
                                     @for (country of countries; track country.code) {
-                                        <mat-option [value]="country.code">
-                                            {{ country.flag }} {{ country.name }}
+                                        <mat-option [value]="country.name">
+                                            {{ country.name }}
                                         </mat-option>
                                     }
                                 </mat-select>
@@ -86,14 +75,10 @@
             
             <!-- Selected Countries Display -->
             <div class="mt-4 flex flex-wrap gap-2 justify-center">
-                @for (countryCode of searchForm.get('selectedCountries')?.value || []; track countryCode) {
-                    @for (country of countries; track country.code) {
-                        @if (country.code === countryCode) {
-                            <span class="country-tag bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                                {{ country.flag }} {{ country.name }}
-                            </span>
-                        }
-                    }
+                @for (countryName of searchForm.get('selectedCountries')?.value || []; track countryName) {
+                    <span class="country-tag bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {{ countryName }}
+                    </span>
                 }
             </div>
         </div>
