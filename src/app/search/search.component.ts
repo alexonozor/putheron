@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
@@ -11,8 +11,14 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { HeaderComponent } from '../shared/components/header/header.component';
 import { BusinessService, Business } from '../shared/services/business.service';
+import { CategoryService } from '../shared/services/category-new.service';
 import { COUNTRIES } from '../shared/data/countries';
 
 @Component({
@@ -30,6 +36,11 @@ import { COUNTRIES } from '../shared/data/countries';
     MatIconModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatSliderModule,
+    MatSidenavModule,
+    MatExpansionModule,
+    MatDividerModule,
+    MatTooltipModule,
     HeaderComponent
   ],
   templateUrl: './search.component.html',
@@ -40,40 +51,84 @@ export class SearchComponent implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private businessService = inject(BusinessService);
+  private categoryService = inject(CategoryService);
   
   // Signals
   searchQuery = signal<string>('');
   selectedCountries = signal<string[]>([]);
+  selectedCategories = signal<string[]>([]);
+  selectedBusinessTypes = signal<string[]>([]);
+  selectedRating = signal<number>(0);
   businesses = signal<Business[]>([]);
+  categories = signal<any[]>([]);
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
   total = signal<number>(0);
   currentPage = signal<number>(1);
   totalPages = signal<number>(0);
+  filtersOpen = signal<boolean>(false);
   
   // Filter form
   filterForm!: FormGroup;
   
-  // Countries list
+  // Filter options
   countries = COUNTRIES;
+  businessTypes = [
+    { value: 'service', label: 'Service' },
+    { value: 'product', label: 'Product' },
+    { value: 'both', label: 'Both' }
+  ];
+  
+  ratingOptions = [
+    { value: 0, label: 'All ratings' },
+    { value: 1, label: '1+ stars' },
+    { value: 2, label: '2+ stars' },
+    { value: 3, label: '3+ stars' },
+    { value: 4, label: '4+ stars' },
+    { value: 5, label: '5 stars' }
+  ];
   
   // Results computed signal
   hasResults = computed(() => this.businesses().length > 0);
-  hasSearched = computed(() => this.searchQuery() || this.selectedCountries().length > 0);
+  hasSearched = computed(() => 
+    this.searchQuery() || 
+    this.selectedCountries().length > 0 || 
+    this.selectedCategories().length > 0 || 
+    this.selectedBusinessTypes().length > 0 ||
+    this.selectedRating() > 0
+  );
+
+  hasActiveFilters = computed(() => {
+    const form = this.filterForm?.value;
+    return !!(form?.selectedCountries?.length > 0 || 
+             form?.businessType || 
+             form?.location || 
+             form?.featuredOnly ||
+             form?.selectedCategories?.length > 0 ||
+             form?.selectedBusinessTypes?.length > 0 ||
+             form?.selectedRating > 0);
+  });
 
   ngOnInit() {
     this.initializeForm();
+    this.loadCategories();
     
     // Subscribe to route changes
     this.route.queryParams.subscribe(params => {
       this.searchQuery.set(params['q'] || '');
       this.selectedCountries.set(params['countries'] ? params['countries'].split(',') : []);
+      this.selectedCategories.set(params['categories'] ? params['categories'].split(',') : []);
+      this.selectedBusinessTypes.set(params['businessTypes'] ? params['businessTypes'].split(',') : []);
+      this.selectedRating.set(parseInt(params['rating']) || 0);
       this.currentPage.set(parseInt(params['page']) || 1);
       
       // Update form with URL params
       this.filterForm.patchValue({
         searchQuery: this.searchQuery(),
-        selectedCountries: this.selectedCountries()
+        selectedCountries: this.selectedCountries(),
+        selectedCategories: this.selectedCategories(),
+        selectedBusinessTypes: this.selectedBusinessTypes(),
+        selectedRating: this.selectedRating()
       }, { emitEvent: false });
       
       // Perform search
@@ -84,8 +139,23 @@ export class SearchComponent implements OnInit {
   private initializeForm() {
     this.filterForm = this.fb.group({
       searchQuery: [this.searchQuery()],
-      selectedCountries: [this.selectedCountries()]
+      selectedCountries: [this.selectedCountries()],
+      selectedCategories: [this.selectedCategories()],
+      selectedBusinessTypes: [this.selectedBusinessTypes()],
+      selectedRating: [this.selectedRating()],
+      businessType: [''],
+      location: [''],
+      featuredOnly: [false]
     });
+  }
+
+  private async loadCategories() {
+    try {
+      const categories = await this.categoryService.loadCategories();
+      this.categories.set(categories);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
   }
 
   async performSearch() {
@@ -139,7 +209,37 @@ export class SearchComponent implements OnInit {
       queryParams.countries = formValue.selectedCountries.join(',');
     }
 
+    if (formValue.selectedCategories && formValue.selectedCategories.length > 0) {
+      queryParams.categories = formValue.selectedCategories.join(',');
+    }
+
+    if (formValue.selectedBusinessTypes && formValue.selectedBusinessTypes.length > 0) {
+      queryParams.businessTypes = formValue.selectedBusinessTypes.join(',');
+    }
+
+    if (formValue.selectedRating && formValue.selectedRating > 0) {
+      queryParams.rating = formValue.selectedRating;
+    }
+
     this.router.navigate(['/search'], { queryParams });
+  }
+
+  clearFilters() {
+    this.filterForm.reset({
+      searchQuery: '',
+      selectedCountries: [],
+      selectedCategories: [],
+      selectedBusinessTypes: [],
+      selectedRating: 0,
+      businessType: '',
+      location: '',
+      featuredOnly: false
+    });
+    this.onSearch();
+  }
+
+  toggleFilters() {
+    this.filtersOpen.update(open => !open);
   }
 
   onPageChange(page: number) {
@@ -174,7 +274,23 @@ export class SearchComponent implements OnInit {
   }
 
   onBusinessClick(business: Business) {
-    this.router.navigate(['/business', business.slug]);
+    this.router.navigate(['/business', business._id]);
+  }
+
+  // Helper methods for template
+  generatePageNumbers(): number[] {
+    const totalPages = this.totalPages();
+    const currentPage = this.currentPage();
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    
+    const start = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    const end = Math.min(totalPages, start + maxVisiblePages - 1);
+    
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 }
 

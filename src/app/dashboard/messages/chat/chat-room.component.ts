@@ -195,6 +195,14 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     const newMessageSub = this.socketService.onNewMessage().subscribe(response => {
       if (response.success && response.data) {
         const currentMessages = this.messages();
+        // Check if message already exists to prevent duplicates
+        const existingMessage = currentMessages.find(m => m._id === response.data._id);
+        
+        if (existingMessage) {
+          console.log('Message already exists, skipping duplicate:', response.data._id);
+          return;
+        }
+
         this.messages.set([...currentMessages, response.data]);
         this.shouldScrollToBottom = true;
         
@@ -398,8 +406,18 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       // Send message via socket for real-time delivery
       const response = await this.socketService.sendMessage(this.chatId, content);
       
-      if (response.success) {
-        // Clear form - message will be added via socket subscription
+      if (response.success && response.data) {
+        // Add the message to local state since sender won't receive new-message event
+        const currentMessages = this.messages();
+        // Check if message already exists to prevent duplicates
+        const existingMessage = currentMessages.find(m => m._id === response.data._id);
+        
+        if (!existingMessage) {
+          this.messages.set([...currentMessages, response.data]);
+          this.shouldScrollToBottom = true;
+        }
+        
+        // Clear form
         this.messageForm.reset();
         console.log('Message sent successfully via socket');
       } else {

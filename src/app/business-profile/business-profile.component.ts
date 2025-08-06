@@ -268,7 +268,9 @@ export class BusinessProfileComponent implements OnInit {
   addService() {
     const business = this.business();
     if (business) {
-      this.router.navigate(['dashboard', 'services', 'create-service']);
+      this.router.navigate(['dashboard', 'services', 'create-service'], {
+        queryParams: { businessId: business._id }
+      });
     }
   }
 
@@ -278,8 +280,8 @@ export class BusinessProfileComponent implements OnInit {
 
   contactBusiness() {
     const business = this.business();
-    if (business?.email) {
-      window.location.href = `mailto:${business.email}`;
+    if (business?.contact_email) {
+      window.location.href = `mailto:${business.contact_email}`;
     }
   }
 

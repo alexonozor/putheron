@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../shared/services/auth.service';
 import { BusinessService } from '../shared/services/business.service';
 import { ProjectService } from '../shared/services/project.service';
@@ -18,6 +21,9 @@ import { Subscription } from 'rxjs';
     CommonModule,
     MatSidenavModule,
     MatMenuModule,
+    MatIconModule,
+    MatButtonModule,
+    MatDividerModule,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
@@ -121,8 +127,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   createService() {
-    // TODO: Navigate to create service page
-    alert('Create service functionality will be available soon!');
+    this.router.navigate(['/dashboard/services/create-service']);
   }
 
   getActiveTabTitle(): string {

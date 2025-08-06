@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -12,6 +12,8 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AuthService } from '../../../shared/services/auth.service';
 import { BusinessService, Category, Subcategory, CreateBusinessDto, UpdateBusinessDto, Business } from '../../../shared/services/business.service';
+
+declare let google: any;
 
 @Component({
   selector: 'app-create-business',
@@ -31,12 +33,16 @@ import { BusinessService, Category, Subcategory, CreateBusinessDto, UpdateBusine
   templateUrl: './create-business.component.html',
   styleUrl: './create-business.component.scss'
 })
-export class CreateBusinessComponent implements OnInit {
+export class CreateBusinessComponent implements OnInit, AfterViewInit {
+  @ViewChild('addressInput', { static: false }) addressInput!: ElementRef;
+  
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private businessService = inject(BusinessService);
+
+  private autocomplete: any;
 
   // Signals
   public categories = signal<Category[]>([]);
@@ -46,6 +52,7 @@ export class CreateBusinessComponent implements OnInit {
   public error = signal<string | null>(null);
   public logoPreview = signal<string | null>(null);
   public bannerPreview = signal<string | null>(null);
+  public sosCertificationPreview = signal<string | null>(null);
   public isEditMode = signal(false);
   public businessId = signal<string | null>(null);
   public currentBusiness = signal<Business | null>(null);
@@ -53,6 +60,7 @@ export class CreateBusinessComponent implements OnInit {
   // File storage
   public logoFile: File | null = null;
   public bannerFile: File | null = null;
+  public sosCertificationFile: File | null = null;
 
   // Forms
   public businessInfoForm: FormGroup;
@@ -70,13 +78,16 @@ export class CreateBusinessComponent implements OnInit {
 
     this.businessDetailsForm = this.fb.group({
       address: [''],
-      city: [''],
-      state: [''],
-      country: [''],
-      postal_code: [''],
-      contact_email: ['', [Validators.email]],
-      contact_phone: [''],
-      website_url: ['']
+      city: ['', Validators.required],
+      state: ['', Validators.required],
+      postal_code: ['', Validators.required],
+      location: this.fb.group({
+        type: ['Point'],
+        coordinates: [null]
+      }),
+      contact_email: ['', [Validators.required, Validators.email]],
+      contact_phone: ['', Validators.required],
+      website: ['']
     });
   }
 
@@ -104,6 +115,131 @@ export class CreateBusinessComponent implements OnInit {
     if (this.isEditMode()) {
       this.loadBusinessForEdit();
     }
+  }
+
+  ngAfterViewInit() {
+    // Initialize Google Places Autocomplete after view has loaded
+    setTimeout(() => {
+      this.initializeAutocomplete();
+    }, 100);
+  }
+
+  private initializeAutocomplete() {
+    if (typeof google !== 'undefined' && google.maps && google.maps.places && this.addressInput) {
+      this.autocomplete = new google.maps.places.Autocomplete(
+        this.addressInput.nativeElement,
+        {
+          componentRestrictions: { country: 'us' },
+          fields: ['address_components', 'geometry', 'formatted_address'],
+          types: ['establishment', 'geocode']
+        }
+      );
+
+      this.autocomplete.addListener('place_changed', () => {
+        const place = this.autocomplete.getPlace();
+        if (place && place.address_components) {
+          this.processPlaceData(place);
+        }
+      });
+    } else {
+      // Retry if Google Maps hasn't loaded yet
+      setTimeout(() => this.initializeAutocomplete(), 200);
+    }
+  }
+
+  private processPlaceData(place: any) {
+    let street_number = '';
+    let route = '';
+    let city = '';
+    let state = '';
+    let postal_code = '';
+
+    // Extract address components
+    for (const component of place.address_components) {
+      const types = component.types;
+      
+      if (types.includes('street_number')) {
+        street_number = component.long_name;
+      } else if (types.includes('route')) {
+        route = component.long_name;
+      } else if (types.includes('locality')) {
+        city = component.long_name;
+      } else if (types.includes('administrative_area_level_1')) {
+        state = component.short_name;
+      } else if (types.includes('postal_code')) {
+        postal_code = component.long_name;
+      }
+    }
+
+    // Construct full address
+    const address = `${street_number} ${route}`.trim();
+
+    // Get coordinates
+    const lat = place.geometry?.location?.lat();
+    const lng = place.geometry?.location?.lng();
+
+    // Update form with the extracted data
+    this.businessDetailsForm.patchValue({
+      address: address || place.formatted_address,
+      city: city,
+      state: state,
+      postal_code: postal_code,
+      location: {
+        type: 'Point',
+        coordinates: lat && lng ? [lng, lat] : null
+      }
+    });
+
+    // Make the fields disabled after autocomplete selection
+    const cityControl = this.businessDetailsForm.get('city');
+    const stateControl = this.businessDetailsForm.get('state');
+    const postalCodeControl = this.businessDetailsForm.get('postal_code');
+    
+    if (cityControl) cityControl.disable();
+    if (stateControl) stateControl.disable();
+    if (postalCodeControl) postalCodeControl.disable();
+  }
+
+  // Handle place selected from Google Maps Autocomplete
+  onLocationSelected(place: any) {
+    // This method is kept for potential future use but the main logic is in processPlaceData
+    console.log('onLocationSelected called:', place);
+  }
+
+  clearLocationData() {
+    this.businessDetailsForm.patchValue({
+      address: '',
+      city: '',
+      state: '',
+      postal_code: '',
+      location: {
+        type: 'Point',
+        coordinates: null
+      }
+    });
+
+    // Re-enable fields for manual input
+    const cityControl = this.businessDetailsForm.get('city');
+    const stateControl = this.businessDetailsForm.get('state');
+    const postalCodeControl = this.businessDetailsForm.get('postal_code');
+    
+    if (cityControl) cityControl.enable();
+    if (stateControl) stateControl.enable();
+    if (postalCodeControl) postalCodeControl.enable();
+  }
+
+  enableManualLocationEdit() {
+    // Make the readonly fields editable
+    const cityControl = this.businessDetailsForm.get('city');
+    const stateControl = this.businessDetailsForm.get('state');
+    const postalCodeControl = this.businessDetailsForm.get('postal_code');
+    
+    if (cityControl) cityControl.enable();
+    if (stateControl) stateControl.enable();
+    if (postalCodeControl) postalCodeControl.enable();
+    
+    // Show a brief feedback message
+    console.log('Manual editing enabled for location fields');
   }
 
   async loadCategories() {
@@ -152,11 +288,11 @@ export class CreateBusinessComponent implements OnInit {
         address: business.address || '',
         city: business.city || '',
         state: business.state || '',
-        country: business.country || '',
         postal_code: business.postal_code || '',
+        location: business.location || { type: 'Point', coordinates: null },
         contact_email: business.contact_email || '',
         contact_phone: business.contact_phone || '',
-        website_url: business.website_url || ''
+        website: business.website || ''
       });
 
       // Load subcategories for the selected category
@@ -171,6 +307,9 @@ export class CreateBusinessComponent implements OnInit {
       }
       if (business.banner_url) {
         this.bannerPreview.set(business.banner_url);
+      }
+      if (business.sos_certification_url) {
+        this.sosCertificationPreview.set(business.sos_certification_url);
       }
 
     } catch (err: any) {
@@ -215,11 +354,17 @@ export class CreateBusinessComponent implements OnInit {
       this.submitting.set(true);
       this.error.set(null);
 
-      // Combine form data
+      // Combine form data - use getRawValue() to include disabled fields
       const businessData: CreateBusinessDto | UpdateBusinessDto = {
         ...this.businessInfoForm.value,
-        ...this.businessDetailsForm.value
+        ...this.businessDetailsForm.getRawValue()
       };
+
+      // Debug logging
+      console.log('businessInfoForm.value:', this.businessInfoForm.value);
+      console.log('businessDetailsForm.value:', this.businessDetailsForm.value);
+      console.log('businessDetailsForm.getRawValue():', this.businessDetailsForm.getRawValue());
+      console.log('Combined businessData:', businessData);
 
       // Remove empty subcategory_id if not selected
       if (!businessData.subcategory_id) {
@@ -262,6 +407,15 @@ export class CreateBusinessComponent implements OnInit {
         }
       }
 
+      if (this.sosCertificationFile) {
+        try {
+          await this.businessService.uploadSosCertificationAsync(businessResult._id, this.sosCertificationFile);
+        } catch (sosCertificationError) {
+          console.warn('Failed to upload SOS certification:', sosCertificationError);
+          // Don't fail the entire process for SOS certification upload
+        }
+      }
+
       // Success! Navigate to the dashboard with success message
       const successMessage = this.isEditMode() 
         ? 'Business updated successfully!' 
@@ -290,6 +444,10 @@ export class CreateBusinessComponent implements OnInit {
       this.businessInfoForm.markAllAsTouched();
       return;
     }
+    if (stepper.selectedIndex === 1 && this.businessDetailsForm.invalid) {
+      this.businessDetailsForm.markAllAsTouched();
+      return;
+    }
     stepper.next();
   }
 
@@ -312,6 +470,10 @@ export class CreateBusinessComponent implements OnInit {
 
   isBusinessDetailsValid(): boolean {
     return this.businessDetailsForm.valid;
+  }
+
+  isAllFormsValid(): boolean {
+    return this.businessInfoForm.valid && this.businessDetailsForm.valid;
   }
 
   // File upload methods
@@ -383,6 +545,47 @@ export class CreateBusinessComponent implements OnInit {
   removeBannerPreview(): void {
     this.bannerFile = null;
     this.bannerPreview.set(null);
+  }
+
+  onSosCertificationSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      
+      // Validate file type (PDF, DOC, DOCX, JPG, PNG)
+      const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        this.error.set('Please select a valid document file (PDF, DOC, DOCX, JPG, PNG)');
+        return;
+      }
+      
+      // Validate file size (10MB max for documents)
+      if (file.size > 10 * 1024 * 1024) {
+        this.error.set('SOS Certification file size must be less than 10MB');
+        return;
+      }
+      
+      this.sosCertificationFile = file;
+      
+      // Create preview for images, or show file name for documents
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.sosCertificationPreview.set(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // For documents, just show the filename as preview
+        this.sosCertificationPreview.set(file.name);
+      }
+      
+      this.error.set(null);
+    }
+  }
+
+  removeSosCertificationPreview(): void {
+    this.sosCertificationFile = null;
+    this.sosCertificationPreview.set(null);
   }
 
   // Utility methods

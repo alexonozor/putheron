@@ -2,14 +2,37 @@ import { Component, signal, inject, computed, effect, OnInit } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatRadioModule } from '@angular/material/radio';
 import { AuthService } from '../shared/services';
 import { RegisterRequest } from '../models';
 import { COUNTRIES } from '../shared/data/countries';
+import { USCitiesService, USCity } from '../shared/services/us-cities.service';
+import { US_STATES } from '../shared/data/us-states';
+import { HeaderComponent } from '../shared/components/header/header.component';
 
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatRadioModule,
+    MatProgressSpinnerModule,
+    HeaderComponent
+  ],
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss']
 })
@@ -18,18 +41,26 @@ export class AuthComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
+  private readonly citiesService = inject(USCitiesService);
 
   // Signals for component state
   readonly isSignUp = signal(false);
   readonly error = signal('');
   readonly successMessage = signal('');
   readonly authMessage = signal('');
+  readonly filteredCities = signal<USCity[]>([]);
+  readonly availableCities = signal<USCity[]>([]);
+  
+  // Password visibility signals
+  readonly showPassword = signal(false);
+  readonly showConfirmPassword = signal(false);
 
   // Reactive form
   readonly authForm: FormGroup;
   
   // Countries list for country selector
   readonly countries = COUNTRIES;
+  readonly usStates = US_STATES;
 
   // Computed signals
   readonly loading = this.authService.loading;
@@ -40,28 +71,59 @@ export class AuthComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       firstName: [''], // Will be required conditionally
-      lastName: [''], // Optional
+      lastName: [''], // Will be required conditionally
+      phone: [''], // Will be required conditionally
+      city: [''], // Will be required conditionally
+      state: [''], // Will be required conditionally
       countryOfOrigin: [''], // Will be required conditionally
-      isBuyer: [true], // Default to buyer
-      isSeller: [false]
+      userType: ['buyer'] // Default to buyer
     });
 
-    // Update firstName and countryOfOrigin validation based on isSignUp
+    // Update validation based on isSignUp
     effect(() => {
       const firstNameControl = this.authForm.get('firstName');
+      const lastNameControl = this.authForm.get('lastName');
+      const phoneControl = this.authForm.get('phone');
+      const cityControl = this.authForm.get('city');
+      const stateControl = this.authForm.get('state');
       const countryOfOriginControl = this.authForm.get('countryOfOrigin');
+      const userTypeControl = this.authForm.get('userType');
       
       if (this.isSignUp()) {
         firstNameControl?.setValidators([Validators.required]);
+        lastNameControl?.setValidators([Validators.required]);
+        phoneControl?.setValidators([Validators.required]);
+        cityControl?.setValidators([Validators.required]);
+        stateControl?.setValidators([Validators.required]);
         countryOfOriginControl?.setValidators([Validators.required]);
+        userTypeControl?.setValidators([Validators.required]);
       } else {
         firstNameControl?.clearValidators();
+        lastNameControl?.clearValidators();
+        phoneControl?.clearValidators();
+        cityControl?.clearValidators();
+        stateControl?.clearValidators();
         countryOfOriginControl?.clearValidators();
+        userTypeControl?.clearValidators();
       }
+      
       firstNameControl?.updateValueAndValidity();
+      lastNameControl?.updateValueAndValidity();
+      phoneControl?.updateValueAndValidity();
+      cityControl?.updateValueAndValidity();
+      stateControl?.updateValueAndValidity();
       countryOfOriginControl?.updateValueAndValidity();
+      userTypeControl?.updateValueAndValidity();
     });
   }
+
+  // Form control getters for template
+  get firstNameControl() { return this.authForm.get('firstName'); }
+  get lastNameControl() { return this.authForm.get('lastName'); }
+  get phoneControl() { return this.authForm.get('phone'); }
+  get cityControl() { return this.authForm.get('city'); }
+  get stateControl() { return this.authForm.get('state'); }
+  get countryOfOriginControl() { return this.authForm.get('countryOfOrigin'); }
 
   ngOnInit() {
     // Check for query parameters
@@ -78,6 +140,36 @@ export class AuthComponent implements OnInit {
     });
   }
 
+  onCityInput(value: string) {
+    const cities = this.citiesService.searchCities(value);
+    this.filteredCities.set(cities);
+  }
+
+  onCitySelected(city: USCity) {
+    this.authForm.patchValue({
+      city: city.name,
+      state: city.stateCode
+    });
+    this.filteredCities.set([]);
+  }
+
+  onStateSelected(stateCode: string, preserveCity: boolean = false) {
+    if (stateCode) {
+      const cities = this.citiesService.getCitiesByState(stateCode);
+      this.availableCities.set(cities);
+      // Only clear city when state changes if not preserving existing city
+      if (!preserveCity) {
+        this.authForm.patchValue({ city: '' });
+      }
+    } else {
+      this.availableCities.set([]);
+    }
+  }
+
+  displayCity(city: USCity): string {
+    return city ? city.name : '';
+  }
+
   toggleMode() {
     this.isSignUp.update(current => !current);
     this.clearMessages();
@@ -92,7 +184,7 @@ export class AuthComponent implements OnInit {
       return;
     }
 
-    const { email, password, firstName, lastName, countryOfOrigin, isBuyer, isSeller } = this.authForm.value;
+    const { email, password, firstName, lastName, phone, city, state, countryOfOrigin, userType } = this.authForm.value;
 
     try {
       if (this.isSignUp()) {
@@ -101,9 +193,13 @@ export class AuthComponent implements OnInit {
           password,
           first_name: firstName,
           last_name: lastName,
+          phone: phone,
+          city: city,
+          state: state,
+          country: 'USA',
           country_of_origin: countryOfOrigin,
-          is_buyer: isBuyer || true,
-          is_seller: isSeller || false
+          is_buyer: userType === 'buyer',
+          is_seller: userType === 'seller'
         };
         
         const { data, error } = await this.authService.signUp(registerData);
@@ -121,14 +217,19 @@ export class AuthComponent implements OnInit {
         if (error) {
           this.error.set(error.message);
         } else {
-          // Check for return URL
-          const returnUrl = sessionStorage.getItem('returnUrl');
-          if (returnUrl) {
-            sessionStorage.removeItem('returnUrl');
-            this.router.navigate([returnUrl]);
-          } else {
-            this.router.navigate(['/dashboard']);
-          }
+          this.successMessage.set('Successfully signed in!');
+          
+          // Wait a moment for the auth state to fully update
+          setTimeout(() => {
+            // Check for return URL
+            const returnUrl = sessionStorage.getItem('returnUrl');
+            if (returnUrl) {
+              sessionStorage.removeItem('returnUrl');
+              this.router.navigate([returnUrl]);
+            } else {
+              this.router.navigate(['/dashboard']);
+            }
+          }, 100);
         }
       }
     } catch (err: any) {
@@ -154,9 +255,16 @@ export class AuthComponent implements OnInit {
     this.successMessage.set('');
   }
 
+  // Password visibility toggle methods
+  togglePasswordVisibility() {
+    this.showPassword.set(!this.showPassword());
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword.set(!this.showConfirmPassword());
+  }
+
   // Getters for template convenience
   get emailControl() { return this.authForm.get('email'); }
   get passwordControl() { return this.authForm.get('password'); }
-  get firstNameControl() { return this.authForm.get('firstName'); }
-  get countryOfOriginControl() { return this.authForm.get('countryOfOrigin'); }
 }

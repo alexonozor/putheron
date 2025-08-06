@@ -8,6 +8,7 @@ export interface User {
   avatar_url?: string;
   bio?: string;
   city?: string;
+  state?: string;
   country?: string;
   country_of_origin: string; // Required field
   is_buyer?: boolean;
@@ -34,6 +35,7 @@ export interface RegisterRequest {
   is_seller?: boolean;
   bio?: string;
   city?: string;
+  state?: string;
   country?: string;
   country_of_origin: string; // Required field
   phone?: string;
@@ -45,6 +47,7 @@ export interface UpdateUserRequest {
   avatar_url?: string;
   bio?: string;
   city?: string;
+  state?: string;
   country?: string;
   country_of_origin?: string;
   is_buyer?: boolean;

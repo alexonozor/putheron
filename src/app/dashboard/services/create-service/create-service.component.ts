@@ -119,10 +119,21 @@ export class CreateServiceComponent implements OnInit {
     if (this.isEditMode()) {
       await this.loadService();
     } else {
-      // Auto-select business if only one exists
-      const businesses = this.userBusinesses();
-      if (businesses.length === 1) {
-        this.serviceInfoForm.get('business_id')?.setValue(businesses[0]._id);
+      // Check for business ID from query parameters (from business profile)
+      const businessIdFromQuery = this.route.snapshot.queryParamMap.get('businessId');
+      if (businessIdFromQuery) {
+        // Verify this business ID exists in user's businesses
+        const businesses = this.userBusinesses();
+        const selectedBusiness = businesses.find(b => b._id === businessIdFromQuery);
+        if (selectedBusiness) {
+          this.serviceInfoForm.get('business_id')?.setValue(businessIdFromQuery);
+        }
+      } else {
+        // Auto-select business if only one exists
+        const businesses = this.userBusinesses();
+        if (businesses.length === 1) {
+          this.serviceInfoForm.get('business_id')?.setValue(businesses[0]._id);
+        }
       }
     }
   }

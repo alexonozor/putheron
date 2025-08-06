@@ -55,6 +55,9 @@ export class ProjectsComponent implements OnInit {
   readonly activeBusinessProjects = computed(() => 
     this.businessProjects().filter(p => ['accepted', 'in_progress'].includes(p.status))
   );
+  readonly completedBusinessProjects = computed(() => 
+    this.businessProjects().filter(p => p.status === 'completed')
+  );
 
   ngOnInit() {
     if (!this.user()) {

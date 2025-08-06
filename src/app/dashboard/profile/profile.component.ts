@@ -8,7 +8,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatSelectModule } from '@angular/material/select';
 import { AuthService } from '../../shared/services/auth.service';
+import { USCitiesService, USCity } from '../../shared/services/us-cities.service';
+import { COUNTRIES } from '../../shared/data/countries';
+import { US_STATES } from '../../shared/data/us-states';
 import { User } from '../../models/user.model';
 
 @Component({
@@ -23,7 +27,8 @@ import { User } from '../../models/user.model';
     MatButtonModule,
     MatIconModule,
     MatSnackBarModule,
-    MatTabsModule
+    MatTabsModule,
+    MatSelectModule
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
@@ -32,9 +37,13 @@ export class ProfileComponent {
   private readonly authService = inject(AuthService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly citiesService = inject(USCitiesService);
 
   readonly user = this.authService.user;
   readonly isLoading = signal(false);
+  readonly countries = COUNTRIES;
+  readonly usStates = US_STATES;
+  readonly availableCities = signal<USCity[]>([]);
 
   profileForm: FormGroup;
   passwordForm: FormGroup;
@@ -45,14 +54,37 @@ export class ProfileComponent {
     // Profile form
     this.profileForm = this.fb.group({
       first_name: [currentUser?.first_name || '', [Validators.required]],
-      last_name: [currentUser?.last_name || ''],
+      last_name: [currentUser?.last_name || '', [Validators.required]],
       email: [currentUser?.email || '', [Validators.required, Validators.email]],
-      phone: [currentUser?.phone || ''],
+      phone: [currentUser?.phone || '', [Validators.required]],
       bio: [currentUser?.bio || ''],
-      city: [currentUser?.city || ''],
-      country: [currentUser?.country || ''],
-      country_of_origin: [currentUser?.country_of_origin || '']
+      city: [currentUser?.city || '', [Validators.required]],
+      state: [currentUser?.state || '', [Validators.required]],
+      country: [{ value: currentUser?.country || 'USA', disabled: true }],
+      country_of_origin: [currentUser?.country_of_origin || '', [Validators.required]]
     });
+
+    // Set initial cities if state is already selected
+    if (currentUser?.state) {
+      this.onStateSelected(currentUser.state, true); // Preserve existing city
+      
+      // Ensure the city value is properly set after cities are loaded
+      if (currentUser?.city) {
+        setTimeout(() => {
+          // Verify the city exists in available cities
+          const cities = this.citiesService.getCitiesByState(currentUser.state!);
+          const cityExists = cities.some(city => city.name === currentUser.city);
+          
+          if (cityExists) {
+            this.profileForm.patchValue({ city: currentUser.city });
+          } else {
+            // If city doesn't exist in the state, clear it
+            console.warn(`City "${currentUser.city}" not found in state "${currentUser.state}"`);
+            this.profileForm.patchValue({ city: '' });
+          }
+        }, 0);
+      }
+    }
 
     // Password form
     this.passwordForm = this.fb.group({
@@ -60,6 +92,23 @@ export class ProfileComponent {
       newPassword: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
+  }
+
+  onStateSelected(stateCode: string, preserveCity: boolean = false) {
+    if (stateCode) {
+      const cities = this.citiesService.getCitiesByState(stateCode);
+      this.availableCities.set(cities);
+      // Only clear city when state changes if not preserving existing city
+      if (!preserveCity) {
+        this.profileForm.patchValue({ city: '' });
+      }
+    } else {
+      this.availableCities.set([]);
+    }
+  }
+
+  displayCity(city: USCity): string {
+    return city ? city.name : '';
   }
 
   passwordMatchValidator(form: FormGroup) {
@@ -88,15 +137,18 @@ export class ProfileComponent {
     
     try {
       const formData = this.profileForm.value;
-      // TODO: Implement profile update API call
-      // await this.authService.updateProfile(formData);
+      const result = await this.authService.updateProfile(formData);
+      
+      if (result.error) {
+        throw result.error;
+      }
       
       this.snackBar.open('Profile updated successfully!', 'Close', {
         duration: 3000,
         panelClass: ['success-snackbar']
       });
-    } catch (error) {
-      this.snackBar.open('Failed to update profile. Please try again.', 'Close', {
+    } catch (error: any) {
+      this.snackBar.open(error?.message || 'Failed to update profile. Please try again.', 'Close', {
         duration: 3000,
         panelClass: ['error-snackbar']
       });

@@ -88,11 +88,10 @@ export interface Business {
   owner_id: string | any; // Can be string ID or populated user object
   logo_url?: string;
   banner_url?: string;
+  sos_certification_url?: string;
   cover_image_url?: string;
   images?: string[];
   website?: string;
-  email?: string;
-  phone?: string;
   address?: string;
   city?: string;
   state?: string;
@@ -106,7 +105,6 @@ export interface Business {
   tags?: string[];
   contact_email?: string;
   contact_phone?: string;
-  website_url?: string;
   social_links?: {
     facebook?: string;
     twitter?: string;
@@ -145,18 +143,18 @@ export interface CreateBusinessDto {
   logo_url?: string;
   images?: string[];
   website?: string;
-  email?: string;
-  phone?: string;
   address?: string;
   city?: string;
   state?: string;
-  country?: string;
   postal_code?: string;
+  location?: {
+    type: string;
+    coordinates: [number, number] | null;
+  };
   services?: string[];
   tags?: string[];
   contact_email?: string;
   contact_phone?: string;
-  website_url?: string;
   social_links?: {
     facebook?: string;
     twitter?: string;
@@ -803,6 +801,21 @@ export class BusinessService {
 
   async uploadBannerAsync(businessId: string, file: File): Promise<{ banner_url: string }> {
     const response = await firstValueFrom(this.uploadBanner(businessId, file));
+    return response.data;
+  }
+
+  uploadSosCertification(businessId: string, file: File): Observable<{ success: boolean; data: { sos_certification_url: string }; message: string }> {
+    const formData = new FormData();
+    formData.append('sos_certification', file);
+    
+    return this.http.post<{ success: boolean; data: { sos_certification_url: string }; message: string }>(
+      `${this.apiUrl}/${businessId}/upload-sos-certification`,
+      formData
+    );
+  }
+
+  async uploadSosCertificationAsync(businessId: string, file: File): Promise<{ sos_certification_url: string }> {
+    const response = await firstValueFrom(this.uploadSosCertification(businessId, file));
     return response.data;
   }
 

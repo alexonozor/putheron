@@ -246,8 +246,16 @@ export class NotificationService {
 
   // Method to handle new notification from socket
   handleNewNotification(notification: Notification) {
-    // Add to beginning of notifications array
+    // Check if notification already exists to prevent duplicates
     const currentNotifications = this.notifications();
+    const existingNotification = currentNotifications.find(n => n._id === notification._id);
+    
+    if (existingNotification) {
+      console.log('Notification already exists, skipping duplicate:', notification._id);
+      return;
+    }
+
+    // Add to beginning of notifications array
     this.notifications.set([notification, ...currentNotifications]);
     
     // Update unread count
@@ -352,15 +360,26 @@ export class NotificationService {
   }
 
   formatTimeAgo(date: Date | string): string {
-    const now = new Date();
-    const notificationDate = new Date(date);
-    const diffInSeconds = Math.floor((now.getTime() - notificationDate.getTime()) / 1000);
+    try {
+      const now = new Date();
+      const notificationDate = new Date(date);
+      
+      // Check if the date is valid
+      if (isNaN(notificationDate.getTime())) {
+        return 'recently';
+      }
+      
+      const diffInSeconds = Math.floor((now.getTime() - notificationDate.getTime()) / 1000);
 
-    if (diffInSeconds < 60) return 'just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    
-    return notificationDate.toLocaleDateString();
+      if (diffInSeconds < 60) return 'just now';
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+      if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+      
+      return notificationDate.toLocaleDateString();
+    } catch (error) {
+      console.error('Error formatting date:', error, 'Date value:', date);
+      return 'recently';
+    }
   }
 }

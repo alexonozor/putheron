@@ -1,221 +1,348 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 p-4">
-  <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ isSignUp() ? 'Create Account' : 'Welcome Back' }}</h1>
-      <p class="text-gray-600 text-sm">{{ isSignUp() ? 'Join Putheron to connect with amazing women' : 'Sign in to your account' }}</p>
+<!-- Navigation Header -->
+<app-header></app-header>
+
+<div class="auth-container min-h-screen flex">
+  <!-- Left Side - Authentication Form -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
+    <div class="w-full max-w-lg">
+      <div class="p-8">
+        <div class="text-center mb-8 p-0">
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">
+            {{ isSignUp() ? 'Join Our Community' : 'Welcome Back' }}
+          </h2>
+          <p class="text-gray-600">
+            {{ isSignUp() ? 'Create your account to get started' : 'Sign in to your account' }}
+          </p>
+        </div>
+
+        <div class="p-0">
+          <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
+            <!-- Sign Up Fields - Organized Layout -->
+            @if (isSignUp()) {
+              <div class="space-y-4 mb-6">
+                <!-- Name Fields Row -->
+                <div class="grid grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>First Name</mat-label>
+                    <input
+                      matInput
+                      formControlName="firstName"
+                      placeholder="First name"
+                      [disabled]="loading()"
+                    />
+                    <mat-icon matSuffix>person</mat-icon>
+                    @if (firstNameControl?.invalid && firstNameControl?.touched) {
+                      <mat-error>Required</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Last Name</mat-label>
+                    <input
+                      matInput
+                      formControlName="lastName"
+                      placeholder="Last name"
+                      [disabled]="loading()"
+                    />
+                    @if (lastNameControl?.invalid && lastNameControl?.touched) {
+                      <mat-error>Required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+
+                <!-- Contact & Location -->
+                <mat-form-field appearance="outline">
+                  <mat-label>Phone Number</mat-label>
+                  <input
+                    matInput
+                    type="tel"
+                    formControlName="phone"
+                    placeholder="Your phone number"
+                    [disabled]="loading()"
+                  />
+                  <mat-icon matSuffix>phone</mat-icon>
+                  @if (phoneControl?.invalid && phoneControl?.touched) {
+                    <mat-error>Phone number is required</mat-error>
+                  }
+                </mat-form-field>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>State</mat-label>
+                    <mat-select
+                      formControlName="state"
+                      [disabled]="loading()"
+                      (selectionChange)="onStateSelected($event.value)"
+                    >
+                      <mat-option value="">Select state</mat-option>
+                      @for (state of usStates; track state.code) {
+                        <mat-option [value]="state.code">{{ state.name }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matSuffix>location_on</mat-icon>
+                    @if (stateControl?.invalid && stateControl?.touched) {
+                      <mat-error>Required</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>City</mat-label>
+                    <mat-select
+                      formControlName="city"
+                      [disabled]="loading() || availableCities().length === 0"
+                    >
+                      @if (availableCities().length === 0) {
+                        <mat-option value="">Select state first</mat-option>
+                      } @else {
+                        <mat-option value="">Select city</mat-option>
+                        @for (city of availableCities(); track city.name) {
+                          <mat-option [value]="city.name">{{ city.name }}</mat-option>
+                        }
+                      }
+                    </mat-select>
+                    <mat-icon matSuffix>location_city</mat-icon>
+                    @if (cityControl?.invalid && cityControl?.touched) {
+                      <mat-error>Required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+
+                <!-- User Type Selection -->
+                <div class="space-y-3 p-4 bg-gray-50 rounded-lg">
+                  <h4 class="text-sm font-medium text-gray-700 mb-3">I want to:</h4>
+                  <mat-radio-group 
+                    formControlName="userType" 
+                    class="radio-group-inline"
+                    [disabled]="loading()"
+                  >
+                    <div class="radio-options">
+                      <mat-radio-button value="buyer" class="radio-option">
+                        Find women-owned businesses
+                      </mat-radio-button>
+                      <mat-radio-button value="seller" class="radio-option">
+                        Offer services through my business
+                      </mat-radio-button>
+                    </div>
+                  </mat-radio-group>
+                </div>
+              </div>
+            }
+
+            <!-- Email and Password -->
+            <div class="space-y-4 mb-6">
+              @if (isSignUp()) {
+                <div class="grid grid-cols-2 gap-4">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Email Address</mat-label>
+                    <input
+                      matInput
+                      type="email"
+                      formControlName="email"
+                      placeholder="your@email.com"
+                      [disabled]="loading()"
+                    />
+                    <mat-icon matSuffix>email</mat-icon>
+                    @if (emailControl?.invalid && emailControl?.touched) {
+                      <mat-error>
+                        @if (emailControl?.hasError('required')) {
+                          Email is required
+                        } @else if (emailControl?.hasError('email')) {
+                          Invalid email format
+                        }
+                      </mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Country of Origin</mat-label>
+                    <mat-select
+                      formControlName="countryOfOrigin"
+                      [disabled]="loading()"
+                    >
+                      <mat-option value="">Select country</mat-option>
+                      @for (country of countries; track country.code) {
+                        <mat-option [value]="country.name">{{ country.name }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matSuffix>public</mat-icon>
+                    @if (countryOfOriginControl?.invalid && countryOfOriginControl?.touched) {
+                      <mat-error>Required</mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+              } @else {
+                <mat-form-field appearance="outline">
+                  <mat-label>Email Address</mat-label>
+                  <input
+                    matInput
+                    type="email"
+                    formControlName="email"
+                    placeholder="your@email.com"
+                    [disabled]="loading()"
+                  />
+                  <mat-icon matSuffix>email</mat-icon>
+                  @if (emailControl?.invalid && emailControl?.touched) {
+                    <mat-error>
+                      @if (emailControl?.hasError('required')) {
+                        Email is required
+                      } @else if (emailControl?.hasError('email')) {
+                        Invalid email format
+                      }
+                    </mat-error>
+                  }
+                </mat-form-field>
+              }
+
+              <mat-form-field appearance="outline">
+                <mat-label>Password</mat-label>
+                <input
+                  matInput
+                  [type]="showPassword() ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Enter password"
+                  [disabled]="loading()"
+                />
+                <button 
+                  mat-icon-button 
+                  matSuffix 
+                  type="button"
+                  (click)="togglePasswordVisibility()"
+                  [attr.aria-label]="'Toggle password visibility'"
+                  [attr.aria-pressed]="showPassword()"
+                >
+                  <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                @if (passwordControl?.invalid && passwordControl?.touched) {
+                  <mat-error>
+                    @if (passwordControl?.hasError('required')) {
+                      Password is required
+                    } @else if (passwordControl?.hasError('minlength')) {
+                      Minimum 6 characters
+                    }
+                  </mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <!-- Messages -->
+            @if (authMessage()) {
+              <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-center text-blue-700">
+                  <mat-icon class="mr-2 text-sm">info</mat-icon>
+                  <span class="text-sm">{{ authMessage() }}</span>
+                </div>
+              </div>
+            }
+
+            @if (error()) {
+              <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex items-center text-red-700">
+                  <mat-icon class="mr-2 text-sm">error</mat-icon>
+                  <span class="text-sm">{{ error() }}</span>
+                </div>
+              </div>
+            }
+
+            @if (successMessage()) {
+              <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex items-center text-green-700">
+                  <mat-icon class="mr-2 text-sm">check_circle</mat-icon>
+                  <span class="text-sm">{{ successMessage() }}</span>
+                </div>
+              </div>
+            }
+
+            <!-- Submit Button -->
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              class="w-full py-3 text-base font-medium mb-4"
+              [disabled]="loading() || !authForm.valid"
+            >
+              @if (!(loading())) {
+                {{ isSignUp() ? 'Create Account' : 'Sign In' }}
+              } @else {
+                <span class="flex items-center justify-center gap-2">
+                  <mat-spinner diameter="16"></mat-spinner>
+                  {{ isSignUp() ? 'Creating...' : 'Signing In...' }}
+                </span>
+              }
+            </button>
+
+            <!-- Additional Actions -->
+            <div class="space-y-3 text-center">
+              @if (!isSignUp()) {
+                <button 
+                  mat-button 
+                  type="button" 
+                  color="primary"
+                  (click)="resetPassword()"
+                  class="text-sm"
+                >
+                  Forgot your password?
+                </button>
+                
+                <!-- Navigation to Sign Up (only show on Sign In page) -->
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                  <p class="text-sm text-gray-600">
+                    Don't have an account? 
+                    <button 
+                      mat-button 
+                      type="button" 
+                      color="primary"
+                      (click)="toggleMode()"
+                      class="text-sm font-medium ml-1"
+                    >
+                      Sign up
+                    </button>
+                  </p>
+                </div>
+              }
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
-      <!-- Full Name Field (Sign Up Only) -->
-      @if (isSignUp()) {
-        <div class="space-y-2">
-          <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
-          <input
-            type="text"
-            id="firstName"
-            formControlName="firstName"
-            placeholder="Enter your first name"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-            [class.border-red-500]="!!(firstNameControl?.invalid && firstNameControl?.touched)"
-            [class.focus:ring-red-500]="!!(firstNameControl?.invalid && firstNameControl?.touched)"
-            [disabled]="loading()"
-          />
-          @if (firstNameControl?.invalid && firstNameControl?.touched) {
-            <div class="text-red-600 text-xs mt-1">First name is required</div>
-          }
-        </div>
-
-        <!-- Last Name Field (Sign Up Only) -->
-        <div class="space-y-2">
-          <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name (Optional)</label>
-          <input
-            type="text"
-            id="lastName"
-            formControlName="lastName"
-            placeholder="Enter your last name"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-            [disabled]="loading()"
-          />
-        </div>
-
-        <!-- Country of Origin Field (Sign Up Only) -->
-        <div class="space-y-2">
-          <label for="countryOfOrigin" class="block text-sm font-medium text-gray-700">Country of Origin *</label>
-          <select
-            id="countryOfOrigin"
-            formControlName="countryOfOrigin"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-            [class.border-red-500]="!!(countryOfOriginControl?.invalid && countryOfOriginControl?.touched)"
-            [class.focus:ring-red-500]="!!(countryOfOriginControl?.invalid && countryOfOriginControl?.touched)"
-            [disabled]="loading()"
-          >
-            <option value="">Select your country of origin</option>
-            @for (country of countries; track country.code) {
-              <option [value]="country.name">{{ country.name }}</option>
-            }
-          </select>
-          @if (countryOfOriginControl?.invalid && countryOfOriginControl?.touched) {
-            <div class="text-red-600 text-xs mt-1">Country of origin is required</div>
-          }
-        </div>
-
-        <!-- User Type Selection -->
-        <div class="space-y-3">
-          <label class="block text-sm font-medium text-gray-700">I want to:</label>
-          <div class="grid grid-cols-1 gap-2">
-            <label class="flex items-center">
-              <input
-                type="checkbox"
-                formControlName="isBuyer"
-                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                [disabled]="loading()"
-              />
-              <span class="ml-2 text-sm text-gray-700">Find services from women-owned businesses</span>
-            </label>
-            <label class="flex items-center">
-              <input
-                type="checkbox"
-                formControlName="isSeller"
-                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                [disabled]="loading()"
-              />
-              <span class="ml-2 text-sm text-gray-700">Offer services through my women-owned business</span>
-            </label>
-          </div>
-        </div>
-      }
-
-      <!-- Email Field -->
-      <div class="space-y-2">
-        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-        <input
-          type="email"
-          id="email"
-          formControlName="email"
-          placeholder="Enter your email"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-          [class.border-red-500]="!!(emailControl?.invalid && emailControl?.touched)"
-          [class.focus:ring-red-500]="!!(emailControl?.invalid && emailControl?.touched)"
-          [disabled]="loading()"
-        />
-        @if (emailControl?.invalid && emailControl?.touched) {
-          <div class="text-red-600 text-xs mt-1">
-            @if (emailControl?.hasError('required')) {
-              Email is required
-            } @else if (emailControl?.hasError('email')) {
-              Please enter a valid email address
-            }
-          </div>
-        }
-      </div>
-
-      <!-- Password Field -->
-      <div class="space-y-2">
-        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-        <input
-          type="password"
-          id="password"
-          formControlName="password"
-          placeholder="Enter your password"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-          [class.border-red-500]="!!(passwordControl?.invalid && passwordControl?.touched)"
-          [class.focus:ring-red-500]="!!(passwordControl?.invalid && passwordControl?.touched)"
-          [disabled]="loading()"
-        />
-        @if (passwordControl?.invalid && passwordControl?.touched) {
-          <div class="text-red-600 text-xs mt-1">
-            @if (passwordControl?.hasError('required')) {
-              Password is required
-            } @else if (passwordControl?.hasError('minlength')) {
-              Password must be at least 6 characters
-            }
-          </div>
-        }
-      </div>
-
-      <!-- Auth Message (from query params) -->
-      @if (authMessage()) {
-        <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-md text-sm mb-4">
-          {{ authMessage() }}
-        </div>
-      }
-
-      <!-- Error Message -->
-      @if (error()) {
-        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-          {{ error() }}
-        </div>
-      }
-
-      <!-- Success Message -->
-      @if (successMessage()) {
-        <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-md text-sm">
-          {{ successMessage() }}
-        </div>
-      }
-
-      <!-- Submit Button -->
-      <button
-        type="submit"
-        class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-2 px-4 rounded-md font-medium hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
-        [disabled]="loading() || !authForm.valid"
-      >
-        @if (!(loading())) {
-          <span>{{ isSignUp() ? 'Create Account' : 'Sign In' }}</span>
-        } @else {
-          <span class="flex items-center gap-2">
-            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.25"/>
-              <path d="m12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-            </svg>
-            {{ isSignUp() ? 'Creating Account...' : 'Signing In...' }}
-          </span>
-        }
-      </button>
-    </form>
-
-    <!-- Forgot Password -->
-    @if (!isSignUp()) {
-      <div class="text-center mt-4">
-        <button type="button" class="text-indigo-600 text-sm hover:text-indigo-500 underline" (click)="resetPassword()">
-          Forgot your password?
-        </button>
-      </div>
-    }
-
-    <!-- Toggle Mode -->
-    <div class="text-center mt-6">
-      <p class="text-gray-600 text-sm">
-        {{ isSignUp() ? 'Already have an account?' : "Don't have an account?" }}
-        <button type="button" class="text-indigo-600 font-medium hover:text-indigo-500 ml-1" (click)="toggleMode()">
-          {{ isSignUp() ? 'Sign In' : 'Sign Up' }}
-        </button>
-      </p>
+  <!-- Right Side - Image with Text Overlay -->
+  <div class="w-full lg:w-1/2 relative overflow-hidden">
+    <!-- Background Image -->
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" 
+         style="background-image: url('https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');">
     </div>
+    
+    <!-- Dark overlay for better text readability -->
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-600/90 via-pink-600/90 to-indigo-700/90"></div>
 
-    <!-- Social Auth (Future Enhancement) -->
-    <div class="mt-6">
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300"></div>
+    <!-- Text Overlay -->
+    <div class="relative z-10 h-full flex flex-col justify-center items-center p-12 text-white text-center">
+      <div class="max-w-lg">
+        <h2 class="text-4xl font-bold mb-6">Discover & Support</h2>
+        <h3 class="text-3xl font-semibold mb-8 text-yellow-300">Women-Owned Businesses</h3>
+        
+        <div class="space-y-6 text-lg">
+          <div class="flex items-center justify-center space-x-3">
+            <mat-icon class="text-2xl text-green-400">search</mat-icon>
+            <span>Find amazing local services</span>
+          </div>
+          <div class="flex items-center justify-center space-x-3">
+            <mat-icon class="text-2xl text-blue-400">business_center</mat-icon>
+            <span>Grow your business reach</span>
+          </div>
+          <div class="flex items-center justify-center space-x-3">
+            <mat-icon class="text-2xl text-pink-400">favorite</mat-icon>
+            <span>Empower women entrepreneurs</span>
+          </div>
         </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-white text-gray-500">or</span>
+        
+        <div class="mt-8 p-4 backdrop-blur-sm rounded-lg">
+          <p class="text-base opacity-90">
+            Join our community of empowered women and supportive customers building a stronger economy together.
+          </p>
         </div>
       </div>
-      <button 
-        type="button" 
-        class="mt-4 w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-md font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" 
-        disabled
-      >
-        <svg viewBox="0 0 24 24" width="20" height="20">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-        </svg>
-        Continue with Google
-      </button>
     </div>
   </div>
 </div>

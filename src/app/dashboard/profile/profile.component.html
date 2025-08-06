@@ -25,7 +25,7 @@
             <form [formGroup]="profileForm" (ngSubmit)="updateProfile()" class="space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>First Name</mat-label>
+                  <mat-label>First Name *</mat-label>
                   <input matInput formControlName="first_name" placeholder="Enter your first name">
                   <mat-icon matSuffix>person</mat-icon>
                   @if (profileForm.get('first_name')?.hasError('required') && profileForm.get('first_name')?.touched) {
@@ -34,9 +34,12 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Last Name</mat-label>
+                  <mat-label>Last Name *</mat-label>
                   <input matInput formControlName="last_name" placeholder="Enter your last name">
                   <mat-icon matSuffix>person</mat-icon>
+                  @if (profileForm.get('last_name')?.hasError('required') && profileForm.get('last_name')?.touched) {
+                    <mat-error>Last name is required</mat-error>
+                  }
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="w-full">
@@ -52,27 +55,61 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Phone</mat-label>
+                  <mat-label>Phone *</mat-label>
                   <input matInput formControlName="phone" placeholder="Enter your phone number">
                   <mat-icon matSuffix>phone</mat-icon>
+                  @if (profileForm.get('phone')?.hasError('required') && profileForm.get('phone')?.touched) {
+                    <mat-error>Phone number is required</mat-error>
+                  }
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>City</mat-label>
-                  <input matInput formControlName="city" placeholder="Enter your city">
+                  <mat-label>State *</mat-label>
+                  <mat-select formControlName="state" (selectionChange)="onStateSelected($event.value)">
+                    @for (state of usStates; track state.code) {
+                      <mat-option [value]="state.code">{{ state.name }}</mat-option>
+                    }
+                  </mat-select>
+                  <mat-icon matSuffix>map</mat-icon>
+                  @if (profileForm.get('state')?.hasError('required') && profileForm.get('state')?.touched) {
+                    <mat-error>State is required</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>City *</mat-label>
+                  <mat-select formControlName="city" [disabled]="availableCities().length === 0">
+                    @if (availableCities().length === 0) {
+                      <mat-option disabled>Please select a state first</mat-option>
+                    }
+                    @for (city of availableCities(); track city.name) {
+                      <mat-option [value]="city.name">{{ city.name }}</mat-option>
+                    }
+                  </mat-select>
                   <mat-icon matSuffix>location_city</mat-icon>
+                  @if (profileForm.get('city')?.hasError('required') && profileForm.get('city')?.touched) {
+                    <mat-error>City is required</mat-error>
+                  }
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="w-full">
                   <mat-label>Country</mat-label>
-                  <input matInput formControlName="country" placeholder="Enter your country">
+                  <input matInput formControlName="country" readonly>
                   <mat-icon matSuffix>flag</mat-icon>
+                  <mat-hint>Country is set to USA by default</mat-hint>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="w-full">
                   <mat-label>Country of Origin</mat-label>
-                  <input matInput formControlName="country_of_origin" placeholder="Enter your country of origin">
+                  <mat-select formControlName="country_of_origin">
+                    @for (country of countries; track country.code) {
+                      <mat-option [value]="country.code">{{ country.name }}</mat-option>
+                    }
+                  </mat-select>
                   <mat-icon matSuffix>home</mat-icon>
+                  @if (profileForm.get('country_of_origin')?.hasError('required') && profileForm.get('country_of_origin')?.touched) {
+                    <mat-error>Country of origin is required</mat-error>
+                  }
                 </mat-form-field>
               </div>
 
