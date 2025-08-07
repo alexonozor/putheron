@@ -12,26 +12,20 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-interface WalletData {
-  _id: string;
-  user_id: string;
-  wallet_type: 'available' | 'pending_clear' | 'active_orders';
-  balance: number;
-  total_earnings: number;
-  total_withdrawn: number;
-  is_active: boolean;
-  last_transaction_at?: string;
-  createdAt: string;
-  updatedAt: string;
+interface WalletSummary {
+  active_orders: number;        // Computed from accepted/in_progress projects
+  payments_clearing: number;    // Computed from completed projects
+  available: number;           // Manual field for cleared funds
+  total_earnings: number;      // Sum of all three
 }
 
 interface TransactionData {
   _id: string;
   user_id: string;
-  transaction_type: 'payment_received' | 'payment_cleared' | 'withdrawal' | 'refund' | 'additional_payment' | 'platform_fee';
+  transaction_type: 'project_started' | 'project_completed' | 'additional_payment' | 'payment_cleared' | 'withdrawal' | 'refund' | 'platform_fee';
   amount: number;
   status: 'pending' | 'completed' | 'failed' | 'cancelled';
-  wallet_type: 'available' | 'pending_clear' | 'active_orders';
+  wallet_type: 'active_orders' | 'payments_clearing' | 'available';
   description?: string;
   project_id?: {
     _id: string;
@@ -52,17 +46,6 @@ interface TransactionData {
   metadata?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
-}
-
-interface EarningsSummary {
-  available_funds: number;
-  pending_clearance: number;
-  active_orders: number;
-  total_earnings: number;
-  total_withdrawn: number;
-  net_earnings: number;
-  wallets: WalletData[];
-  has_transactions?: boolean;
 }
 
 @Component({
@@ -89,7 +72,7 @@ export class EarningsComponent implements OnInit {
   // Signals
   readonly loading = signal(false);
   readonly loadingTransactions = signal(false);
-  readonly earningsSummary = signal<EarningsSummary | null>(null);
+  readonly earningsSummary = signal<WalletSummary | null>(null);
   readonly transactions = signal<TransactionData[]>([]);
   readonly error = signal<string | null>(null);
 
@@ -101,12 +84,13 @@ export class EarningsComponent implements OnInit {
 
   readonly canWithdraw = computed(() => {
     const summary = this.earningsSummary();
-    return summary && summary.available_funds > 0;
+    return summary && summary.available > 0;
   });
 
   readonly showEmptyState = computed(() => {
     const summary = this.earningsSummary();
-    return !this.loading() && summary && !summary.has_transactions;
+    const transactions = this.transactions();
+    return !this.loading() && summary && transactions.length === 0;
   });
 
   // Table configuration
@@ -132,21 +116,25 @@ export class EarningsComponent implements OnInit {
       console.log('📡 Making API call to:', `${this.apiUrl}/summary`);
       
       const response = await firstValueFrom(
-        this.http.get<{ success: boolean; data: EarningsSummary; message: string }>(
+        this.http.get<WalletSummary>(
           `${this.apiUrl}/summary`
         )
       );
       console.log('✅ API Response:', response);
       
-      if (response.data) {
-        this.earningsSummary.set(response.data);
-        console.log('💰 Earnings summary set:', response.data);
+      if (response) {
+        this.earningsSummary.set(response);
+        console.log('💰 Earnings summary set:', response);
       } else {
-        console.log('🏗️ No earnings data, initializing wallets...');
-        // Try to initialize wallets first
-        await this.initializeWallets();
-        // Then retry loading summary
-        await this.loadEarningsSummaryRetry();
+        console.log('🏗️ No earnings data, setting default...');
+        // Set default empty summary
+        const defaultSummary: WalletSummary = {
+          active_orders: 0,
+          payments_clearing: 0,
+          available: 0,
+          total_earnings: 0
+        };
+        this.earningsSummary.set(defaultSummary);
       }
     } catch (error: any) {
       console.error('❌ Error loading earnings summary:', error);
@@ -161,9 +149,15 @@ export class EarningsComponent implements OnInit {
       if (error.status === 401) {
         this.error.set('Authentication failed. Please log in again.');
       } else if (error.status === 404) {
-        console.log('🏗️ Wallets not found, attempting to initialize...');
-        await this.initializeWallets();
-        await this.loadEarningsSummaryRetry();
+        console.log('🏗️ Wallets not found, setting default summary...');
+        // Set default empty summary
+        const defaultSummary: WalletSummary = {
+          active_orders: 0,
+          payments_clearing: 0,
+          available: 0,
+          total_earnings: 0
+        };
+        this.earningsSummary.set(defaultSummary);
       } else {
         this.error.set('Failed to load earnings data');
       }
@@ -173,76 +167,16 @@ export class EarningsComponent implements OnInit {
     }
   }
 
-  async initializeWallets() {
-    try {
-      console.log('🏗️ Initializing user wallets...');
-      const response = await firstValueFrom(
-        this.http.post<{ success: boolean; data: any; message: string }>(
-          `${this.apiUrl}/initialize`,
-          {}
-        )
-      );
-      console.log('✅ Wallets initialized:', response);
-    } catch (error) {
-      console.error('❌ Failed to initialize wallets:', error);
-    }
-  }
-
-  async loadEarningsSummaryRetry() {
-    try {
-      console.log('🔄 Retrying earnings summary load...');
-      const response = await firstValueFrom(
-        this.http.get<{ success: boolean; data: EarningsSummary; message: string }>(
-          `${this.apiUrl}/summary`
-        )
-      );
-      
-      if (response.data) {
-        this.earningsSummary.set(response.data);
-        console.log('💰 Earnings summary loaded on retry:', response.data);
-      } else {
-        // Create a default empty summary
-        const defaultSummary: EarningsSummary = {
-          available_funds: 0,
-          pending_clearance: 0,
-          active_orders: 0,
-          total_earnings: 0,
-          total_withdrawn: 0,
-          net_earnings: 0,
-          wallets: [],
-          has_transactions: false
-        };
-        this.earningsSummary.set(defaultSummary);
-        console.log('📝 Set default earnings summary');
-      }
-    } catch (error) {
-      console.error('❌ Retry failed:', error);
-      // Set default empty summary even if retry fails
-      const defaultSummary: EarningsSummary = {
-        available_funds: 0,
-        pending_clearance: 0,
-        active_orders: 0,
-        total_earnings: 0,
-        total_withdrawn: 0,
-        net_earnings: 0,
-        wallets: [],
-        has_transactions: false
-      };
-      this.earningsSummary.set(defaultSummary);
-      console.log('📝 Set default earnings summary after error');
-    }
-  }
-
   async loadTransactions() {
     this.loadingTransactions.set(true);
 
     try {
       const response = await firstValueFrom(
-        this.http.get<{ success: boolean; data: TransactionData[]; message: string }>(
+        this.http.get<TransactionData[]>(
           `${this.apiUrl}/transactions`
         )
       );
-      this.transactions.set(response.data || []);
+      this.transactions.set(response || []);
     } catch (error: any) {
       console.error('Error loading transactions:', error);
       this.transactions.set([]);
@@ -268,11 +202,12 @@ export class EarningsComponent implements OnInit {
 
   getTransactionTypeLabel(type: string): string {
     const labels: Record<string, string> = {
-      'payment_received': 'Payment Received',
+      'project_started': 'Project Started',
+      'project_completed': 'Project Completed',
+      'additional_payment': 'Additional Payment',
       'payment_cleared': 'Payment Cleared',
       'withdrawal': 'Withdrawal',
       'refund': 'Refund',
-      'additional_payment': 'Additional Payment',
       'platform_fee': 'Platform Fee'
     };
     return labels[type] || type;
@@ -290,9 +225,10 @@ export class EarningsComponent implements OnInit {
 
   getTransactionTypeColor(type: string): string {
     const colors: Record<string, string> = {
-      'payment_received': 'text-green-600',
+      'project_started': 'text-blue-600',
+      'project_completed': 'text-green-600',
       'additional_payment': 'text-green-600',
-      'payment_cleared': 'text-blue-600',
+      'payment_cleared': 'text-purple-600',
       'withdrawal': 'text-red-600',
       'platform_fee': 'text-orange-600',
       'refund': 'text-purple-600'

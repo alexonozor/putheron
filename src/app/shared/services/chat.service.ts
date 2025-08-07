@@ -80,7 +80,7 @@ export interface UpdateMessageDto {
 }
 
 export interface CreatePaymentRequestDto {
-  amount: string;
+  amount: number; // Changed from string to number to match backend
   description: string;
   content: string;
 }

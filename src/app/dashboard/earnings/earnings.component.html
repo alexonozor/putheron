@@ -49,10 +49,10 @@
           <mat-icon class="text-green-600">account_balance_wallet</mat-icon>
         </div>
         <div class="space-y-2">
-          <p class="text-sm text-gray-600">Balance available for use</p>
-          <p class="text-4xl font-bold text-gray-900">{{ formatCurrency(earningsSummary()!.available_funds) }}</p>
+          <p class="text-sm text-gray-600">Balance available for withdrawal</p>
+          <p class="text-4xl font-bold text-gray-900">{{ earningsSummary()!.available | currency}}</p>
         </div>
-        @if (earningsSummary()!.available_funds > 0) {
+        @if (earningsSummary()!.available > 0) {
           <button 
             (click)="requestWithdrawal()"
             class="mt-4 w-full bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors">
@@ -73,15 +73,15 @@
         <div class="space-y-4">
           <div>
             <p class="text-sm text-gray-600">Payments being cleared</p>
-            <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(earningsSummary()!.pending_clearance) }}</p>
-            <p class="text-xs text-gray-500">Your earnings since joining.</p>
+            <p class="text-2xl font-bold text-gray-900">{{earningsSummary()!.payments_clearing | currency}}</p>
+            <p class="text-xs text-gray-500">Funds from completed projects awaiting clearance.</p>
           </div>
           
           <!-- Payments for Active Orders -->
           <div>
-            <p class="text-sm text-gray-600">Payments for active orders</p>
-            <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(earningsSummary()!.active_orders) }}</p>
-            <p class="text-xs text-gray-500">Earnings spent on purchases since joining.</p>
+            <p class="text-sm text-gray-600">Active project earnings</p>
+            <p class="text-2xl font-bold text-gray-900">{{ earningsSummary()!.active_orders | currency}}</p>
+            <p class="text-xs text-gray-500">Earnings from ongoing projects.</p>
           </div>
         </div>
       </mat-card>
@@ -92,18 +92,18 @@
           <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Earnings to date</h3>
           <mat-icon class="text-purple-600">trending_up</mat-icon>
         </div>
-        <p class="text-4xl font-bold text-gray-900">{{ formatCurrency(earningsSummary()!.total_earnings) }}</p>
+        <p class="text-4xl font-bold text-gray-900">{{ earningsSummary()!.total_earnings | currency }}</p>
         <p class="text-sm text-gray-600 mt-2">Your total earnings since joining.</p>
       </mat-card>
 
-      <!-- Expenses to Date -->
+      <!-- Platform Fee Info -->
       <mat-card class="p-6">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Expenses to date</h3>
-          <mat-icon class="text-orange-600">money_off</mat-icon>
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Platform Fee (5%)</h3>
+          <mat-icon class="text-orange-600">info</mat-icon>
         </div>
-        <p class="text-4xl font-bold text-gray-900">{{ formatCurrency(earningsSummary()!.total_withdrawn) }}</p>
-        <p class="text-sm text-gray-600 mt-2">Earnings spent on purchases since joining.</p>
+        <p class="text-2xl font-bold text-gray-900">{{ earningsSummary()!.total_earnings * 0.05 | currency }}</p>
+        <p class="text-sm text-gray-600 mt-2">Platform fee deducted from earnings.</p>
       </mat-card>
     </div>
 

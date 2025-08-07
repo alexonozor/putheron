@@ -8,7 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 
 export interface PaymentRequestData {
-  amount: string;
+  amount: number; // Changed from string to number
   description: string;
   content: string;
 }
@@ -158,7 +158,7 @@ export class PaymentRequestModalComponent {
     if (this.paymentForm.valid) {
       const formValue = this.paymentForm.value;
       const result: PaymentRequestData = {
-        amount: formValue.amount.toString(),
+        amount: parseFloat(formValue.amount), // Send as number, not string
         description: formValue.description,
         content: formValue.content
       };
