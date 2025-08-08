@@ -36,7 +36,7 @@ export interface Project {
     features?: string[];
   }[];
   offered_price: number;
-  status: 'pending' | 'accepted' | 'rejected' | 'in_progress' | 'awaiting_client_approval' | 'completed' | 'cancelled';
+  status: 'pending' | 'accepted' | 'rejected' | 'in_progress' | 'awaiting_client_approval' | 'completed' | 'cancelled' | 'settled';
   deadline?: Date | string;
   additional_notes?: string;
   image_url?: string;
@@ -50,7 +50,9 @@ export interface Project {
   accepted_at?: Date | string;
   rejected_at?: Date | string;
   completed_at?: Date | string;
+  cancelled_at?: Date | string;
   rejection_reason?: string;
+  cancellation_reason?: string;
   chat_room_id?: string;
   is_archived: boolean;
   createdAt: Date | string;

@@ -47,7 +47,13 @@ export class ProjectsComponent implements OnInit {
     this.myProjects().filter(p => ['accepted', 'in_progress'].includes(p.status))
   );
   readonly completedMyProjects = computed(() => 
-    this.myProjects().filter(p => p.status === 'completed')
+    this.myProjects().filter(p => ['completed', 'settled'].includes(p.status))
+  );
+  readonly rejectedMyProjects = computed(() => 
+    this.myProjects().filter(p => p.status === 'rejected')
+  );
+  readonly cancelledMyProjects = computed(() => 
+    this.myProjects().filter(p => p.status === 'cancelled')
   );
   readonly pendingBusinessProjects = computed(() => 
     this.businessProjects().filter(p => p.status === 'pending')
@@ -56,7 +62,13 @@ export class ProjectsComponent implements OnInit {
     this.businessProjects().filter(p => ['accepted', 'in_progress'].includes(p.status))
   );
   readonly completedBusinessProjects = computed(() => 
-    this.businessProjects().filter(p => p.status === 'completed')
+    this.businessProjects().filter(p => ['completed', 'settled'].includes(p.status))
+  );
+  readonly rejectedBusinessProjects = computed(() => 
+    this.businessProjects().filter(p => p.status === 'rejected')
+  );
+  readonly cancelledBusinessProjects = computed(() => 
+    this.businessProjects().filter(p => p.status === 'cancelled')
   );
 
   ngOnInit() {
@@ -99,8 +111,9 @@ export class ProjectsComponent implements OnInit {
       'accepted': 'bg-blue-100 text-blue-800',
       'in_progress': 'bg-purple-100 text-purple-800',
       'completed': 'bg-green-100 text-green-800',
+      'settled': 'bg-green-100 text-green-800',
       'rejected': 'bg-red-100 text-red-800',
-      'cancelled': 'bg-gray-100 text-gray-800'
+      'cancelled': 'bg-orange-100 text-orange-800'
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   }
@@ -111,6 +124,7 @@ export class ProjectsComponent implements OnInit {
       'accepted': 'Accepted',
       'in_progress': 'In Progress',
       'completed': 'Completed',
+      'settled': 'Settled',
       'rejected': 'Rejected',
       'cancelled': 'Cancelled'
     };

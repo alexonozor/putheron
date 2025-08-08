@@ -7,6 +7,7 @@ import { AuthGuard } from './shared/guards/auth.guard';
 import { GuestGuard } from './shared/guards/guest.guard';
 import { BusinessProfileComponent } from './business-profile/business-profile.component';
 import { SearchComponent } from './search/search.component';
+import { PayPalCallbackComponent } from './components/paypal-callback/paypal-callback.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -26,6 +27,10 @@ export const routes: Routes = [
     path: 'create-project/:businessId', 
     component: CreateProjectStepsComponent,
     canActivate: [AuthGuard]
+  },
+  { 
+    path: 'paypal/callback', 
+    component: PayPalCallbackComponent
   },
   { path: '**', redirectTo: '' }
 

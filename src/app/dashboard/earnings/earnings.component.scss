@@ -12,6 +12,17 @@
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
+// Transaction tabs styling
+.transaction-tabs {
+  .mat-mdc-tab-group {
+    --mat-tab-header-divider-color: #e5e7eb;
+  }
+  
+  .mat-mdc-tab {
+    min-width: 120px;
+  }
+}
+
 // Transaction table styling
 .mat-mdc-table {
   background: transparent;

@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
   api: {
-    baseUrl: 'http://localhost:3000/api',
+    baseUrl: 'https://putheron-c027767ea741.herokuapp.com/api',
     timeout: 10000
   },
   auth: {
