@@ -355,7 +355,22 @@
 
   <!-- Fixed Message Input -->
   @if (!loading() && !error()) {
-    <div class="input-container">
+    @if (isChatDisabled()) {
+      <!-- Chat Disabled State -->
+      <div class="input-container">
+        <div class="chat-disabled-container">
+          <div class="chat-disabled-content">
+            <mat-icon class="disabled-icon">lock</mat-icon>
+            <div class="disabled-text">
+              <h4>{{ chatDisabledMessage() }}</h4>
+              <p>This conversation has been archived and is now read-only.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <!-- Active Chat Input -->
+      <div class="input-container">
       <!-- Typing Indicator -->
       @if (typingUsers().length > 0) {
         <div class="typing-indicator">
@@ -456,6 +471,7 @@
           </button>
         </form>
       </div>
-    </div>
-  }
+      </div> <!-- Close active chat input-container -->
+    } <!-- Close active chat conditional -->
+  } <!-- Close @if (!loading() && !error()) -->
 </div>

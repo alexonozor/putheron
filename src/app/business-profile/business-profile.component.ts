@@ -275,7 +275,7 @@ export class BusinessProfileComponent implements OnInit {
   }
 
   editService(serviceId: string) {
-    this.router.navigate(['/edit-service', serviceId]);
+    this.router.navigate(['/dashboard/services/edit-service', serviceId]);
   }
 
   contactBusiness() {
@@ -298,6 +298,12 @@ export class BusinessProfileComponent implements OnInit {
       return;
     }
 
+    // Check if business has any active services
+    if (this.activeServices().length === 0) {
+      alert('This business has no active services available for projects. Please contact them directly or check back later.');
+      return;
+    }
+
     // Check if user is trying to start a project with their own business
     const ownerId = typeof business.owner_id === 'string' 
       ? business.owner_id 
@@ -310,6 +316,35 @@ export class BusinessProfileComponent implements OnInit {
 
     // Navigate to create-project page with business ID
     this.router.navigate(['/create-project', business._id]);
+  }
+
+  startProjectWithService(serviceId: string) {
+    const business = this.business();
+    const currentUser = this.authService.user();
+
+    if (!currentUser) {
+      this.router.navigate(['/auth']);
+      return;
+    }
+
+    if (!business) {
+      return;
+    }
+
+    // Check if user is trying to start a project with their own business
+    const ownerId = typeof business.owner_id === 'string' 
+      ? business.owner_id 
+      : business.owner_id?._id;
+      
+    if (currentUser._id === ownerId) {
+      alert('You cannot start a project with your own business.');
+      return;
+    }
+
+    // Navigate to create-project page with business ID and service ID as query param
+    this.router.navigate(['/create-project', business._id], {
+      queryParams: { serviceId: serviceId }
+    });
   }
 
   contactOwner() {

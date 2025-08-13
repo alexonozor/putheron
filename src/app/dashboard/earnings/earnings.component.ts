@@ -19,9 +19,9 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { PayPalService } from '../../services/paypal.service';
+import { StripeConnectService } from '../../services/stripe-connect.service';
+import { StripeAccountStatus } from '../../models/stripe-account.model';
 import { WithdrawalService } from '../../services/withdrawal.service';
-import { PayPalAccount } from '../../models/paypal-account.model';
 import { 
   Withdrawal, 
   WithdrawalStatus,
@@ -92,7 +92,7 @@ interface TransactionData {
 })
 export class EarningsComponent implements OnInit {
   private readonly http = inject(HttpClient);
-  private readonly paypalService = inject(PayPalService);
+  private readonly stripeConnectService = inject(StripeConnectService);
   private readonly withdrawalService = inject(WithdrawalService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
@@ -108,10 +108,14 @@ export class EarningsComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly viewMode = signal<'grid' | 'list'>('list');
   
-  // PayPal related signals
-  readonly paypalAccounts = signal<PayPalAccount[]>([]);
+  // Stripe related signals
+  readonly stripeAccountStatus = signal<StripeAccountStatus>({ 
+    has_account: false, 
+    payouts_enabled: false, 
+    requirements_due: false 
+  });
   readonly withdrawals = signal<Withdrawal[]>([]);
-  readonly paypalLoading = signal(false);
+  readonly stripeLoading = signal(false);
 
   // Filter form
   readonly filterForm: FormGroup = this.fb.group({
@@ -142,22 +146,22 @@ export class EarningsComponent implements OnInit {
     return !!(form.startDate || form.endDate || (form.activityFilter && form.activityFilter !== ''));
   });
 
-  // PayPal computed properties
-  readonly hasPayPalAccount = computed(() => {
-    const accounts = this.paypalAccounts();
-    return accounts.length > 0 && accounts.some(account => account.is_verified && account.is_active);
+  // Stripe computed properties
+  readonly hasStripeAccount = computed(() => {
+    const status = this.stripeAccountStatus();
+    return status.has_account && status.payouts_enabled && !status.requirements_due;
   });
 
-  readonly canWithdrawToPayPal = computed(() => {
-    return this.canWithdraw() && this.hasPayPalAccount();
+  readonly canWithdrawToStripe = computed(() => {
+    return this.canWithdraw() && this.hasStripeAccount();
   });
 
-  readonly paypalAccountStatus = computed(() => {
-    const accounts = this.paypalAccounts();
-    if (accounts.length === 0) return 'not-connected';
-    if (accounts.some(account => account.is_verified && account.is_active)) return 'connected';
-    if (accounts.some(account => !account.is_verified && account.is_active)) return 'pending';
-    return 'failed';
+  readonly stripeConnectionStatus = computed(() => {
+    const status = this.stripeAccountStatus();
+    if (!status.has_account) return 'not-connected';
+    if (status.requirements_due) return 'pending';
+    if (!status.payouts_enabled) return 'failed';
+    return 'connected';
   });
 
   // Table configuration
@@ -169,16 +173,12 @@ export class EarningsComponent implements OnInit {
     'status'
   ];
 
-  ngOnInit() {
-    this.loadEarningsSummary();
-    this.loadTransactions();
-    this.loadPayPalAccounts();
-    this.loadWithdrawals();
-    
-    // Initialize filtered transactions and set up form change listener
-    this.filteredTransactions.set(this.transactions());
-    
-    // Listen for form changes
+  async ngOnInit() {
+    await this.loadEarningsSummary();
+    await this.loadTransactions();
+    await this.loadStripeAccountStatus();
+    await this.loadWithdrawals();
+    // Set up reactive filters
     this.filterForm.valueChanges.subscribe(() => {
       this.applyFilters();
     });
@@ -327,16 +327,16 @@ export class EarningsComponent implements OnInit {
     await this.loadTransactions();
   }
 
-  // PayPal related methods
-  async loadPayPalAccounts() {
+  // Stripe related methods
+  async loadStripeAccountStatus() {
     try {
-      this.paypalLoading.set(true);
-      const accounts = await firstValueFrom(this.paypalService.getAccounts());
-      this.paypalAccounts.set(accounts);
+      this.stripeLoading.set(true);
+      const status = await firstValueFrom(this.stripeConnectService.getAccountStatus());
+      this.stripeAccountStatus.set(status);
     } catch (error) {
-      console.error('Error loading PayPal accounts:', error);
+      console.error('Error loading Stripe account status:', error);
     } finally {
-      this.paypalLoading.set(false);
+      this.stripeLoading.set(false);
     }
   }
 
@@ -349,36 +349,41 @@ export class EarningsComponent implements OnInit {
     }
   }
 
-  async connectPayPal() {
+  async connectStripe() {
     try {
-      this.paypalLoading.set(true);
-      const response = await firstValueFrom(this.paypalService.getConnectUrl());
-      window.location.href = response.auth_url;
+      this.stripeLoading.set(true);
+      const response = await firstValueFrom(this.stripeConnectService.createOrGetAccount());
+      if (response.onboarding_url) {
+        window.location.href = response.onboarding_url;
+      } else {
+        // Already connected, refresh status
+        await this.loadStripeAccountStatus();
+        this.snackBar.open('Stripe account already connected', 'Close', { duration: 3000 });
+      }
     } catch (error) {
-      console.error('Error connecting PayPal:', error);
-      this.snackBar.open('Failed to connect PayPal account', 'Close', { duration: 3000 });
+      console.error('Error connecting Stripe:', error);
+      this.snackBar.open('Failed to connect Stripe account', 'Close', { duration: 3000 });
     } finally {
-      this.paypalLoading.set(false);
+      this.stripeLoading.set(false);
     }
   }
 
-  async withdrawToPayPal() {
+  async withdrawToStripe() {
     const summary = this.earningsSummary();
     if (!summary || summary.available <= 0) {
       this.snackBar.open('No funds available for withdrawal', 'Close', { duration: 3000 });
       return;
     }
 
-    if (!this.hasPayPalAccount()) {
-      this.snackBar.open('Please connect your PayPal account first', 'Close', { duration: 3000 });
+    if (!this.hasStripeAccount()) {
+      this.snackBar.open('Please complete your Stripe account setup first', 'Close', { duration: 3000 });
       return;
     }
 
     try {
       const withdrawalData: CreateWithdrawalRequest = {
         amount: summary.available,
-        method: WithdrawalMethod.PAYPAL,
-        paypal_account_id: this.paypalAccounts()[0]._id
+        method: WithdrawalMethod.STRIPE
       };
 
       const withdrawal = await firstValueFrom(this.withdrawalService.createWithdrawal(withdrawalData));

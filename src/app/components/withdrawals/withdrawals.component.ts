@@ -15,7 +15,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatPaginatorModule } from '@angular/material/paginator';
 
 import { WithdrawalService } from '../../services/withdrawal.service';
-import { PayPalService } from '../../services/paypal.service';
+import { StripeConnectService } from '../../services/stripe-connect.service';
 import { 
   Withdrawal, 
   CreateWithdrawalRequest, 
@@ -23,7 +23,7 @@ import {
   WithdrawalStatus,
   WithdrawalStats 
 } from '../../models/withdrawal.model';
-import { PayPalAccount } from '../../models/paypal-account.model';
+import { StripeAccount, StripeAccountStatus } from '../../models/stripe-account.model';
 
 @Component({
   selector: 'app-withdrawals',
@@ -48,7 +48,7 @@ import { PayPalAccount } from '../../models/paypal-account.model';
     <div class="withdrawals-container">
       <div class="header">
         <h2>Withdrawals</h2>
-        <p class="subtitle">Withdraw your earnings to PayPal</p>
+        <p class="subtitle">Withdraw your earnings to your Stripe account</p>
       </div>
 
       <!-- Statistics Cards -->
@@ -106,44 +106,35 @@ import { PayPalAccount } from '../../models/paypal-account.model';
         <!-- Create Withdrawal Tab -->
         <mat-tab label="New Withdrawal">
           <div class="tab-content">
-            <!-- No PayPal Account Warning -->
-            <div *ngIf="paypalAccounts.length === 0" class="no-paypal-warning">
+            <!-- No Stripe Account Warning -->
+            <div *ngIf="!stripeAccountStatus?.has_account || !stripeAccountStatus?.payouts_enabled" class="no-stripe-warning">
               <mat-icon>warning</mat-icon>
-              <h3>No PayPal Account Connected</h3>
-              <p>You need to connect a PayPal account before creating withdrawals.</p>
-              <button mat-raised-button color="primary" routerLink="/paypal-accounts">
-                Connect PayPal Account
+              <h3 *ngIf="!stripeAccountStatus?.has_account">No Stripe Account Connected</h3>
+              <h3 *ngIf="stripeAccountStatus?.has_account && !stripeAccountStatus?.payouts_enabled">Stripe Account Setup Required</h3>
+              <p *ngIf="!stripeAccountStatus?.has_account">You need to connect a Stripe account before creating withdrawals.</p>
+              <p *ngIf="stripeAccountStatus?.has_account && !stripeAccountStatus?.payouts_enabled">
+                Complete your Stripe account setup to enable withdrawals.
+              </p>
+              <button mat-raised-button color="primary" (click)="connectToStripe()">
+                {{ !stripeAccountStatus?.has_account ? 'Connect Stripe Account' : 'Complete Setup' }}
               </button>
             </div>
 
             <!-- Withdrawal Form -->
-            <mat-card *ngIf="paypalAccounts.length > 0" class="withdrawal-form-card">
+            <mat-card *ngIf="stripeAccountStatus?.payouts_enabled" class="withdrawal-form-card">
               <mat-card-header>
                 <mat-card-title>Create New Withdrawal</mat-card-title>
-                <mat-card-subtitle>Withdraw your earnings to PayPal</mat-card-subtitle>
+                <mat-card-subtitle>Withdraw your earnings to your Stripe account</mat-card-subtitle>
+                <div class="card-actions">
+                  <button mat-stroked-button (click)="openStripeDashboard()">
+                    <mat-icon>dashboard</mat-icon>
+                    Stripe Dashboard
+                  </button>
+                </div>
               </mat-card-header>
 
               <mat-card-content>
                 <form [formGroup]="withdrawalForm" (ngSubmit)="createWithdrawal()">
-                  <div class="form-row">
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>PayPal Account</mat-label>
-                      <mat-select formControlName="paypal_account_id" required>
-                        <mat-option *ngFor="let account of paypalAccounts" [value]="account._id">
-                          <div class="paypal-option">
-                            <span class="email">{{ account.email }}</span>
-                            <span class="status" [ngClass]="account.is_verified ? 'verified' : 'unverified'">
-                              {{ account.is_verified ? '✓ Verified' : '⚠ Not Verified' }}
-                            </span>
-                          </div>
-                        </mat-option>
-                      </mat-select>
-                      <mat-error *ngIf="withdrawalForm.get('paypal_account_id')?.hasError('required')">
-                        Please select a PayPal account
-                      </mat-error>
-                    </mat-form-field>
-                  </div>
-
                   <div class="form-row">
                     <mat-form-field appearance="outline" class="full-width">
                       <mat-label>Withdrawal Amount</mat-label>
@@ -246,8 +237,16 @@ import { PayPalAccount } from '../../models/paypal-account.model';
 
                   <div class="withdrawal-details">
                     <div class="detail-row">
+                      <span class="label">Method:</span>
+                      <span>{{ withdrawal.method | titlecase }}</span>
+                    </div>
+                    <div class="detail-row" *ngIf="withdrawal.paypal_account">
                       <span class="label">PayPal Account:</span>
-                      <span>{{ withdrawal.paypal_account?.email || 'Unknown' }}</span>
+                      <span>{{ withdrawal.paypal_account.email || 'Unknown' }}</span>
+                    </div>
+                    <div class="detail-row" *ngIf="withdrawal.stripe_account_id">
+                      <span class="label">Stripe Account:</span>
+                      <span>{{ withdrawal.stripe_account_id }}</span>
                     </div>
                     <div class="detail-row">
                       <span class="label">Created:</span>
@@ -362,7 +361,7 @@ import { PayPalAccount } from '../../models/paypal-account.model';
       padding: 24px 0;
     }
 
-    .no-paypal-warning {
+    .no-stripe-warning {
       text-align: center;
       padding: 48px;
       background: #fff3cd;
@@ -371,7 +370,7 @@ import { PayPalAccount } from '../../models/paypal-account.model';
       margin-bottom: 24px;
     }
 
-    .no-paypal-warning mat-icon {
+    .no-stripe-warning mat-icon {
       font-size: 48px;
       width: 48px;
       height: 48px;
@@ -384,29 +383,16 @@ import { PayPalAccount } from '../../models/paypal-account.model';
       margin: 0 auto;
     }
 
+    .card-actions {
+      margin-left: auto;
+    }
+
     .form-row {
       margin-bottom: 16px;
     }
 
     .full-width {
       width: 100%;
-    }
-
-    .paypal-option {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-    }
-
-    .paypal-option .status.verified {
-      color: #4caf50;
-      font-size: 0.8rem;
-    }
-
-    .paypal-option .status.unverified {
-      color: #ff9800;
-      font-size: 0.8rem;
     }
 
     .fee-calculation {
@@ -580,29 +566,29 @@ import { PayPalAccount } from '../../models/paypal-account.model';
 })
 export class WithdrawalsComponent implements OnInit {
   withdrawalForm: FormGroup;
-  paypalAccounts: PayPalAccount[] = [];
+  stripeAccountStatus: StripeAccountStatus | null = null;
   withdrawals: Withdrawal[] = [];
   stats: WithdrawalStats | null = null;
   
   creating = false;
   loadingWithdrawals = true;
+  loadingStripeStatus = true;
   cancelling: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private withdrawalService: WithdrawalService,
-    private paypalService: PayPalService,
+    private stripeConnectService: StripeConnectService,
     private snackBar: MatSnackBar
   ) {
     this.withdrawalForm = this.fb.group({
       amount: ['', [Validators.required, Validators.min(10), Validators.max(10000)]],
-      paypal_account_id: ['', Validators.required],
       description: ['']
     });
   }
 
   ngOnInit() {
-    this.loadPayPalAccounts();
+    this.loadStripeAccountStatus();
     this.loadWithdrawals();
     this.loadStats();
     this.setupFormValidation();
@@ -627,13 +613,16 @@ export class WithdrawalsComponent implements OnInit {
     });
   }
 
-  loadPayPalAccounts() {
-    this.paypalService.getAccounts().subscribe({
-      next: (accounts) => {
-        this.paypalAccounts = accounts.filter(account => account.is_verified);
+  loadStripeAccountStatus() {
+    this.loadingStripeStatus = true;
+    this.stripeConnectService.getAccountStatus().subscribe({
+      next: (status) => {
+        this.stripeAccountStatus = status;
+        this.loadingStripeStatus = false;
       },
       error: (error) => {
-        console.error('Failed to load PayPal accounts:', error);
+        console.error('Failed to load Stripe account status:', error);
+        this.loadingStripeStatus = false;
       }
     });
   }
@@ -665,13 +654,12 @@ export class WithdrawalsComponent implements OnInit {
   }
 
   createWithdrawal() {
-    if (this.withdrawalForm.invalid) return;
+    if (this.withdrawalForm.invalid || !this.stripeAccountStatus?.payouts_enabled) return;
 
     this.creating = true;
     const request: CreateWithdrawalRequest = {
       amount: this.withdrawalForm.value.amount,
-      method: WithdrawalMethod.PAYPAL,
-      paypal_account_id: this.withdrawalForm.value.paypal_account_id,
+      method: WithdrawalMethod.STRIPE,
       description: this.withdrawalForm.value.description || undefined
     };
 
@@ -687,6 +675,30 @@ export class WithdrawalsComponent implements OnInit {
         console.error('Failed to create withdrawal:', error);
         this.snackBar.open(error.error?.message || 'Failed to create withdrawal', 'Close', { duration: 5000 });
         this.creating = false;
+      }
+    });
+  }
+
+  connectToStripe() {
+    this.stripeConnectService.createOnboardingLink().subscribe({
+      next: (response) => {
+        window.location.href = response.url;
+      },
+      error: (error) => {
+        console.error('Failed to create onboarding link:', error);
+        this.snackBar.open('Failed to start Stripe onboarding', 'Close', { duration: 5000 });
+      }
+    });
+  }
+
+  openStripeDashboard() {
+    this.stripeConnectService.createLoginLink().subscribe({
+      next: (response) => {
+        window.open(response.url, '_blank');
+      },
+      error: (error) => {
+        console.error('Failed to create login link:', error);
+        this.snackBar.open('Failed to open Stripe dashboard', 'Close', { duration: 5000 });
       }
     });
   }

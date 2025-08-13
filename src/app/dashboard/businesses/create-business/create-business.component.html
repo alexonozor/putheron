@@ -145,10 +145,9 @@
                 }
                 <button 
                   type="button"
-                  mat-flat-button 
-                  color="primary"
                   (click)="nextStep(stepper)"
-                  [disabled]="!isBusinessInfoValid()">
+                  [disabled]="!isBusinessInfoValid()"
+                  class="flex items-center px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
                   Next
                   <mat-icon class="ml-2">arrow_forward</mat-icon>
                 </button>
@@ -235,20 +234,16 @@
                     <div class="flex flex-col gap-2 pt-1">
                       <button 
                         type="button"
-                        mat-stroked-button
-                        size="small"
                         (click)="enableManualLocationEdit()"
-                        class="text-xs h-8 min-w-[80px] border-blue-300 text-blue-600 hover:bg-blue-50">
+                        class="flex items-center justify-center px-3 py-1.5 text-xs h-8 min-w-[80px] border border-blue-300 text-blue-600 bg-white rounded-md hover:bg-blue-50 transition-colors">
                         <mat-icon class="mr-1" style="font-size: 14px; width: 14px; height: 14px;">edit</mat-icon>
                         Edit
                       </button>
                       
                       <button 
                         type="button"
-                        mat-stroked-button
-                        size="small"
                         (click)="clearLocationData()"
-                        class="text-xs h-8 min-w-[80px] border-red-300 text-red-600 hover:bg-red-50">
+                        class="flex items-center justify-center px-3 py-1.5 text-xs h-8 min-w-[80px] border border-red-300 text-red-600 bg-white rounded-md hover:bg-red-50 transition-colors">
                         <mat-icon class="mr-1" style="font-size: 14px; width: 14px; height: 14px;">clear</mat-icon>
                         Clear
                       </button>
@@ -294,8 +289,15 @@
                       <input 
                         matInput 
                         type="tel"
+                        appPhoneFormat
                         formControlName="contact_phone" 
                         placeholder="+1 (555) 123-4567">
+                      @if (contact_phone?.hasError('required') && contact_phone?.touched) {
+                        <mat-error>Business phone is required</mat-error>
+                      }
+                      @if (contact_phone?.hasError('usaPhone') && contact_phone?.touched) {
+                        <mat-error>{{ contact_phone?.errors?.['usaPhone']?.message }}</mat-error>
+                      }
                     </mat-form-field>
                   </div>
 
@@ -344,8 +346,8 @@
                           class="hidden">
                         <button 
                           type="button"
-                          mat-stroked-button
-                          (click)="logoInput.click()">
+                          (click)="logoInput.click()"
+                          class="flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-md hover:bg-gray-50 transition-colors">
                           <mat-icon class="mr-2">upload</mat-icon>
                           Choose Logo
                         </button>
@@ -387,8 +389,8 @@
                           class="hidden">
                         <button 
                           type="button"
-                          mat-stroked-button
-                          (click)="bannerInput.click()">
+                          (click)="bannerInput.click()"
+                          class="flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-md hover:bg-gray-50 transition-colors">
                           <mat-icon class="mr-2">upload</mat-icon>
                           Choose Banner
                         </button>
@@ -445,8 +447,8 @@
                           class="hidden">
                         <button 
                           type="button"
-                          mat-stroked-button
-                          (click)="sosCertificationInput.click()">
+                          (click)="sosCertificationInput.click()"
+                          class="flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-md hover:bg-gray-50 transition-colors">
                           <mat-icon class="mr-2">upload_file</mat-icon>
                           Choose Certification
                         </button>
@@ -460,9 +462,8 @@
               <div class="flex justify-between">
                 <button 
                   type="button"
-                  mat-button 
-                  color="primary"
-                  (click)="previousStep(stepper)">
+                  (click)="previousStep(stepper)"
+                  class="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
                   <mat-icon class="mr-2">arrow_back</mat-icon>
                   Previous
                 </button>
@@ -475,10 +476,9 @@
                   }
                   <button 
                     type="button"
-                    mat-flat-button 
-                    color="primary"
                     (click)="nextStep(stepper)"
-                    [disabled]="!isBusinessDetailsValid()">
+                    [disabled]="!isBusinessDetailsValid()"
+                    class="flex items-center px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
                     Next
                     <mat-icon class="ml-2">arrow_forward</mat-icon>
                   </button>
@@ -567,9 +567,8 @@
               <div class="flex justify-between">
                 <button 
                   type="button"
-                  mat-button 
-                  color="primary"
-                  (click)="previousStep(stepper)">
+                  (click)="previousStep(stepper)"
+                  class="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
                   <mat-icon class="mr-2">arrow_back</mat-icon>
                   Previous
                 </button>
@@ -582,10 +581,9 @@
                   }
                   <button 
                     type="button"
-                    mat-flat-button 
-                    color="primary"
                     (click)="submitBusiness()"
-                    [disabled]="submitting() || !isAllFormsValid()">
+                    [disabled]="submitting() || !isAllFormsValid()"
+                    class="flex items-center px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
                     @if (submitting()) {
                       <ng-container>
                         <mat-icon class="mr-2 animate-spin">refresh</mat-icon>

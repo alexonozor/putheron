@@ -5,7 +5,6 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -23,7 +22,6 @@ import { BusinessService, Business, CreateServiceDto, UpdateServiceDto, Service,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatButtonModule,
     MatIconModule,
     MatCardModule,
     MatCheckboxModule,
@@ -55,7 +53,6 @@ export class CreateServiceComponent implements OnInit {
   // Forms
   serviceInfoForm: FormGroup;
   servicePricingForm: FormGroup;
-  serviceSeoForm: FormGroup;
   
   readonly pricingTypes: PricingType[] = ['fixed', 'hourly', 'project', 'custom'];
 
@@ -69,10 +66,8 @@ export class CreateServiceComponent implements OnInit {
     this.serviceInfoForm = this.fb.group({
       business_id: ['', [Validators.required]],
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      slug: [''],
       short_description: ['', [Validators.maxLength(160)]],
-      description: [''],
-      category: ['']
+      description: ['']
     });
 
     this.servicePricingForm = this.fb.group({
@@ -85,17 +80,9 @@ export class CreateServiceComponent implements OnInit {
       tags: ['']
     });
 
-    this.serviceSeoForm = this.fb.group({
-      meta_title: [''],
-      meta_description: ['']
-    });
-
     // Auto-generate slug from name
     this.serviceInfoForm.get('name')?.valueChanges.subscribe(name => {
-      if (name && !this.serviceInfoForm.get('slug')?.dirty) {
-        const slug = this.generateSlug(name);
-        this.serviceInfoForm.get('slug')?.setValue(slug);
-      }
+      // Slug generation removed as it's now handled on backend
     });
   }
 
@@ -178,10 +165,8 @@ export class CreateServiceComponent implements OnInit {
     this.serviceInfoForm.patchValue({
       business_id: typeof service.business_id === 'string' ? service.business_id : service.business_id._id,
       name: service.name,
-      slug: service.slug,
       short_description: service.short_description || '',
-      description: service.description || '',
-      category: service.category || ''
+      description: service.description || ''
     });
 
     // Service Pricing Form
@@ -195,25 +180,10 @@ export class CreateServiceComponent implements OnInit {
       tags: service.tags?.join(', ') || ''
     });
 
-    // Service SEO Form
-    this.serviceSeoForm.patchValue({
-      meta_title: service.meta_title || '',
-      meta_description: service.meta_description || ''
-    });
-
     // Handle existing images
     if (service.images && service.images.length > 0) {
       this.existingImages.set([...service.images]);
     }
-  }
-
-  private generateSlug(name: string): string {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
   }
 
   private formatFeatures(featuresString: string): string[] {
@@ -241,10 +211,6 @@ export class CreateServiceComponent implements OnInit {
     return this.servicePricingForm.valid;
   }
 
-  isServiceSeoValid(): boolean {
-    return this.serviceSeoForm.valid;
-  }
-
   // Navigation methods
   nextStep(stepper: any): void {
     stepper.next();
@@ -255,7 +221,7 @@ export class CreateServiceComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (!this.isServiceInfoValid() || !this.isServicePricingValid() || !this.isServiceSeoValid() || this.submitting()) {
+    if (!this.isServiceInfoValid() || !this.isServicePricingValid() || this.submitting()) {
       this.markAllFormsTouched();
       return;
     }
@@ -266,26 +232,21 @@ export class CreateServiceComponent implements OnInit {
     try {
       const serviceInfoData = this.serviceInfoForm.value;
       const servicePricingData = this.servicePricingForm.value;
-      const serviceSeoData = this.serviceSeoForm.value;
 
       let serviceResult: any;
       let serviceId: string;
 
       const serviceData = {
         name: serviceInfoData.name,
-        slug: serviceInfoData.slug || this.generateSlug(serviceInfoData.name),
         short_description: serviceInfoData.short_description || undefined,
         description: serviceInfoData.description || undefined,
-        category: serviceInfoData.category || undefined,
         features: this.formatFeatures(servicePricingData.features),
         price: servicePricingData.price || undefined,
         pricing_type: servicePricingData.pricing_type,
         duration: servicePricingData.duration || undefined,
         tags: this.formatTags(servicePricingData.tags),
         is_active: servicePricingData.is_active,
-        is_featured: servicePricingData.is_featured,
-        meta_title: serviceSeoData.meta_title || undefined,
-        meta_description: serviceSeoData.meta_description || undefined
+        is_featured: servicePricingData.is_featured
       };
 
       if (this.isEditMode()) {
@@ -345,9 +306,6 @@ export class CreateServiceComponent implements OnInit {
     Object.keys(this.servicePricingForm.controls).forEach(key => {
       this.servicePricingForm.get(key)?.markAsTouched();
     });
-    Object.keys(this.serviceSeoForm.controls).forEach(key => {
-      this.serviceSeoForm.get(key)?.markAsTouched();
-    });
   }
 
   onCancel(): void {
@@ -369,10 +327,8 @@ export class CreateServiceComponent implements OnInit {
   // Form field getters for template
   get business_id() { return this.serviceInfoForm.get('business_id'); }
   get name() { return this.serviceInfoForm.get('name'); }
-  get slug() { return this.serviceInfoForm.get('slug'); }
   get short_description() { return this.serviceInfoForm.get('short_description'); }
   get description() { return this.serviceInfoForm.get('description'); }
-  get category() { return this.serviceInfoForm.get('category'); }
   get features() { return this.serviceInfoForm.get('features'); }
   get price() { return this.servicePricingForm.get('price'); }
   get pricing_type() { return this.servicePricingForm.get('pricing_type'); }
@@ -470,6 +426,4 @@ export class CreateServiceComponent implements OnInit {
       this.uploadingImages.set(false);
     }
   }
-  get meta_title() { return this.serviceSeoForm.get('meta_title'); }
-  get meta_description() { return this.serviceSeoForm.get('meta_description'); }
 }

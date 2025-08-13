@@ -34,11 +34,9 @@
         <h3 class="text-lg font-medium text-gray-900 mb-2">No businesses found</h3>
         <p class="text-sm text-gray-500 mb-6">You need to create a business before adding services.</p>
         <button
-          mat-raised-button
-          color="primary"
           routerLink="/dashboard/businesses/create-business"
-        >
-          <mat-icon>add</mat-icon>
+          class="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
+          <mat-icon class="mr-2">add</mat-icon>
           Create Business
         </button>
       </div>
@@ -120,17 +118,6 @@
                 }
               </mat-form-field>
 
-              <!-- Slug -->
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>URL Slug</mat-label>
-                <input
-                  matInput
-                  formControlName="slug"
-                  placeholder="auto-generated from service name"
-                />
-                <mat-hint>Used in URLs. Auto-generated if left blank.</mat-hint>
-              </mat-form-field>
-
               <!-- Short Description -->
               <mat-form-field appearance="outline" class="w-full">
                 <mat-label>Short Description</mat-label>
@@ -158,23 +145,12 @@
                 ></textarea>
               </mat-form-field>
 
-              <!-- Category -->
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Category</mat-label>
-                <input
-                  matInput
-                  formControlName="category"
-                  placeholder="e.g., Design, Development, Marketing"
-                />
-              </mat-form-field>
-
               <div class="flex justify-end">
                 <button 
                   type="button"
-                  mat-flat-button 
-                  color="primary"
                   (click)="nextStep(stepper)"
-                  [disabled]="!isServiceInfoValid()">
+                  [disabled]="!isServiceInfoValid()"
+                  class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
                   Next
                   <mat-icon class="ml-2">arrow_forward</mat-icon>
                 </button>
@@ -281,17 +257,16 @@
               <div class="flex justify-between">
                 <button 
                   type="button"
-                  mat-button
-                  (click)="previousStep(stepper)">
+                  (click)="previousStep(stepper)"
+                  class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
                   <mat-icon class="mr-2">arrow_back</mat-icon>
                   Previous
                 </button>
                 <button 
                   type="button"
-                  mat-flat-button 
-                  color="primary"
                   (click)="nextStep(stepper)"
-                  [disabled]="!isServicePricingValid()">
+                  [disabled]="!isServicePricingValid()"
+                  class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
                   Next
                   <mat-icon class="ml-2">arrow_forward</mat-icon>
                 </button>
@@ -299,8 +274,8 @@
             </form>
           </mat-step>
 
-          <!-- Step 3: Service Images -->
-          <mat-step label="Service Images">
+          <!-- Step 3: Service Images & Finish -->
+          <mat-step label="Images & Finish">
             <div class="p-6 space-y-6">
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
@@ -349,15 +324,16 @@
                     accept="image/*"
                     class="hidden">
                   
-                  <button
-                    type="button"
-                    mat-raised-button
-                    color="primary"
-                    (click)="fileInput.click()"
-                    [disabled]="selectedImages().length + existingImages().length >= 5">
-                    <mat-icon>add_photo_alternate</mat-icon>
-                    Select Images
-                  </button>
+                  <div class="flex justify-center">
+                    <button
+                      type="button"
+                      (click)="fileInput.click()"
+                      [disabled]="selectedImages().length + existingImages().length >= 5"
+                      class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
+                      <mat-icon class="mr-2">add_photo_alternate</mat-icon>
+                      Select Images
+                    </button>
+                  </div>
                   
                   <p class="text-sm text-gray-500 mt-2">
                     {{ selectedImages().length + existingImages().length }} of 5 images selected
@@ -400,107 +376,16 @@
               <div class="flex justify-between">
                 <button 
                   type="button"
-                  mat-button
-                  (click)="previousStep(stepper)">
+                  (click)="previousStep(stepper)"
+                  class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
                   <mat-icon class="mr-2">arrow_back</mat-icon>
                   Back
                 </button>
                 <button 
                   type="button"
-                  mat-flat-button 
-                  color="primary"
-                  (click)="nextStep(stepper)">
-                  Next
-                  <mat-icon class="ml-2">arrow_forward</mat-icon>
-                </button>
-              </div>
-            </div>
-          </mat-step>
-
-          <!-- Step 4: SEO & Settings -->
-          <mat-step [stepControl]="serviceSeoForm" label="SEO & Finish">
-            <form [formGroup]="serviceSeoForm" class="p-6 space-y-6">
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                  SEO Settings (Optional)
-                </h3>
-                <p class="text-gray-600 mb-6">
-                  Optimize your service for search engines to improve visibility.
-                </p>
-              </div>
-
-              <!-- Meta Title -->
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Meta Title</mat-label>
-                <input
-                  matInput
-                  formControlName="meta_title"
-                  placeholder="Custom title for search engines"
-                />
-                <mat-hint>If left blank, service name will be used</mat-hint>
-              </mat-form-field>
-
-              <!-- Meta Description -->
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Meta Description</mat-label>
-                <textarea
-                  matInput
-                  formControlName="meta_description"
-                  rows="3"
-                  placeholder="Custom description for search engines"
-                  maxlength="160"
-                ></textarea>
-                <mat-hint align="end">{{ (meta_description?.value || '').length }}/160 characters</mat-hint>
-              </mat-form-field>
-
-              <!-- Review Section -->
-              <div class="bg-gray-50 rounded-lg p-4">
-                <h4 class="text-md font-medium text-gray-900 mb-3">Review Your Service</h4>
-                <div class="space-y-2 text-sm">
-                  <div class="flex justify-between">
-                    <span class="text-gray-600">Service Name:</span>
-                    <span class="font-medium">{{ name?.value || 'Not specified' }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-600">Price:</span>
-                    <span class="font-medium">
-                      @if (price?.value) {
-                        ${{ price?.value }} ({{ pricing_type?.value | titlecase }})
-                      } @else {
-                        Not specified
-                      }
-                    </span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-600">Status:</span>
-                    <span class="font-medium">
-                      @if (is_active?.value) {
-                        <span class="text-green-600">Active</span>
-                      } @else {
-                        <span class="text-gray-600">Inactive</span>
-                      }
-                      @if (is_featured?.value) {
-                        <span class="text-blue-600 ml-2">• Featured</span>
-                      }
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex justify-between">
-                <button 
-                  type="button"
-                  mat-button
-                  (click)="previousStep(stepper)">
-                  <mat-icon class="mr-2">arrow_back</mat-icon>
-                  Previous
-                </button>
-                <button 
-                  type="button"
-                  mat-flat-button 
-                  color="primary"
                   (click)="onSubmit()"
-                  [disabled]="!canSubmitService()">
+                  [disabled]="!canSubmitService()"
+                  class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
                   @if (submitting()) {
                     <ng-container>
                       <mat-icon class="animate-spin mr-2">hourglass_empty</mat-icon>
@@ -514,7 +399,7 @@
                   }
                 </button>
               </div>
-            </form>
+            </div>
           </mat-step>
 
         </mat-stepper>

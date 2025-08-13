@@ -12,6 +12,8 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AuthService } from '../../../shared/services/auth.service';
 import { BusinessService, Category, Subcategory, CreateBusinessDto, UpdateBusinessDto, Business } from '../../../shared/services/business.service';
+import { PhoneValidators } from '../../../shared/validators/phone.validator';
+import { PhoneFormatDirective } from '../../../shared/directives/phone-format.directive';
 
 declare let google: any;
 
@@ -28,7 +30,8 @@ declare let google: any;
     MatIconModule,
     MatCardModule,
     MatStepperModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    PhoneFormatDirective
   ],
   templateUrl: './create-business.component.html',
   styleUrl: './create-business.component.scss'
@@ -86,7 +89,7 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
         coordinates: [null]
       }),
       contact_email: ['', [Validators.required, Validators.email]],
-      contact_phone: ['', Validators.required],
+      contact_phone: ['', [Validators.required, PhoneValidators.usaPhone()]],
       website: ['']
     });
   }
@@ -456,7 +459,7 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
   }
 
   goBack() {
-    this.router.navigate(['/dashboard/businesses']);
+    this.router.navigate(['/dashboard/businesses/list']);
   }
 
   loadData() {
@@ -604,7 +607,13 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
     if (field.errors['email']) {
       return 'Please enter a valid email address';
     }
+    if (field.errors['usaPhone']) {
+      return field.errors['usaPhone'].message;
+    }
 
     return 'This field is invalid';
   }
+
+  // Form field getters
+  get contact_phone() { return this.businessDetailsForm.get('contact_phone'); }
 }

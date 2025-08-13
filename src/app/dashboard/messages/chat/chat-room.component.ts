@@ -85,6 +85,30 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     return Boolean(this.canLeaveReview() || this.existingReview());
   });
 
+  // Check if chat should be disabled (when project is completed and payment cleared)
+  readonly isChatDisabled = computed(() => {
+    const currentChat = this.chat();
+    if (!currentChat) return false;
+    
+    const projectStatus = currentChat.project_id.status;
+    // Disable chat when project is completed OR settled (payment cleared)
+    return projectStatus === 'completed' || projectStatus === 'settled';
+  });
+
+  readonly chatDisabledMessage = computed(() => {
+    const currentChat = this.chat();
+    if (!currentChat) return '';
+    
+    const projectStatus = currentChat.project_id.status;
+    if (projectStatus === 'completed') {
+      return 'Project completed - Chat will be disabled after payment processing';
+    }
+    if (projectStatus === 'settled') {
+      return 'Project completed and payment processed - Chat is now disabled';
+    }
+    return '';
+  });
+
   // Form
   messageForm: FormGroup;
 
@@ -709,6 +733,9 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     const user = this.user();
     if (!chat || !user) return false;
 
+    // Disable all actions if chat is disabled (project completed/settled)
+    if (this.isChatDisabled()) return false;
+
     const isBusinessOwner = chat.project_id.business_owner_id._id === user._id;
     const isClient = chat.project_id.client_id._id === user._id;
     const status = chat.project_id.status;
@@ -1057,6 +1084,9 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     const user = this.user();
     const chat = this.chat();
     if (!user || !chat) return false;
+    
+    // Disable payment requests if chat is disabled (project completed/settled)
+    if (this.isChatDisabled()) return false;
     
     // Only business owner can request payment for in-progress projects
     return chat.project_id.business_owner_id._id === user._id && 

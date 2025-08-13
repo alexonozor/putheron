@@ -14,6 +14,8 @@ import { AuthService } from '../shared/services';
 import { RegisterRequest } from '../models';
 import { COUNTRIES } from '../shared/data/countries';
 import { USCitiesService, USCity } from '../shared/services/us-cities.service';
+import { PhoneValidators } from '../shared/validators/phone.validator';
+import { PhoneFormatDirective } from '../shared/directives/phone-format.directive';
 import { US_STATES } from '../shared/data/us-states';
 import { HeaderComponent } from '../shared/components/header/header.component';
 
@@ -31,7 +33,8 @@ import { HeaderComponent } from '../shared/components/header/header.component';
     MatCheckboxModule,
     MatRadioModule,
     MatProgressSpinnerModule,
-    HeaderComponent
+    HeaderComponent,
+    PhoneFormatDirective
   ],
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.scss']
@@ -92,7 +95,7 @@ export class AuthComponent implements OnInit {
       if (this.isSignUp()) {
         firstNameControl?.setValidators([Validators.required]);
         lastNameControl?.setValidators([Validators.required]);
-        phoneControl?.setValidators([Validators.required]);
+        phoneControl?.setValidators([Validators.required, PhoneValidators.usaPhone()]);
         cityControl?.setValidators([Validators.required]);
         stateControl?.setValidators([Validators.required]);
         countryOfOriginControl?.setValidators([Validators.required]);

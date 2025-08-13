@@ -6,10 +6,18 @@ export interface Withdrawal {
   net_amount: number;
   method: WithdrawalMethod;
   status: WithdrawalStatus;
-  paypal_account_id: string;
+  
+  // PayPal specific fields
+  paypal_account_id?: string;
   paypal_payout_batch_id?: string;
   paypal_payout_item_id?: string;
   paypal_transaction_id?: string;
+  
+  // Stripe specific fields
+  stripe_account_id?: string;
+  stripe_transfer_id?: string;
+  stripe_payout_id?: string;
+  
   description?: string;
   admin_notes?: string;
   processed_at?: Date;
@@ -23,7 +31,8 @@ export interface Withdrawal {
 }
 
 export enum WithdrawalMethod {
-  PAYPAL = 'paypal'
+  PAYPAL = 'paypal',
+  STRIPE = 'stripe'
 }
 
 export enum WithdrawalStatus {
@@ -37,7 +46,7 @@ export enum WithdrawalStatus {
 export interface CreateWithdrawalRequest {
   amount: number;
   method: WithdrawalMethod;
-  paypal_account_id: string;
+  paypal_account_id?: string; // For PayPal withdrawals
   description?: string;
 }
 

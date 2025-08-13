@@ -9,6 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
+import { PhoneValidators } from '../../shared/validators/phone.validator';
+import { PhoneFormatDirective } from '../../shared/directives/phone-format.directive';
 import { AuthService } from '../../shared/services/auth.service';
 import { USCitiesService, USCity } from '../../shared/services/us-cities.service';
 import { COUNTRIES } from '../../shared/data/countries';
@@ -28,7 +30,8 @@ import { User } from '../../models/user.model';
     MatIconModule,
     MatSnackBarModule,
     MatTabsModule,
-    MatSelectModule
+    MatSelectModule,
+    PhoneFormatDirective
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
@@ -56,7 +59,7 @@ export class ProfileComponent {
       first_name: [currentUser?.first_name || '', [Validators.required]],
       last_name: [currentUser?.last_name || '', [Validators.required]],
       email: [currentUser?.email || '', [Validators.required, Validators.email]],
-      phone: [currentUser?.phone || '', [Validators.required]],
+      phone: [currentUser?.phone || '', [Validators.required, PhoneValidators.usaPhone()]],
       bio: [currentUser?.bio || ''],
       city: [currentUser?.city || '', [Validators.required]],
       state: [currentUser?.state || '', [Validators.required]],
@@ -200,4 +203,7 @@ export class ProfileComponent {
     
     return user.email.charAt(0).toUpperCase();
   }
+
+  // Form field getters
+  get phone() { return this.profileForm.get('phone'); }
 }

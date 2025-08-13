@@ -8,6 +8,7 @@ import { GuestGuard } from './shared/guards/guest.guard';
 import { BusinessProfileComponent } from './business-profile/business-profile.component';
 import { SearchComponent } from './search/search.component';
 import { PayPalCallbackComponent } from './components/paypal-callback/paypal-callback.component';
+import { StripeCallbackComponent } from './components/stripe-callback/stripe-callback.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -31,6 +32,14 @@ export const routes: Routes = [
   { 
     path: 'paypal/callback', 
     component: PayPalCallbackComponent
+  },
+  { 
+    path: 'stripe/return', 
+    component: StripeCallbackComponent
+  },
+  { 
+    path: 'stripe/refresh', 
+    component: StripeCallbackComponent
   },
   { path: '**', redirectTo: '' }
 

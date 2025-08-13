@@ -56,13 +56,17 @@
                   <input
                     matInput
                     type="tel"
+                    appPhoneFormat
                     formControlName="phone"
-                    placeholder="Your phone number"
+                    placeholder="(555) 123-4567"
                     [disabled]="loading()"
                   />
                   <mat-icon matSuffix>phone</mat-icon>
-                  @if (phoneControl?.invalid && phoneControl?.touched) {
+                  @if (phoneControl?.hasError('required') && phoneControl?.touched) {
                     <mat-error>Phone number is required</mat-error>
+                  }
+                  @if (phoneControl?.hasError('usaPhone') && phoneControl?.touched) {
+                    <mat-error>{{ phoneControl?.errors?.['usaPhone']?.message }}</mat-error>
                   }
                 </mat-form-field>
 

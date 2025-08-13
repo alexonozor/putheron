@@ -70,7 +70,6 @@ export class ListServicesComponent implements OnInit {
         service.name.toLowerCase().includes(search) ||
         service.description?.toLowerCase().includes(search) ||
         service.short_description?.toLowerCase().includes(search) ||
-        service.category?.toLowerCase().includes(search) ||
         service.tags?.some(tag => tag.toLowerCase().includes(search))
       );
     }

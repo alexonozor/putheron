@@ -1218,6 +1218,72 @@
   }
 }
 
+// ============================================
+// DISABLED CHAT STATE
+// ============================================
+.chat-disabled-container {
+  padding: 20px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  
+  @media (max-width: 767px) {
+    padding: 16px;
+  }
+}
+
+.chat-disabled-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  
+  @media (max-width: 767px) {
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+  }
+}
+
+.disabled-icon {
+  color: #64748b;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.disabled-text {
+  h4 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    line-height: 1.4;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.4;
+  }
+  
+  @media (max-width: 767px) {
+    h4 {
+      font-size: 13px;
+    }
+    
+    p {
+      font-size: 11px;
+    }
+  }
+}
+
 // High contrast mode
 @media (prefers-contrast: high) {
   .message-bubble.my-bubble {

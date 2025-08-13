@@ -20,7 +20,6 @@ export interface Service {
   duration?: string;
   features?: string[];
   images?: string[];
-  category?: string;
   tags?: string[];
   is_active?: boolean;
   is_featured?: boolean;
@@ -34,7 +33,6 @@ export interface Service {
 
 export interface CreateServiceDto {
   name: string;
-  slug?: string;
   description?: string;
   short_description?: string;
   price?: number;
@@ -42,7 +40,6 @@ export interface CreateServiceDto {
   duration?: string;
   features?: string[];
   images?: string[];
-  category?: string;
   tags?: string[];
   is_active?: boolean;
   is_featured?: boolean;
