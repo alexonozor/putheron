@@ -5,31 +5,64 @@
       <h1 class="text-3xl font-bold text-gray-900">Earnings & Payments</h1>
       <p class="text-gray-600 mt-1">Manage your earnings, track payments, and request withdrawals</p>
     </div>
-    @if (canWithdrawToStripe()) {
-      <button 
-        (click)="withdrawToStripe()"
-        [disabled]="stripeLoading()"
-        class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50">
-        @if (stripeLoading()) {
-          <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
-        } @else {
-          <mat-icon class="mr-2">account_balance_wallet</mat-icon>
-        }
-        Withdraw to Stripe
-      </button>
-    } @else if (canWithdraw() && !hasStripeAccount()) {
-      <button 
-        (click)="connectStripe()"
-        [disabled]="stripeLoading()"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50">
-        @if (stripeLoading()) {
-          <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
-        } @else {
-          <mat-icon class="mr-2">payment</mat-icon>
-        }
-        Connect Stripe
-      </button>
-    }
+    
+    <div class="flex gap-3">
+      @if (canWithdrawToStripe()) {
+        <button 
+          (click)="withdrawToStripe()"
+          [disabled]="stripeLoading()"
+          class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50">
+          @if (stripeLoading()) {
+            <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+          } @else {
+            <mat-icon class="mr-2">account_balance_wallet</mat-icon>
+          }
+          Withdraw to Stripe
+        </button>
+      } @else if (canWithdraw() && !hasStripeAccount()) {
+        <button 
+          (click)="connectStripe()"
+          [disabled]="stripeLoading()"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50">
+          @if (stripeLoading()) {
+            <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+          } @else {
+            <mat-icon class="mr-2">payment</mat-icon>
+          }
+          Connect Stripe
+        </button>
+      }
+
+      <!-- Stripe Account Management (when connected) -->
+      @if (hasStripeAccount()) {
+        <div class="flex gap-2">
+          <button 
+            (click)="openStripeDashboard()"
+            [disabled]="stripeLoading()"
+            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
+            matTooltip="Open Stripe Dashboard">
+            @if (stripeLoading()) {
+              <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+            } @else {
+              <mat-icon class="mr-2">dashboard</mat-icon>
+            }
+            Stripe Dashboard
+          </button>
+          <button 
+            (click)="disconnectStripe()"
+            [disabled]="stripeLoading()"
+            class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
+            matTooltip="Disconnect Stripe Account">
+            @if (stripeLoading()) {
+              <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+            } @else {
+              <mat-icon class="mr-2">link_off</mat-icon>
+            }
+            Disconnect
+          </button>
+        </div>
+      }
+    </div>
   </div>
 
   <!-- Loading State -->
@@ -149,11 +182,39 @@
               Complete Stripe Setup
             </button>
           }
+
+          <!-- Stripe Management Options (when connected) -->
+          @if (stripeConnectionStatus() === 'connected') {
+            <div class="flex gap-2">
+              <button 
+                (click)="openStripeDashboard()"
+                [disabled]="stripeLoading()"
+                class="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm">
+                @if (stripeLoading()) {
+                  <mat-spinner diameter="14" class="inline-block mr-2"></mat-spinner>
+                } @else {
+                  <mat-icon class="mr-1 text-sm">dashboard</mat-icon>
+                }
+                Dashboard
+              </button>
+              <button 
+                (click)="disconnectStripe()"
+                [disabled]="stripeLoading()"
+                class="flex-1 bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50 text-sm">
+                @if (stripeLoading()) {
+                  <mat-spinner diameter="14" class="inline-block mr-2"></mat-spinner>
+                } @else {
+                  <mat-icon class="mr-1 text-sm">link_off</mat-icon>
+                }
+                Disconnect
+              </button>
+            </div>
+          }
         </div>
         
         <p class="mt-3 text-xs text-gray-500">
           @if (hasStripeAccount()) {
-            Connected to Stripe Express account
+            Connected to Stripe Express account. You can access your dashboard or disconnect anytime.
           } @else {
             Connect Stripe to withdraw funds
           }
@@ -437,6 +498,30 @@
                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
                   Connect Stripe to Start
                 </button>
+              } @else {
+                <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div class="flex items-center mb-2">
+                    <mat-icon class="text-blue-600 mr-2">info</mat-icon>
+                    <span class="font-medium text-blue-900">Stripe Account Connected</span>
+                  </div>
+                  <p class="text-blue-700 text-sm mb-3">
+                    Your withdrawals will appear here. You can manage your Stripe account using the buttons above.
+                  </p>
+                  <div class="flex gap-2">
+                    <button 
+                      (click)="openStripeDashboard()"
+                      [disabled]="stripeLoading()"
+                      class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
+                      View Dashboard
+                    </button>
+                    <button 
+                      (click)="disconnectStripe()"
+                      [disabled]="stripeLoading()"
+                      class="bg-white border border-blue-300 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors disabled:opacity-50">
+                      Disconnect
+                    </button>
+                  </div>
+                </div>
               }
             </div>
           } @else {

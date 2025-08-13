@@ -28,6 +28,7 @@ import {
   WithdrawalMethod,
   CreateWithdrawalRequest 
 } from '../../models/withdrawal.model';
+import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../shared/components/confirmation-dialog.component';
 
 interface WalletSummary {
   active_orders: number;        // Computed from accepted/in_progress projects
@@ -400,6 +401,72 @@ export class EarningsComponent implements OnInit {
     } catch (error) {
       console.error('Error initiating withdrawal:', error);
       this.snackBar.open('Failed to initiate withdrawal', 'Close', { duration: 3000 });
+    }
+  }
+
+  async disconnectStripe() {
+    if (!this.hasStripeAccount()) {
+      this.snackBar.open('No Stripe account connected', 'Close', { duration: 3000 });
+      return;
+    }
+
+    // Show confirmation dialog
+    const dialogData: ConfirmationDialogData = {
+      title: 'Disconnect Stripe Account',
+      message: 'Are you sure you want to disconnect your Stripe account? You will not be able to withdraw funds until you reconnect. Any pending withdrawals will continue to process normally.',
+      confirmText: 'Disconnect',
+      cancelText: 'Keep Connected',
+      type: 'warning',
+      icon: 'warning'
+    };
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '450px',
+      data: dialogData,
+      disableClose: true
+    });
+
+    const confirmed = await firstValueFrom(dialogRef.afterClosed());
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      this.stripeLoading.set(true);
+      const response = await firstValueFrom(this.stripeConnectService.disconnectAccount());
+      
+      if (response.success) {
+        this.snackBar.open('Stripe account disconnected successfully', 'Close', { duration: 3000 });
+        // Refresh status to reflect disconnection
+        await this.loadStripeAccountStatus();
+      } else {
+        this.snackBar.open(response.message || 'Failed to disconnect Stripe account', 'Close', { duration: 3000 });
+      }
+    } catch (error) {
+      console.error('Error disconnecting Stripe:', error);
+      this.snackBar.open('Failed to disconnect Stripe account', 'Close', { duration: 3000 });
+    } finally {
+      this.stripeLoading.set(false);
+    }
+  }
+
+  async openStripeDashboard() {
+    if (!this.hasStripeAccount()) {
+      this.snackBar.open('No Stripe account connected', 'Close', { duration: 3000 });
+      return;
+    }
+
+    try {
+      this.stripeLoading.set(true);
+      const response = await firstValueFrom(this.stripeConnectService.createLoginLink());
+      if (response.url) {
+        window.open(response.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error opening Stripe dashboard:', error);
+      this.snackBar.open('Failed to open Stripe dashboard', 'Close', { duration: 3000 });
+    } finally {
+      this.stripeLoading.set(false);
     }
   }
 

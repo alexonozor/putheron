@@ -44,4 +44,11 @@ export class StripeConnectService {
   createLoginLink(): Observable<LoginLinkResponse> {
     return this.http.post<LoginLinkResponse>(`${this.apiUrl}/account/login`, {});
   }
+
+  /**
+   * Disconnect Stripe account
+   */
+  disconnectAccount(): Observable<{ success: boolean; message: string }> {
+    return this.http.delete<{ success: boolean; message: string }>(`${this.apiUrl}/account`);
+  }
 }
