@@ -24,9 +24,17 @@ export interface StripeAccount {
 
 export interface StripeAccountStatus {
   has_account: boolean;
-  payouts_enabled: boolean;
-  requirements_due: boolean;
-  account?: StripeAccount;
+  account_id?: string;
+  details_submitted?: boolean;
+  payouts_enabled?: boolean;
+  charges_enabled?: boolean;
+  requirements_due?: boolean;
+  requirements?: {
+    currently_due?: string[];
+    eventually_due?: string[];
+    past_due?: string[];
+    pending_verification?: string[];
+  };
 }
 
 export interface OnboardingLinkResponse {

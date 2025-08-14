@@ -11,6 +11,7 @@ export interface User {
   state?: string;
   country?: string;
   country_of_origin: string; // Required field
+  user_mode?: 'client' | 'business_owner'; // Default is 'client'
   is_buyer?: boolean;
   is_seller?: boolean;
   is_active?: boolean;
@@ -33,6 +34,7 @@ export interface RegisterRequest {
   last_name?: string;
   is_buyer?: boolean;
   is_seller?: boolean;
+  user_mode?: 'client' | 'business_owner';
   bio?: string;
   city?: string;
   state?: string;

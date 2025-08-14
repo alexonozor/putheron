@@ -152,14 +152,16 @@
     @if (!loading() && hasResults()) {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         @for (business of businesses(); track business._id) {
-          <div class="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
+          <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group cursor-pointer"
                (click)="onBusinessClick(business)">
             
-            <!-- Service Image/Banner -->
-            <div class="relative h-44 overflow-hidden">
-              @if (business.banner_url) {
-                <img [src]="business.banner_url" [alt]="business.name" 
-                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <!-- Banner Section -->
+            <div class="relative h-32 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+              @if (business.banner_url && business.banner_url.trim() !== '') {
+                <img 
+                  [src]="business.banner_url" 
+                  [alt]="business.name + ' banner'"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
               } @else {
                 <div class="w-full h-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
                   <mat-icon class="text-white text-4xl opacity-60">business</mat-icon>
@@ -169,81 +171,115 @@
               <!-- Pro Badge -->
               @if (business.is_featured) {
                 <div class="absolute top-3 left-3">
-                  <mat-chip color="accent" class="font-bold">
-                    <mat-icon matChipTrailingIcon>star</mat-icon>
+                  <span class="bg-yellow-100 text-yellow-800 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium backdrop-blur-sm">
+                    <mat-icon class="w-3 h-3 mr-1">star</mat-icon>
                     PRO
-                  </mat-chip>
-                </div>
-              }
-            </div>
-
-            <!-- Service Info -->
-            <div class="p-4">
-              <!-- Owner Profile -->
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                  @if (business.logo_url) {
-                    <img [src]="business.logo_url" [alt]="getOwnerName(business)" 
-                         class="w-full h-full object-cover">
-                  } @else {
-                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                      <mat-icon class="text-gray-400 text-sm">person</mat-icon>
-                    </div>
-                  }
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-gray-900 truncate">{{ getOwnerName(business) }}</p>
-                  <p class="text-xs text-gray-500">{{ getCategoryName(business) }}</p>
-                </div>
-                @if (business.is_featured) {
-                  <mat-icon class="text-yellow-400">star</mat-icon>
-                }
-              </div>
-
-              <!-- Service Title -->
-              <h3 class="text-sm font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">
-                {{ business.name }}
-              </h3>
-
-              <!-- Service Description -->
-              @if (business.short_description) {
-                <p class="text-xs text-gray-600 mb-3 line-clamp-2">{{ business.short_description }}</p>
-              }
-
-              <!-- Rating and Reviews -->
-              <div class="flex items-center gap-1 mb-3">
-                @if (business.rating > 0) {
-                  <mat-icon class="text-yellow-400 text-sm">star</mat-icon>
-                  <span class="text-sm font-bold text-gray-900">{{ business.rating.toFixed(1) }}</span>
-                  <span class="text-xs text-gray-500">({{ business.review_count }})</span>
-                } @else {
-                  <span class="text-xs text-gray-500">New business</span>
-                }
-              </div>
-
-              <!-- Business Type and Heritage -->
-              <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
-                @if (business.business_type) {
-                  <span class="capitalize">{{ business.business_type }}</span>
-                }
-                <span>{{ getOwnerCountry(business) }}</span>
-              </div>
-
-              <!-- Location -->
-              @if (business.city || business.state) {
-                <div class="flex items-center gap-1 text-xs text-gray-500">
-                  <mat-icon class="text-gray-400 text-sm">location_on</mat-icon>
-                  <span>
-                    @if (business.city && business.state) {
-                      {{ business.city }}, {{ business.state }}
-                    } @else if (business.city) {
-                      {{ business.city }}
-                    } @else {
-                      {{ business.state }}
-                    }
                   </span>
                 </div>
               }
+              
+              <!-- Status Badge -->
+              <div class="absolute top-3 right-3">
+                <span class="bg-green-100 text-green-800 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium backdrop-blur-sm">
+                  {{ business.business_type | titlecase }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Logo and Business Info Container -->
+            <div class="relative px-6 pb-6">
+              <!-- Logo positioned to overlap banner -->
+              <div class="flex justify-center -mt-8 mb-4">
+                <div class="w-16 h-16 rounded-full bg-white shadow-lg ring-2 ring-white overflow-hidden">
+                  @if (business.logo_url) {
+                    <img 
+                      [src]="business.logo_url" 
+                      [alt]="business.name + ' logo'"
+                      class="w-full h-full object-cover">
+                  } @else {
+                    <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <mat-icon class="text-gray-400 text-lg">business</mat-icon>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Business Details -->
+              <div class="text-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 truncate mb-1 group-hover:text-green-600 transition-colors">
+                  {{ business.name }}
+                </h3>
+                <p class="text-sm text-gray-600 mb-1">{{ getCategoryName(business) }}</p>
+                @if (business.city && business.state) {
+                  <p class="text-xs text-gray-500 flex items-center justify-center">
+                    <mat-icon class="w-3 h-3 mr-1 text-xs">location_on</mat-icon>
+                    {{ business.city }}, {{ business.state }}
+                  </p>
+                }
+              </div>
+
+              <!-- Business Description -->
+              <p class="text-sm text-gray-600 mb-4 line-clamp-2 text-center">
+                {{ business.short_description || business.description || 'Professional service provider' }}
+              </p>
+
+              <!-- Rating Section -->
+              <div class="flex items-center justify-center mb-4">
+                @if (business.rating != null && business.rating > 0) {
+                  <div class="flex items-center gap-1">
+                    <mat-icon class="text-yellow-400 text-sm">star</mat-icon>
+                    <span class="text-sm font-bold text-gray-900">{{ business.rating.toFixed(1) }}</span>
+                    <span class="text-xs text-gray-500">({{ business.review_count || 0 }} {{ (business.review_count || 0) === 1 ? 'review' : 'reviews' }})</span>
+                  </div>
+                } @else {
+                  <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">New business</span>
+                }
+              </div>
+
+              @if (business.tags && business.tags.length > 0) {
+                <div class="mb-4">
+                  <div class="flex flex-wrap gap-1 justify-center">
+                    @for (tag of business.tags.slice(0, 2); track tag) {
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
+                        {{ tag }}
+                      </span>
+                    }
+                    @if (business.tags.length > 2) {
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
+                        +{{ business.tags.length - 2 }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Owner Info Footer (replaces action buttons) -->
+              <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                    @if (getOwnerAvatar(business)) {
+                      <img [src]="getOwnerAvatar(business)" [alt]="getOwnerName(business)" 
+                           class="w-full h-full object-cover">
+                    } @else {
+                      <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <mat-icon class="text-gray-400 text-sm">person</mat-icon>
+                      </div>
+                    }
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ getOwnerName(business) }}</p>
+                    <p class="text-xs text-gray-500">{{ getOwnerCountry(business) }}</p>
+                  </div>
+                </div>
+                
+                <!-- View count or additional business info -->
+                @if (business.view_count > 0) {
+                  <div class="text-xs text-gray-500 flex items-center">
+                    <mat-icon class="w-3 h-3 mr-1 text-xs">visibility</mat-icon>
+                    {{ business.view_count }}
+                  </div>
+                }
+              </div>
             </div>
           </div>
         }

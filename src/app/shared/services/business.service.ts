@@ -86,6 +86,7 @@ export interface Business {
   logo_url?: string;
   banner_url?: string;
   sos_certification_url?: string;
+  sos_certification_urls?: string[];
   cover_image_url?: string;
   images?: string[];
   website?: string;
@@ -813,6 +814,24 @@ export class BusinessService {
 
   async uploadSosCertificationAsync(businessId: string, file: File): Promise<{ sos_certification_url: string }> {
     const response = await firstValueFrom(this.uploadSosCertification(businessId, file));
+    return response.data;
+  }
+
+  // Upload multiple SOS certification documents
+  uploadMultipleSosCertifications(businessId: string, files: File[]): Observable<{ success: boolean; data: { sos_certification_urls: string[] }; message: string }> {
+    const formData = new FormData();
+    files.forEach((file, index) => {
+      formData.append(`files`, file);
+    });
+
+    return this.http.post<{ success: boolean; data: { sos_certification_urls: string[] }; message: string }>(
+      `${this.apiUrl}/${businessId}/upload-multiple-sos-certifications`,
+      formData
+    );
+  }
+
+  async uploadMultipleSosCertificationsAsync(businessId: string, files: File[]): Promise<{ sos_certification_urls: string[] }> {
+    const response = await firstValueFrom(this.uploadMultipleSosCertifications(businessId, files));
     return response.data;
   }
 

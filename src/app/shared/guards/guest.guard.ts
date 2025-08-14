@@ -11,8 +11,8 @@ export const GuestGuard: CanActivateFn = (route, state) => {
   return authService.isAuthenticated$.pipe(
     map(isAuthenticated => {
       if (isAuthenticated) {
-        // User is already authenticated, redirect to dashboard
-        router.navigate(['/dashboard']);
+        // User is already authenticated, redirect to home which will handle mode-based redirection
+        router.navigate(['/']);
         return false;
       } else {
         // User is not authenticated, allow access to auth page

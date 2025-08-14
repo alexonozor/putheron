@@ -88,7 +88,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   // Check if chat should be disabled (when project is completed and payment cleared)
   readonly isChatDisabled = computed(() => {
     const currentChat = this.chat();
-    if (!currentChat) return false;
+    if (!currentChat || !currentChat.project_id) return false;
     
     const projectStatus = currentChat.project_id.status;
     // Disable chat when project is completed OR settled (payment cleared)
@@ -97,7 +97,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   readonly chatDisabledMessage = computed(() => {
     const currentChat = this.chat();
-    if (!currentChat) return '';
+    if (!currentChat || !currentChat.project_id) return '';
     
     const projectStatus = currentChat.project_id.status;
     if (projectStatus === 'completed') {
@@ -118,7 +118,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   readonly otherParticipant = computed(() => {
     const currentChat = this.chat();
     const currentUserId = this.user()?._id;
-    if (!currentChat || !currentUserId) return null;
+    if (!currentChat || !currentUserId || !currentChat.project_id) return null;
     
     if (currentChat.project_id.client_id._id === currentUserId) {
       return currentChat.project_id.business_owner_id;
@@ -320,7 +320,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       
       // Check if this event affects our current chat
       const currentChat = this.chat();
-      if (currentChat && currentChat.project_id._id === data.projectId) {
+      if (currentChat && currentChat.project_id?._id === data.projectId) {
         console.log('Project status updated for current chat, refreshing chat data');
         this.loadChat(); // Reload chat to get updated project status
         this.loadMessages(false); // Reload messages to get the status update message
@@ -672,14 +672,14 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   goToProjectDetails() {
     const chat = this.chat();
-    if (chat) {
+    if (chat && chat.project_id) {
       this.router.navigate(['/dashboard/projects', chat.project_id._id]);
     }
   }
 
   async handleProjectAction(action: 'accept' | 'reject' | 'start' | 'complete' | 'request_completion' | 'approve_completion') {
     const chat = this.chat();
-    if (!chat) return;
+    if (!chat || !chat.project_id) return;
 
     try {
       const projectId = chat.project_id._id;
@@ -731,7 +731,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   canPerformAction(action: 'accept' | 'reject' | 'start' | 'complete' | 'request_completion' | 'approve_completion'): boolean {
     const chat = this.chat();
     const user = this.user();
-    if (!chat || !user) return false;
+    if (!chat || !user || !chat.project_id) return false;
 
     // Disable all actions if chat is disabled (project completed/settled)
     if (this.isChatDisabled()) return false;
@@ -772,7 +772,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     const chat = this.chat();
     
     // Only show notification to the client (recipient of payment request)
-    if (user && chat && chat.project_id.client_id._id === user._id) {
+    if (user && chat && chat.project_id?.client_id._id === user._id) {
       // Show browser notification if permission granted
       if (Notification.permission === 'granted') {
         new Notification('Payment Request Received', {
@@ -837,9 +837,9 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       }
 
       // Get business name for display
-      const businessName = typeof chat.project_id.business_id === 'string' 
+      const businessName = typeof chat.project_id?.business_id === 'string' 
         ? 'Business Owner' 
-        : chat.project_id.business_id.name;
+        : chat.project_id?.business_id?.name || 'Business Owner';
 
       // Open payment modal - this will handle approval and payment in one flow
       const dialogRef = this.dialog.open(PaymentModalComponent, {
@@ -1066,7 +1066,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     // Only client can respond to payment requests
     return message.message_type === 'payment_request' && 
            message.payment_status === 'pending' && 
-           chat.project_id.client_id._id === user._id;
+           chat.project_id?.client_id._id === user._id;
   }
 
   canRespondToCompletion(message: Message): boolean {
@@ -1077,13 +1077,13 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     // Only client can respond to completion requests
     return message.message_type === 'completion_request' && 
            message.completion_status === 'pending' && 
-           chat.project_id.client_id._id === user._id;
+           chat.project_id?.client_id._id === user._id;
   }
 
   canRequestPayment(): boolean {
     const user = this.user();
     const chat = this.chat();
-    if (!user || !chat) return false;
+    if (!user || !chat || !chat.project_id) return false;
     
     // Disable payment requests if chat is disabled (project completed/settled)
     if (this.isChatDisabled()) return false;
@@ -1097,7 +1097,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     const user = this.user();
     const chat = this.chat();
     
-    if (!user || !chat) {
+    if (!user || !chat || !chat.project_id) {
       this.canLeaveReview.set(false);
       this.existingReview.set(null);
       return;
@@ -1123,7 +1123,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       // Check if user has already left a review for this business and project
       const existingReviews = await this.reviewService.getBusinessReviewsAsync(chat.project_id.business_id._id);
       const existingReview = existingReviews.find(
-        review => review.project_id._id === chat.project_id._id && review.user_id._id === user._id
+        review => review.project_id._id === chat.project_id!._id && review.user_id._id === user._id
       );
       
       if (existingReview) {
@@ -1152,7 +1152,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   async openReviewDialog() {
     const chat = this.chat();
-    if (!chat) return;
+    if (!chat || !chat.project_id) return;
 
     const dialogRef = this.dialog.open(ReviewFormComponent, {
       width: '600px',

@@ -51,4 +51,11 @@ export class StripeConnectService {
   disconnectAccount(): Observable<{ success: boolean; message: string }> {
     return this.http.delete<{ success: boolean; message: string }>(`${this.apiUrl}/account`);
   }
+
+  /**
+   * Refresh account status (force sync with Stripe)
+   */
+  refreshAccountStatus(): Observable<StripeAccountStatus> {
+    return this.http.post<StripeAccountStatus>(`${this.apiUrl}/account/refresh`, {});
+  }
 }

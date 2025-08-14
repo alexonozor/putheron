@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,6 +35,27 @@ export class HeaderComponent {
 
   // Mock data for messages count
   readonly messageCount = signal(3);
+
+  // Get current user mode as computed signal
+  readonly userMode = computed(() => {
+    const user = this.user();
+    return user?.user_mode || 'client';
+  });
+
+  // Check if user is a business owner as computed signal
+  readonly isBusinessOwner = computed(() => {
+    return this.userMode() === 'business_owner';
+  });
+
+  constructor() {
+    // Add effect to debug signal changes
+    effect(() => {
+      const user = this.user();
+      const mode = this.userMode();
+      const isBusiness = this.isBusinessOwner();
+      console.log('Header signals updated:', { user: user?.email, mode, isBusiness });
+    });
+  }
 
   // Get user initials for display
   getUserInitials(): string {
@@ -101,12 +122,60 @@ export class HeaderComponent {
     this.router.navigate(['/dashboard/messages']);
   }
 
+  navigateToCreateBusiness() {
+    this.router.navigate(['/dashboard/businesses/create-business']);
+  }
+
+  navigateToOwnBusiness() {
+    // Navigate to the new own-business page
+    this.router.navigate(['/own-business']);
+  }
+
+  navigateToBecomeBusiness() {
+    // If not logged in, go to auth page with business mode
+    this.router.navigate(['/auth'], { queryParams: { mode: 'business' } });
+  }
+
+  async switchToBusinessMode() {
+    // Call API to switch user mode to business_owner
+    try {
+      const result = await this.authService.switchMode('business_owner');
+      if (result.data) {
+        console.log('Switched to business owner mode successfully');
+        console.log('Updated user mode:', this.userMode());
+        // Navigate to dashboard instead of create business page
+        this.navigateToDashboard();
+      } else {
+        console.error('Failed to switch to business mode:', result.error);
+      }
+    } catch (error) {
+      console.error('Error switching to business mode:', error);
+    }
+  }
+
+  async switchToClientMode() {
+    // Call API to switch user mode to client
+    try {
+      const result = await this.authService.switchMode('client');
+      if (result.data) {
+        console.log('Switched to client mode successfully');
+        console.log('Updated user mode:', this.userMode());
+        // Navigate to search page
+        this.router.navigate(['/search']);
+      } else {
+        console.error('Failed to switch to client mode:', result.error);
+      }
+    } catch (error) {
+      console.error('Error switching to client mode:', error);
+    }
+  }
+
   toggleMobileMenu() {
     this.showMobileMenu.update(current => !current);
   }
 
   async signOut() {
     await this.authService.signOut();
-    this.router.navigate(['/']);
+    // Navigation is handled by the auth service
   }
 }

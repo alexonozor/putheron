@@ -341,6 +341,20 @@ export class EarningsComponent implements OnInit {
     }
   }
 
+  async refreshStripeAccountStatus() {
+    try {
+      this.stripeLoading.set(true);
+      const status = await firstValueFrom(this.stripeConnectService.refreshAccountStatus());
+      this.stripeAccountStatus.set(status);
+      this.snackBar.open('Stripe account status refreshed', 'Close', { duration: 3000 });
+    } catch (error) {
+      console.error('Error refreshing Stripe account status:', error);
+      this.snackBar.open('Failed to refresh Stripe status', 'Close', { duration: 3000 });
+    } finally {
+      this.stripeLoading.set(false);
+    }
+  }
+
   async loadWithdrawals() {
     try {
       const response = await firstValueFrom(this.withdrawalService.getWithdrawals());
@@ -398,9 +412,21 @@ export class EarningsComponent implements OnInit {
       // Refresh data
       await this.loadEarningsSummary();
       await this.loadWithdrawals();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error initiating withdrawal:', error);
-      this.snackBar.open('Failed to initiate withdrawal', 'Close', { duration: 3000 });
+      
+      // If the error is about payouts not being enabled, refresh Stripe status
+      if (error.error?.message?.includes('payouts not enabled') || 
+          error.error?.message?.includes('Stripe payouts not enabled')) {
+        this.snackBar.open(
+          'Stripe payouts not enabled. Refreshing account status...', 
+          'Close', 
+          { duration: 5000 }
+        );
+        await this.refreshStripeAccountStatus();
+      } else {
+        this.snackBar.open('Failed to initiate withdrawal', 'Close', { duration: 3000 });
+      }
     }
   }
 

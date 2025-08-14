@@ -56,6 +56,7 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
   public logoPreview = signal<string | null>(null);
   public bannerPreview = signal<string | null>(null);
   public sosCertificationPreview = signal<string | null>(null);
+  public sosCertificationPreviews = signal<{file: File | null, preview: string}[]>([]);
   public isEditMode = signal(false);
   public businessId = signal<string | null>(null);
   public currentBusiness = signal<Business | null>(null);
@@ -64,6 +65,7 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
   public logoFile: File | null = null;
   public bannerFile: File | null = null;
   public sosCertificationFile: File | null = null;
+  public sosCertificationFiles: File[] = [];
 
   // Forms
   public businessInfoForm: FormGroup;
@@ -311,7 +313,16 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
       if (business.banner_url) {
         this.bannerPreview.set(business.banner_url);
       }
-      if (business.sos_certification_url) {
+      
+      // Handle multiple SOS certification URLs
+      if (business.sos_certification_urls && business.sos_certification_urls.length > 0) {
+        const previews = business.sos_certification_urls.map(url => ({
+          file: null as any, // URL-based previews don't have file objects
+          preview: url
+        }));
+        this.sosCertificationPreviews.set(previews);
+      } else if (business.sos_certification_url) {
+        // Legacy single file support
         this.sosCertificationPreview.set(business.sos_certification_url);
       }
 
@@ -410,7 +421,16 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
         }
       }
 
-      if (this.sosCertificationFile) {
+      // Upload multiple SOS certification files if available
+      if (this.sosCertificationFiles.length > 0) {
+        try {
+          await this.businessService.uploadMultipleSosCertificationsAsync(businessResult._id, this.sosCertificationFiles);
+        } catch (sosCertificationError) {
+          console.warn('Failed to upload multiple SOS certifications:', sosCertificationError);
+          // Don't fail the entire process for SOS certification upload
+        }
+      } else if (this.sosCertificationFile) {
+        // Legacy single file upload for backward compatibility
         try {
           await this.businessService.uploadSosCertificationAsync(businessResult._id, this.sosCertificationFile);
         } catch (sosCertificationError) {
@@ -553,37 +573,68 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
   onSosCertificationSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      
-      // Validate file type (PDF, DOC, DOCX, JPG, PNG)
-      const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png'];
-      if (!validTypes.includes(file.type)) {
-        this.error.set('Please select a valid document file (PDF, DOC, DOCX, JPG, PNG)');
-        return;
-      }
-      
-      // Validate file size (10MB max for documents)
-      if (file.size > 10 * 1024 * 1024) {
-        this.error.set('SOS Certification file size must be less than 10MB');
-        return;
-      }
-      
-      this.sosCertificationFile = file;
-      
-      // Create preview for images, or show file name for documents
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          this.sosCertificationPreview.set(e.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        // For documents, just show the filename as preview
-        this.sosCertificationPreview.set(file.name);
+      // Process multiple files
+      for (let i = 0; i < input.files.length; i++) {
+        const file = input.files[i];
+        
+        // Validate file type (PDF, DOC, DOCX, JPG, PNG)
+        const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png'];
+        if (!validTypes.includes(file.type)) {
+          this.error.set(`File "${file.name}" is not a valid document type (PDF, DOC, DOCX, JPG, PNG)`);
+          continue;
+        }
+        
+        // Validate file size (10MB max for documents)
+        if (file.size > 10 * 1024 * 1024) {
+          this.error.set(`File "${file.name}" size must be less than 10MB`);
+          continue;
+        }
+        
+        // Add to files array
+        this.sosCertificationFiles.push(file);
+        
+        // Create preview for images, or show file name for documents
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const previews = this.sosCertificationPreviews();
+            previews.push({
+              file: file,
+              preview: e.target?.result as string
+            });
+            this.sosCertificationPreviews.set([...previews]);
+          };
+          reader.readAsDataURL(file);
+        } else {
+          // For documents, just show the filename as preview
+          const previews = this.sosCertificationPreviews();
+          previews.push({
+            file: file,
+            preview: file.name
+          });
+          this.sosCertificationPreviews.set([...previews]);
+        }
       }
       
       this.error.set(null);
     }
+    
+    // Clear the input to allow selecting the same files again
+    input.value = '';
+  }
+
+  removeSosCertificationFile(previewToRemove: {file: File | null, preview: string}): void {
+    // Remove from files array if it's an actual file
+    if (previewToRemove.file) {
+      const fileIndex = this.sosCertificationFiles.findIndex(f => f === previewToRemove.file);
+      if (fileIndex > -1) {
+        this.sosCertificationFiles.splice(fileIndex, 1);
+      }
+    }
+    
+    // Remove from previews
+    const previews = this.sosCertificationPreviews().filter(p => p !== previewToRemove);
+    this.sosCertificationPreviews.set(previews);
   }
 
   removeSosCertificationPreview(): void {

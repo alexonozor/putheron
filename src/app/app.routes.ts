@@ -7,12 +7,14 @@ import { AuthGuard } from './shared/guards/auth.guard';
 import { GuestGuard } from './shared/guards/guest.guard';
 import { BusinessProfileComponent } from './business-profile/business-profile.component';
 import { SearchComponent } from './search/search.component';
+import { OwnBusinessComponent } from './own-business/own-business.component';
 import { PayPalCallbackComponent } from './components/paypal-callback/paypal-callback.component';
 import { StripeCallbackComponent } from './components/stripe-callback/stripe-callback.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'search', component: SearchComponent },
+  { path: 'own-business', component: OwnBusinessComponent },
   { path: 'auth', component: AuthComponent, canActivate: [GuestGuard] },
   { path: 'login', redirectTo: 'auth' },
   { path: 'signup', redirectTo: 'auth' },

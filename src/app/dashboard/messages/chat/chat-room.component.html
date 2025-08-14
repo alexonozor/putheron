@@ -16,10 +16,10 @@
         @if (chat(); as currentChat) {
           <div class="participant-info">
             <!-- Avatar -->
-            @if (currentChat.project_id.business_id.logo_url) {
+            @if (currentChat.project_id?.business_id?.logo_url) {
               <img 
-                [src]="currentChat.project_id.business_id.logo_url" 
-                [alt]="currentChat.project_id.business_id.name"
+                [src]="currentChat.project_id!.business_id!.logo_url!" 
+                [alt]="currentChat.project_id!.business_id!.name"
                 class="participant-avatar">
             } @else {
               <div class="participant-avatar-placeholder">

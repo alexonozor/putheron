@@ -405,10 +405,43 @@
                       SOS Certification Documentation (Optional)
                     </label>
                     <p class="text-xs text-gray-500 mb-3">
-                      Upload your Secretary of State certification or other business registration documents
+                      Upload your Secretary of State certification or other business registration documents (multiple files allowed)
                     </p>
                     <div class="space-y-4">
-                      @if (sosCertificationPreview()) {
+                      <!-- Multiple files preview -->
+                      @if (sosCertificationPreviews().length > 0) {
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          @for (preview of sosCertificationPreviews(); track preview.preview) {
+                            <div class="relative">
+                              @if (preview.file && preview.file.type && preview.file.type.startsWith('image/')) {
+                                <!-- Image preview -->
+                                <img [src]="preview.preview" [alt]="preview.file.name" class="w-full h-32 object-cover rounded-lg border">
+                              } @else if (!preview.file && (preview.preview.includes('.jpg') || preview.preview.includes('.jpeg') || preview.preview.includes('.png') || preview.preview.includes('/image/'))) {
+                                <!-- URL-based image preview -->
+                                <img [src]="preview.preview" alt="SOS Certification" class="w-full h-32 object-cover rounded-lg border">
+                              } @else {
+                                <!-- Document preview -->
+                                <div class="w-full p-4 border-2 border-gray-300 rounded-lg bg-gray-50 flex items-center">
+                                  <mat-icon class="text-blue-600 text-3xl mr-3">description</mat-icon>
+                                  <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">{{ preview.file?.name || 'SOS Certification Document' }}</p>
+                                    <p class="text-xs text-gray-500">{{ preview.file?.type || 'Document' }}</p>
+                                  </div>
+                                </div>
+                              }
+                              <button 
+                                type="button"
+                                (click)="removeSosCertificationFile(preview)"
+                                class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600">
+                                <mat-icon class="text-sm">close</mat-icon>
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      }
+                      
+                      <!-- Legacy single file preview (for backward compatibility) -->
+                      @if (sosCertificationPreview() && sosCertificationPreviews().length === 0) {
                         <div class="relative">
                           @if (sosCertificationFile && sosCertificationFile.type.startsWith('image/')) {
                             <!-- Image preview -->
@@ -430,29 +463,34 @@
                             <mat-icon class="text-sm">close</mat-icon>
                           </button>
                         </div>
-                      } @else {
+                      }
+                      
+                      <!-- Upload area -->
+                      @if (sosCertificationPreviews().length === 0 && !sosCertificationPreview()) {
                         <div class="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                           <div class="text-center">
                             <mat-icon class="text-gray-400 text-3xl mb-2">upload_file</mat-icon>
-                            <p class="text-gray-500 text-sm">SOS Certification Document</p>
+                            <p class="text-gray-500 text-sm">SOS Certification Documents</p>
                           </div>
                         </div>
                       }
+                      
                       <div>
                         <input 
                           type="file" 
                           #sosCertificationInput
                           (change)="onSosCertificationSelected($event)"
                           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                          multiple
                           class="hidden">
                         <button 
                           type="button"
                           (click)="sosCertificationInput.click()"
                           class="flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-md hover:bg-gray-50 transition-colors">
                           <mat-icon class="mr-2">upload_file</mat-icon>
-                          Choose Certification
+                          {{ sosCertificationPreviews().length > 0 ? 'Add More Certifications' : 'Choose Certifications' }}
                         </button>
-                        <p class="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, JPG, PNG up to 10MB</p>
+                        <p class="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, JPG, PNG up to 10MB each (multiple files allowed)</p>
                       </div>
                     </div>
                   </div>

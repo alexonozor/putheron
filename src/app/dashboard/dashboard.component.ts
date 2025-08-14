@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, signal, OnDestroy, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -49,6 +49,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // Computed signals
   readonly user = this.authService.user;
+  readonly isAuthenticated = this.authService.isAuthenticated;
+
+  // Get current user mode as computed signal
+  readonly userMode = computed(() => {
+    const user = this.user();
+    return user?.user_mode || 'client';
+  });
+
+  // Check if user is a business owner as computed signal
+  readonly isBusinessOwner = computed(() => {
+    return this.userMode() === 'business_owner';
+  });
 
   private mobileSubscription?: Subscription;
 
@@ -57,6 +69,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadDashboardCounts();
     // Initialize socket connection for real-time features
     this.socketService.connect();
+    
+    // Watch for user mode changes and reload data
+    effect(() => {
+      const mode = this.userMode();
+      const user = this.user();
+      const isBusiness = this.isBusinessOwner();
+      console.log('Dashboard signals updated:', { user: user?.email, mode, isBusiness });
+      if (user) {
+        // Reload dashboard counts when mode changes
+        this.loadDashboardCounts();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -138,6 +162,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     switch (lastSegment) {
       case 'dashboard':
       case '':
+        // Show different default title based on user mode
+        return this.isBusinessOwner() ? 'Dashboard Overview' : 'My Projects';
       case 'overview': 
         return 'Dashboard Overview';
       case 'businesses': 
@@ -157,7 +183,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (this.router.url.includes('/messages')) {
           return 'Messages';
         }
-        return 'Dashboard';
+        return this.isBusinessOwner() ? 'Dashboard' : 'My Projects';
     }
   }
 
@@ -184,6 +210,40 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   navigateToSettings() {
     this.router.navigate(['/dashboard/settings']);
+  }
+
+  async switchToBusinessMode() {
+    // Call API to switch user mode to business_owner
+    try {
+      const result = await this.authService.switchMode('business_owner');
+      if (result.data) {
+        console.log('Switched to business owner mode successfully');
+        console.log('Updated user mode:', this.userMode());
+        // Reload dashboard counts since mode changed
+        this.loadDashboardCounts();
+      } else {
+        console.error('Failed to switch to business mode:', result.error);
+      }
+    } catch (error) {
+      console.error('Error switching to business mode:', error);
+    }
+  }
+
+  async switchToClientMode() {
+    // Call API to switch user mode to client
+    try {
+      const result = await this.authService.switchMode('client');
+      if (result.data) {
+        console.log('Switched to client mode successfully');
+        console.log('Updated user mode:', this.userMode());
+        // Navigate to search page for client mode
+        this.router.navigate(['/search']);
+      } else {
+        console.error('Failed to switch to client mode:', result.error);
+      }
+    } catch (error) {
+      console.error('Error switching to client mode:', error);
+    }
   }
 
   viewProfile() {

@@ -26,13 +26,15 @@ export class BusinessProfileComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
   private readonly reviewService = inject(ReviewService);
 
-    // Loading states
+  // Loading states
   public readonly loading = signal(false);
   public readonly servicesLoading = signal(false);
   public readonly portfolioLoading = signal(false);
-  public readonly ownerLoading = signal(false);
   public readonly reviewsLoading = signal(false);
   public readonly error = signal<string | null>(null);
+
+  // Component state
+  private businessId: string | null = null;
 
   // Data signals
   public readonly business = signal<Business | null>(null);
@@ -107,7 +109,8 @@ export class BusinessProfileComponent implements OnInit {
     this.route.params.subscribe(params => {
       const businessId = params['id'];
       if (businessId) {
-        this.loadBusiness(businessId);
+        this.businessId = businessId;
+        this.loadBusiness();
         this.loadServices(businessId);
         this.loadProjects(businessId);
         this.loadReviews(businessId);
@@ -115,25 +118,23 @@ export class BusinessProfileComponent implements OnInit {
     });
   }
 
-  async loadBusiness(businessId: string) {
+  private async loadBusiness() {
+    if (!this.businessId) return;
+
+    this.loading.set(true);
     try {
-      this.loading.set(true);
-      this.error.set(null);
-
-      const business = await this.businessService.getBusinessAsync(businessId);
-      console.log('Loaded business:', business);
-      console.log('Banner URL:', business?.banner_url);
-      this.business.set(business);
-
-      // Load owner information
-      if (business && business.owner_id) {
-        console.log('Loading owner with ID:', business.owner_id, 'Type:', typeof business.owner_id);
-        this.loadOwner(business.owner_id);
+      const business = await this.businessService.getBusinessAsync(this.businessId);
+      if (business) {
+        this.business.set(business);
+        
+        // Owner information is already populated in the business response
+        if (business.owner_id && typeof business.owner_id === 'object') {
+          this.owner.set(business.owner_id);
+        }
       }
-
-    } catch (err: any) {
-      console.error('Error loading business:', err);
-      this.error.set(err?.message || 'Failed to load business profile');
+    } catch (error) {
+      console.error('Error loading business:', error);
+      // Handle error appropriately
     } finally {
       this.loading.set(false);
     }
@@ -189,33 +190,7 @@ export class BusinessProfileComponent implements OnInit {
     }
   }
 
-  async loadOwner(ownerId: string | any) {
-    try {
-      this.ownerLoading.set(true);
-      
-      // Handle case where owner_id might be populated object or string
-      let ownerIdString: string;
-      if (typeof ownerId === 'string') {
-        ownerIdString = ownerId;
-        console.log('Owner ID is string:', ownerIdString);
-      } else if (ownerId && typeof ownerId === 'object' && ownerId._id) {
-        ownerIdString = ownerId._id;
-        console.log('Owner ID is object, extracted ID:', ownerIdString);
-      } else {
-        console.error('Invalid owner ID format:', ownerId);
-        return;
-      }
-      
-      console.log('Making API call with owner ID:', ownerIdString);
-      const owner = await this.authService.getUserById(ownerIdString);
-      this.owner.set(owner);
-    } catch (err: any) {
-      console.error('Error loading owner:', err);
-      // Don't set main error for owner, just log it
-    } finally {
-      this.ownerLoading.set(false);
-    }
-  }
+
 
   formatPrice(price: number | undefined, pricingType: string | undefined): string {
     if (!price) return 'Contact for pricing';

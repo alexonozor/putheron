@@ -82,11 +82,16 @@ export class ChatListComponent implements OnInit {
 
   viewProject(projectId: string, event: Event) {
     event.stopPropagation();
-    this.router.navigate(['/dashboard/projects', projectId]);
+    if (projectId) {
+      this.router.navigate(['/dashboard/projects', projectId]);
+    }
   }
 
   getOtherParticipant(chat: Chat): any {
     const currentUserId = this.user()?._id;
+    if (!chat.project_id) {
+      return { last_name: 'Unknown User', email: '' };
+    }
     if (chat.project_id.client_id._id === currentUserId) {
       return chat.project_id.business_owner_id;
     }

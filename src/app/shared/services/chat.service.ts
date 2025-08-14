@@ -24,7 +24,7 @@ export interface Chat {
       name: string;
       logo_url?: string;
     };
-  };
+  } | null;
   participants: string[];
   title: string;
   last_message_at: Date | string;

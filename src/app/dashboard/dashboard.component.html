@@ -59,6 +59,12 @@
             
             <!-- Dropdown Menu -->
             <mat-menu #userMenu="matMenu">
+              <!-- Mode Display -->
+              <div class="px-4 py-2 text-sm text-gray-500 border-b">
+                Mode: {{ isBusinessOwner() ? 'Business Owner' : 'Client' }}
+              </div>
+              
+              <!-- Dashboard/Profile Actions -->
               <button mat-menu-item (click)="navigateToDashboard()">
                 <mat-icon>dashboard</mat-icon>
                 <span>Dashboard</span>
@@ -67,6 +73,21 @@
                 <mat-icon>person</mat-icon>
                 <span>Profile</span>
               </button>
+              
+              <!-- Mode Switching -->
+              @if (!isBusinessOwner()) {
+                <button mat-menu-item (click)="switchToBusinessMode()">
+                  <mat-icon>business</mat-icon>
+                  <span>Switch to Business Owner</span>
+                </button>
+              } @else {
+                <button mat-menu-item (click)="switchToClientMode()">
+                  <mat-icon>person_outline</mat-icon>
+                  <span>Switch to Client Mode</span>
+                </button>
+              }
+              
+              <mat-divider></mat-divider>
               <button mat-menu-item (click)="navigateToSettings()">
                 <mat-icon>settings</mat-icon>
                 <span>Settings</span>
@@ -103,6 +124,12 @@
             <div class="flex-1">
               <h3 class="font-semibold text-gray-900">{{ (user()?.first_name + ' ' + (user()?.last_name || '')).trim() || user()?.email }}</h3>
               <p class="text-sm text-gray-500">{{ user()?.email }}</p>
+              <div class="flex items-center mt-1">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ isBusinessOwner() ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
+                  <mat-icon class="w-3 h-3 mr-1 !text-xs">{{ isBusinessOwner() ? 'business' : 'person' }}</mat-icon>
+                  {{ isBusinessOwner() ? 'Business Owner' : 'Client' }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -110,50 +137,63 @@
       <!-- Navigation Menu -->
       <nav class="p-4 bg-white flex-1">
         <ul class="space-y-2">
-          <li>
-            <a 
-              routerLink="overview"
-              routerLinkActive="bg-gray-900 text-white"
-              [routerLinkActiveOptions]="{exact: true}"
-              (click)="onNavigationClick()"
-              class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
-              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-              </svg>
-              Overview
-            </a>
-          </li>
-          <li>
-            <a 
-              routerLink="businesses"
-              routerLinkActive="bg-gray-900 text-white"
-              (click)="onNavigationClick()"
-              class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
-              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
-              Businesses
-              <span class="ml-auto bg-gray-200 text-gray-700 py-0.5 px-2 rounded-full text-xs">
-                {{ userBusinessCount() }}
-              </span>
-            </a>
-          </li>
-          <li>
-            <a 
-              routerLink="services"
-              routerLinkActive="bg-gray-900 text-white"
-              (click)="onNavigationClick()"
-              class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
-              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-              Services
-              <span class="ml-auto bg-gray-200 text-gray-700 py-0.5 px-2 rounded-full text-xs">
-                {{ totalServices() }}
-              </span>
-            </a>
-          </li>
+          <!-- Overview - Business Owner Only -->
+          @if (isBusinessOwner()) {
+            <li>
+              <a 
+                routerLink="overview"
+                routerLinkActive="bg-gray-900 text-white"
+                [routerLinkActiveOptions]="{exact: true}"
+                (click)="onNavigationClick()"
+                class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Overview
+              </a>
+            </li>
+          }
+          
+          <!-- Businesses - Business Owner Only -->
+          @if (isBusinessOwner()) {
+            <li>
+              <a 
+                routerLink="businesses"
+                routerLinkActive="bg-gray-900 text-white"
+                (click)="onNavigationClick()"
+                class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                Businesses
+                <span class="ml-auto bg-gray-200 text-gray-700 py-0.5 px-2 rounded-full text-xs">
+                  {{ userBusinessCount() }}
+                </span>
+              </a>
+            </li>
+          }
+          
+          <!-- Services - Business Owner Only -->
+          @if (isBusinessOwner()) {
+            <li>
+              <a 
+                routerLink="services"
+                routerLinkActive="bg-gray-900 text-white"
+                (click)="onNavigationClick()"
+                class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Services
+                <span class="ml-auto bg-gray-200 text-gray-700 py-0.5 px-2 rounded-full text-xs">
+                  {{ totalServices() }}
+                </span>
+              </a>
+            </li>
+          }
+          
+          <!-- Projects - Available to Both Modes -->
           <li>
             <a 
               routerLink="projects"
@@ -169,18 +209,37 @@
               </span>
             </a>
           </li>
+          
+          <!-- Find Business - Available to Both Modes -->
           <li>
             <a 
-              routerLink="earnings"
-              routerLinkActive="bg-gray-900 text-white"
+              routerLink="/search"
               (click)="onNavigationClick()"
               class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
               <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
-              Earnings & Payments
+              Find Business
             </a>
           </li>
+          
+          <!-- Earnings - Business Owner Only -->
+          @if (isBusinessOwner()) {
+            <li>
+              <a 
+                routerLink="earnings"
+                routerLinkActive="bg-gray-900 text-white"
+                (click)="onNavigationClick()"
+                class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                </svg>
+                Earnings & Payments
+              </a>
+            </li>
+          }
+          
+          <!-- Notifications - Available to Both Modes -->
           <li>
             <a 
               routerLink="notifications"
@@ -193,6 +252,8 @@
               Notifications
             </a>
           </li>
+          
+          <!-- Messages - Available to Both Modes -->
           <li>
             <a 
               routerLink="./messages"
@@ -213,26 +274,48 @@
         <!-- Divider -->
         <div class="my-6 border-t border-gray-200"></div>
 
-        <!-- Quick Actions -->
-        <div class="space-y-3">
-          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick Actions</p>
-          <button 
-            (click)="navigateToCreateBusiness()"
-            class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-all duration-200">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            New Business
-          </button>
-          <button 
-            (click)="createService()"
-            class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-all duration-200">
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            New Service
-          </button>
+        <!-- Mode Switch Section -->
+        <div class="space-y-3 mb-6">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Account Mode</p>
+          @if (!isBusinessOwner()) {
+            <button 
+              (click)="switchToBusinessMode()"
+              class="w-full flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-200">
+              <mat-icon class="w-5 h-5 mr-3">business</mat-icon>
+              Switch to Business Owner
+            </button>
+          } @else {
+            <button 
+              (click)="switchToClientMode()"
+              class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200">
+              <mat-icon class="w-5 h-5 mr-3">person_outline</mat-icon>
+              Switch to Client Mode
+            </button>
+          }
         </div>
+
+        <!-- Quick Actions - Business Owner Only -->
+        @if (isBusinessOwner()) {
+          <div class="space-y-3">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Quick Actions</p>
+            <button 
+              (click)="navigateToCreateBusiness()"
+              class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-all duration-200">
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              New Business
+            </button>
+            <button 
+              (click)="createService()"
+              class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded-lg transition-all duration-200">
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              New Service
+            </button>
+          </div>
+        }
       </nav>
 
       <!-- Logout -->

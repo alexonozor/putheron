@@ -52,6 +52,12 @@
                             
                             <!-- Dropdown Menu -->
                             <mat-menu #userMenu="matMenu">
+                                <!-- Mode Display -->
+                                <div class="px-4 py-2 text-sm text-gray-500 border-b">
+                                    Mode: {{ isBusinessOwner() ? 'Business Owner' : 'Client' }}
+                                </div>
+                                
+                                <!-- Dashboard/Profile Actions -->
                                 <button mat-menu-item (click)="navigateToDashboard()">
                                     <mat-icon>dashboard</mat-icon>
                                     <span>Dashboard</span>
@@ -60,6 +66,21 @@
                                     <mat-icon>person</mat-icon>
                                     <span>Profile</span>
                                 </button>
+                                
+                                <!-- Mode Switching -->
+                                @if (!isBusinessOwner()) {
+                                    <button mat-menu-item (click)="switchToBusinessMode()">
+                                        <mat-icon>business</mat-icon>
+                                        <span>Switch to Business Owner</span>
+                                    </button>
+                                } @else {
+                                    <button mat-menu-item (click)="switchToClientMode()">
+                                        <mat-icon>person_outline</mat-icon>
+                                        <span>Switch to Client Mode</span>
+                                    </button>
+                                }
+                                
+                                <mat-divider></mat-divider>
                                 <button mat-menu-item (click)="navigateToSettings()">
                                     <mat-icon>settings</mat-icon>
                                     <span>Settings</span>
@@ -74,6 +95,12 @@
                     </div>
                 } @else {
                     <!-- Guest User -->
+                    <a 
+                        (click)="navigateToOwnBusiness()" 
+                        class="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer"
+                    >
+                        Own a Business
+                    </a>
                     <a routerLink="/auth" class="text-gray-700 hover:text-blue-600 transition-colors">
                         Sign In
                     </a>

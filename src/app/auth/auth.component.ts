@@ -137,6 +137,14 @@ export class AuthComponent implements OnInit {
         this.isSignUp.set(true);
       }
       
+      // Check for business mode parameter
+      if (params['mode'] === 'business') {
+        this.isSignUp.set(true); // Switch to signup mode
+        this.authForm.patchValue({
+          userType: 'seller' // Set as seller for business mode
+        });
+      }
+      
       if (params['message']) {
         this.authMessage.set(params['message']);
       }
@@ -202,7 +210,8 @@ export class AuthComponent implements OnInit {
           country: 'USA',
           country_of_origin: countryOfOrigin,
           is_buyer: userType === 'buyer',
-          is_seller: userType === 'seller'
+          is_seller: userType === 'seller',
+          user_mode: userType === 'seller' ? 'business_owner' : 'client'
         };
         
         const { data, error } = await this.authService.signUp(registerData);
@@ -211,8 +220,8 @@ export class AuthComponent implements OnInit {
           this.error.set(error.message);
         } else {
           this.successMessage.set('Account created successfully! You are now logged in.');
-          // Redirect to dashboard after successful registration
-          this.router.navigate(['/dashboard']);
+          // Redirect to home page, which will handle mode-based redirection
+          this.router.navigate(['/']);
         }
       } else {
         const { data, error } = await this.authService.signIn(email, password);
@@ -230,7 +239,8 @@ export class AuthComponent implements OnInit {
               sessionStorage.removeItem('returnUrl');
               this.router.navigate([returnUrl]);
             } else {
-              this.router.navigate(['/dashboard']);
+              // Redirect to home page, which will handle mode-based redirection
+              this.router.navigate(['/']);
             }
           }, 100);
         }
@@ -256,6 +266,11 @@ export class AuthComponent implements OnInit {
   private clearMessages() {
     this.error.set('');
     this.successMessage.set('');
+  }
+
+  private getRedirectUrl(user: any): string {
+    const userMode = user?.user_mode || 'client';
+    return userMode === 'business_owner' ? '/dashboard' : '/search';
   }
 
   // Password visibility toggle methods

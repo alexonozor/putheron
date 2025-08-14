@@ -36,13 +36,17 @@ export class AuthService {
   readonly token$ = this.tokenSubject.asObservable();
   readonly isAuthenticated$ = this.user$.pipe(map(user => !!user));
   
+  // Reactive signals
+  private _user = signal<User | null>(this.getUserFromStorage());
+  private _isAuthenticated = signal<boolean>(!!this.getUserFromStorage());
+  
   // Computed signals
-  readonly user = computed(() => this.userSubject.value);
-  readonly isAuthenticated = computed(() => !!this.userSubject.value);
+  readonly user = computed(() => this._user());
+  readonly isAuthenticated = computed(() => this._isAuthenticated());
   
   // Legacy properties for backward compatibility
   get currentUser() {
-    return this.userSubject.value;
+    return this._user();
   }
 
   get loading$() {
@@ -69,8 +73,11 @@ export class AuthService {
       localStorage.setItem(this.TOKEN_KEY, token);
       localStorage.setItem(this.USER_KEY, JSON.stringify(user));
     }
+    // Update both BehaviorSubject and signals
     this.tokenSubject.next(token);
     this.userSubject.next(user);
+    this._user.set(user);
+    this._isAuthenticated.set(true);
   }
 
   private clearAuthData(): void {
@@ -78,8 +85,11 @@ export class AuthService {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.USER_KEY);
     }
+    // Update both BehaviorSubject and signals
     this.tokenSubject.next(null);
     this.userSubject.next(null);
+    this._user.set(null);
+    this._isAuthenticated.set(false);
   }
 
   getAuthToken(): string | null {
@@ -149,7 +159,7 @@ export class AuthService {
       this.loading.set(true);
       this.clearAuthData();
       this.config.logIfEnabled('User signed out successfully');
-      await this.router.navigate(['/auth']);
+      await this.router.navigate(['/']);
       return { error: null };
     } catch (error: any) {
       this.config.errorIfEnabled('SignOut error:', error);
@@ -195,6 +205,7 @@ export class AuthService {
 
       if (response?.success && response.data) {
         this.userSubject.next(response.data);
+        this._user.set(response.data);
         if (typeof window !== 'undefined') {
           localStorage.setItem(this.USER_KEY, JSON.stringify(response.data));
         }
@@ -213,6 +224,8 @@ export class AuthService {
     // Clear user and token from memory
     this.userSubject.next(null);
     this.tokenSubject.next(null);
+    this._user.set(null);
+    this._isAuthenticated.set(false);
     
     // Clear from storage
     if (typeof window !== 'undefined') {
@@ -237,6 +250,37 @@ export class AuthService {
     } catch (error: any) {
       this.config.errorIfEnabled('Get user by ID error:', error);
       return null;
+    }
+  }
+
+  async switchMode(userMode: 'client' | 'business_owner'): Promise<{ data: User | null; error: any }> {
+    try {
+      this.loading.set(true);
+      
+      const response = await this.http.put<UserResponse>(
+        `${this.API_URL}/users/switch-mode`,
+        { user_mode: userMode },
+        { headers: this.getAuthHeaders() }
+      ).toPromise();
+
+      if (response?.success && response.data) {
+        // Update the user in storage and state
+        this.userSubject.next(response.data);
+        this._user.set(response.data);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(this.USER_KEY, JSON.stringify(response.data));
+        }
+        
+        this.config.logIfEnabled(`User mode switched to ${userMode} successfully`);
+        return { data: response.data, error: null };
+      }
+
+      return { data: null, error: new Error('Failed to switch user mode') };
+    } catch (error: any) {
+      this.config.errorIfEnabled('Switch mode error:', error);
+      return { data: null, error };
+    } finally {
+      this.loading.set(false);
     }
   }
 

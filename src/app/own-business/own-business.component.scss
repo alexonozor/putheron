@@ -1,0 +1,123 @@
+// Own Business Component Styles
+
+.hero-section {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 50%, #312e81 100%);
+}
+
+.feature-card {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.step-number {
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
+}
+
+.testimonial-card {
+  &:hover {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+  }
+}
+
+.stats-section {
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+}
+
+.cta-section {
+  background: linear-gradient(135deg, #3b82f6, #4338ca);
+}
+
+// Custom button styles
+.accent-button {
+  background: #fbbf24 !important;
+  color: #111827 !important;
+  font-weight: 600;
+  
+  &:hover {
+    background: #f59e0b !important;
+  }
+}
+
+.outlined-button {
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  
+  &:hover {
+    background: #ffffff;
+    color: #3b82f6;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 60px 0;
+    
+    h1 {
+      font-size: 2.5rem;
+      line-height: 1.2;
+    }
+    
+    p {
+      font-size: 1.125rem;
+    }
+  }
+  
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+// Animation classes
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.8s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Custom spacing
+.section-padding {
+  padding: 5rem 0;
+}
+
+@media (max-width: 768px) {
+  .section-padding {
+    padding: 3rem 0;
+  }
+}

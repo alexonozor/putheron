@@ -19,6 +19,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { HeaderComponent } from '../shared/components/header/header.component';
 import { BusinessService, Business } from '../shared/services/business.service';
 import { CategoryService } from '../shared/services/category-new.service';
+import { AuthService } from '../shared/services/auth.service';
 import { COUNTRIES } from '../shared/data/countries';
 
 @Component({
@@ -52,6 +53,7 @@ export class SearchComponent implements OnInit {
   private fb = inject(FormBuilder);
   private businessService = inject(BusinessService);
   private categoryService = inject(CategoryService);
+  private authService = inject(AuthService);
   
   // Signals
   searchQuery = signal<string>('');
@@ -67,6 +69,12 @@ export class SearchComponent implements OnInit {
   currentPage = signal<number>(1);
   totalPages = signal<number>(0);
   filtersOpen = signal<boolean>(false);
+  
+  // Computed properties
+  readonly isClientMode = computed(() => {
+    const user = this.authService.user();
+    return !user || user.user_mode === 'client';
+  });
   
   // Filter form
   filterForm!: FormGroup;
@@ -163,7 +171,13 @@ export class SearchComponent implements OnInit {
     const countries = this.selectedCountries();
     const page = this.currentPage();
     
-    // Skip search if no query and no countries
+    // If no query and user is in client mode, show verified businesses
+    if (!query && countries.length === 0 && this.isClientMode()) {
+      this.loadVerifiedBusinesses();
+      return;
+    }
+    
+    // Skip search if no query and no countries for non-client mode
     if (!query && countries.length === 0) {
       this.businesses.set([]);
       this.total.set(0);
@@ -192,6 +206,35 @@ export class SearchComponent implements OnInit {
     } catch (error) {
       console.error('Search error:', error);
       this.error.set('An error occurred while searching');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async loadVerifiedBusinesses() {
+    try {
+      this.loading.set(true);
+      this.error.set(null);
+
+      // Search for verified businesses using filters
+      const response = await this.businessService.searchBusinesses(
+        undefined, // No query
+        undefined, // No country filter
+        this.currentPage(),
+        12, // Items per page
+        { featured: true } // Search for featured/verified businesses
+      ).toPromise();
+
+      if (response?.success && response.data) {
+        this.businesses.set(response.data.businesses);
+        this.total.set(response.data.total);
+        this.totalPages.set(response.data.totalPages);
+      } else {
+        this.error.set('Failed to load verified businesses');
+      }
+    } catch (error) {
+      console.error('Load verified businesses error:', error);
+      this.error.set('An error occurred while loading verified businesses');
     } finally {
       this.loading.set(false);
     }
@@ -271,6 +314,11 @@ export class SearchComponent implements OnInit {
   getCategoryName(business: Business): string {
     const category = business.category_id as any;
     return category?.name || 'Uncategorized';
+  }
+
+  getOwnerAvatar(business: Business): string | null {
+    const owner = business.owner_id as any;
+    return owner?.profile_image_url || null;
   }
 
   onBusinessClick(business: Business) {

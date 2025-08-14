@@ -140,6 +140,18 @@
                 @default { Stripe Not Connected }
               }
             </span>
+            @if (stripeConnectionStatus() === 'failed' || stripeConnectionStatus() === 'pending') {
+              <button 
+                (click)="refreshStripeAccountStatus()"
+                [disabled]="stripeLoading()"
+                class="ml-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded transition-colors disabled:opacity-50">
+                @if (stripeLoading()) {
+                  <mat-spinner diameter="12" class="inline-block"></mat-spinner>
+                } @else {
+                  <mat-icon class="text-xs">refresh</mat-icon>
+                }
+              </button>
+            }
           </div>
         </div>
 

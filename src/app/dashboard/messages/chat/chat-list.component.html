@@ -54,10 +54,10 @@
             <div class="flex items-start space-x-4">
               <!-- Avatar/Business Logo -->
               <div class="flex-shrink-0">
-                @if (chat.project_id.business_id.logo_url) {
+                @if (chat.project_id?.business_id?.logo_url) {
                   <img 
-                    [src]="chat.project_id.business_id.logo_url" 
-                    [alt]="chat.project_id.business_id.name"
+                    [src]="chat.project_id!.business_id!.logo_url!" 
+                    [alt]="chat.project_id!.business_id!.name"
                     class="w-12 h-12 rounded-full object-cover border border-gray-200">
                 } @else {
                   <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
@@ -79,15 +79,15 @@
                         With {{ getOtherParticipant(chat).last_name || 'Unknown User' }}
                       </span>
                       <span class="text-gray-400">•</span>
-                      <span class="text-sm text-gray-600">{{ chat.project_id.business_id.name }}</span>
+                      <span class="text-sm text-gray-600">{{ chat.project_id?.business_id?.name || 'Unknown Business' }}</span>
                     </div>
 
                     <!-- Project Status -->
                     <div class="flex items-center space-x-3">
                       <span 
                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
-                        [class]="getProjectStatusColor(chat.project_id.status)">
-                        {{ chat.project_id.status | titlecase }}
+                        [class]="getProjectStatusColor(chat.project_id?.status || 'unknown')">
+                        {{ (chat.project_id?.status || 'Unknown') | titlecase }}
                       </span>
                       <span class="text-xs text-gray-500">{{ formatDate(chat.last_message_at) }}</span>
                     </div>
@@ -97,7 +97,7 @@
                   <div class="flex items-center space-x-2">
                     <button 
                       mat-icon-button
-                      (click)="viewProject(chat.project_id._id, $event)"
+                      (click)="viewProject(chat.project_id?._id || '', $event)"
                       class="text-gray-400 hover:text-gray-600">
                       <mat-icon>open_in_new</mat-icon>
                     </button>
