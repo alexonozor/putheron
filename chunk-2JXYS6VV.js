@@ -1,0 +1,1 @@
+import"./chunk-QEZ3K4DX.js";var t=[{path:"",redirectTo:"dashboard",pathMatch:"full"},{path:"dashboard",loadChildren:()=>import("./chunk-PGCKNMLI.js").then(o=>o.adminDashboardRoutes)}];export{t as adminRoutes};
