@@ -863,5 +863,110 @@ export class BusinessService {
   async deleteServiceImageAsync(serviceId: string, imageUrl: string): Promise<void> {
     await firstValueFrom(this.deleteServiceImage(serviceId, imageUrl));
   }
+
+  // Admin methods for business management
+  adminVerifyBusiness(businessId: string): Observable<ApiResponse<Business>> {
+    return this.http.patch<ApiResponse<Business>>(
+      `${this.config.apiBaseUrl}/admin/businesses/${businessId}/verify`,
+      {}
+    );
+  }
+
+  async adminVerifyBusinessAsync(businessId: string): Promise<Business> {
+    const response = await firstValueFrom(this.adminVerifyBusiness(businessId));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to verify business');
+    }
+    return response.data;
+  }
+
+  adminRejectBusiness(businessId: string, reason: string): Observable<ApiResponse<Business>> {
+    return this.http.patch<ApiResponse<Business>>(
+      `${this.config.apiBaseUrl}/admin/businesses/${businessId}/reject`,
+      { reason }
+    );
+  }
+
+  async adminRejectBusinessAsync(businessId: string, reason: string): Promise<Business> {
+    const response = await firstValueFrom(this.adminRejectBusiness(businessId, reason));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to reject business');
+    }
+    return response.data;
+  }
+
+  adminToggleFeatured(businessId: string, featured: boolean): Observable<ApiResponse<Business>> {
+    return this.http.patch<ApiResponse<Business>>(
+      `${this.config.apiBaseUrl}/admin/businesses/${businessId}/toggle-featured`,
+      { isFeatured: featured }
+    );
+  }
+
+  async adminToggleFeaturedAsync(businessId: string, featured: boolean): Promise<Business> {
+    const response = await firstValueFrom(this.adminToggleFeatured(businessId, featured));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to update featured status');
+    }
+    return response.data;
+  }
+
+  adminDeleteBusiness(businessId: string): Observable<ApiResponse<null>> {
+    return this.http.delete<ApiResponse<null>>(
+      `${this.config.apiBaseUrl}/admin/businesses/${businessId}`
+    );
+  }
+
+  async adminDeleteBusinessAsync(businessId: string): Promise<void> {
+    const response = await firstValueFrom(this.adminDeleteBusiness(businessId));
+    if (!response.success) {
+      throw new Error(response.error || 'Failed to delete business');
+    }
+  }
+
+  // Bulk admin operations
+  adminBulkVerifyBusinesses(businessIds: string[]): Observable<ApiResponse<{ verified: string[], failed: string[] }>> {
+    return this.http.patch<ApiResponse<{ verified: string[], failed: string[] }>>(
+      `${this.config.apiBaseUrl}/admin/businesses/bulk-verify`,
+      { businessIds }
+    );
+  }
+
+  async adminBulkVerifyBusinessesAsync(businessIds: string[]): Promise<{ verified: string[], failed: string[] }> {
+    const response = await firstValueFrom(this.adminBulkVerifyBusinesses(businessIds));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to bulk verify businesses');
+    }
+    return response.data;
+  }
+
+  adminBulkToggleFeatured(businessIds: string[], featured: boolean): Observable<ApiResponse<{ updated: string[], failed: string[] }>> {
+    return this.http.patch<ApiResponse<{ updated: string[], failed: string[] }>>(
+      `${this.config.apiBaseUrl}/admin/businesses/bulk-toggle-featured`,
+      { businessIds, isFeatured: featured }
+    );
+  }
+
+  async adminBulkToggleFeaturedAsync(businessIds: string[], featured: boolean): Promise<{ updated: string[], failed: string[] }> {
+    const response = await firstValueFrom(this.adminBulkToggleFeatured(businessIds, featured));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to bulk update featured status');
+    }
+    return response.data;
+  }
+
+  adminBulkDeleteBusinesses(businessIds: string[]): Observable<ApiResponse<{ deleted: string[], failed: string[] }>> {
+    return this.http.delete<ApiResponse<{ deleted: string[], failed: string[] }>>(
+      `${this.config.apiBaseUrl}/admin/businesses/bulk-delete`,
+      { body: { businessIds } }
+    );
+  }
+
+  async adminBulkDeleteBusinessesAsync(businessIds: string[]): Promise<{ deleted: string[], failed: string[] }> {
+    const response = await firstValueFrom(this.adminBulkDeleteBusinesses(businessIds));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to bulk delete businesses');
+    }
+    return response.data;
+  }
 // }
 }

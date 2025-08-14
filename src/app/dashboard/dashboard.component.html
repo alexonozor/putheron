@@ -74,6 +74,14 @@
                 <span>Profile</span>
               </button>
               
+              <!-- Admin Access (only for admin users) -->
+              <!-- @if (isAdmin()) { -->
+                <button mat-menu-item (click)="navigateToAdmin()">
+                  <mat-icon>admin_panel_settings</mat-icon>
+                  <span>Admin Dashboard</span>
+                </button>
+              <!-- } -->
+              
               <!-- Mode Switching -->
               @if (!isBusinessOwner()) {
                 <button mat-menu-item (click)="switchToBusinessMode()">

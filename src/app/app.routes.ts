@@ -24,6 +24,11 @@ export const routes: Routes = [
     loadChildren: () => import('./dashboard/dashboard.route').then(m => m.DASHBOARD_ROUTES),
     canActivate: [AuthGuard]
   },
+  { 
+    path: 'admin', 
+    loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes),
+    canActivate: [AuthGuard]
+  },
   
   { path: 'business/:id', component: BusinessProfileComponent },
   { 

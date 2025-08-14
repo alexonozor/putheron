@@ -1,0 +1,23 @@
+/* Admin Business List Styles */
+.mat-card {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+}
+
+.mat-table {
+  width: 100%;
+}
+
+.mat-header-cell {
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.mat-cell {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.mat-row:hover {
+  background-color: #f9fafb;
+}

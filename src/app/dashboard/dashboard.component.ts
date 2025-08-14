@@ -62,25 +62,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.userMode() === 'business_owner';
   });
 
+  // Check if user has admin privileges - TODO: Add admin role to user schema
+  readonly isAdmin = computed(() => {
+    const user = this.user();
+    // For now, check if user email contains 'admin' or add your admin check logic
+    // In production, you should have an 'admin' role in the user schema
+    return user?.email?.includes('admin') || false;
+  });
+
   private mobileSubscription?: Subscription;
+
+  // Effect to watch for user mode changes - must be in field initializer
+  private userModeEffect = effect(() => {
+    const mode = this.userMode();
+    const user = this.user();
+    const isBusiness = this.isBusinessOwner();
+    console.log('Dashboard signals updated:', { user: user?.email, mode, isBusiness });
+    if (user) {
+      // Reload dashboard counts when mode changes
+      this.loadDashboardCounts();
+    }
+  });
 
   ngOnInit() {
     this.setupMobileDetection();
     this.loadDashboardCounts();
     // Initialize socket connection for real-time features
     this.socketService.connect();
-    
-    // Watch for user mode changes and reload data
-    effect(() => {
-      const mode = this.userMode();
-      const user = this.user();
-      const isBusiness = this.isBusinessOwner();
-      console.log('Dashboard signals updated:', { user: user?.email, mode, isBusiness });
-      if (user) {
-        // Reload dashboard counts when mode changes
-        this.loadDashboardCounts();
-      }
-    });
   }
 
   ngOnDestroy() {
@@ -210,6 +218,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   navigateToSettings() {
     this.router.navigate(['/dashboard/settings']);
+  }
+
+  navigateToAdmin() {
+    this.router.navigate(['/admin']);
   }
 
   async switchToBusinessMode() {

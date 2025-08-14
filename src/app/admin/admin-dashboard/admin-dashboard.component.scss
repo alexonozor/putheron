@@ -1,0 +1,193 @@
+/* Dashboard Component Styles */
+
+/* Sidebar styling to match navbar */
+::ng-deep .mat-drawer {
+  background-color: white !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+  border-radius: 0 !important; // Remove all border radius
+  border-top-right-radius: 0 !important; // Specifically remove right side radius
+  border-bottom-right-radius: 0 !important;
+}
+
+::ng-deep .mat-drawer-container {
+  background-color: #f9fafb !important;
+}
+
+/* Ensure sidebar has consistent white background */
+::ng-deep mat-sidenav {
+  background-color: white !important;
+  border-right: 1px solid #e5e7eb !important;
+  border-radius: 0 !important; // Remove border radius
+}
+
+/* Remove border radius from sidenav inner container */
+::ng-deep .mat-drawer-inner-container {
+  border-radius: 0 !important;
+}
+
+/* Enhanced backdrop for mobile overlay */
+::ng-deep .mat-drawer-backdrop {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Ensure sidenav content takes full width */
+::ng-deep .mat-drawer-content {
+  flex: 1 !important;
+  width: 100% !important;
+  overflow: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+::ng-deep mat-sidenav-content {
+  flex: 1 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* Ensure sidenav container takes full height and width */
+::ng-deep .mat-drawer-container {
+  background-color: #f9fafb !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+/* Custom sidenav container class */
+.sidenav-container {
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 !important;
+  display: flex !important;
+}
+
+/* Ensure main content area is properly styled */
+main {
+  width: 100% !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  padding: 1.5rem !important;
+}
+
+/* Base layout styles - since we're using Tailwind classes in the template, 
+   we'll keep this minimal for component-specific customizations */
+
+.dashboard-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.dashboard-loading .spinner {
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  height: 3rem;
+  width: 3rem;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #2563eb;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Custom hover effects for business items */
+.business-item:hover {
+  background-color: #f9fafb;
+  transition: background-color 0.15s ease-in-out;
+}
+
+/* Status badge custom colors */
+.status-approved {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-suspended {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+/* Button hover effects */
+.create-business-btn:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+  transition: all 0.2s ease-in-out;
+}
+
+.action-btn:hover {
+  background-color: #f9fafb;
+  transform: translateY(-1px);
+  transition: all 0.15s ease-in-out;
+}
+
+.action-btn-danger:hover {
+  background-color: #fef2f2;
+  transform: translateY(-1px);
+  transition: all 0.15s ease-in-out;
+}
+
+/* Card shadow effects */
+.stat-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+/* Empty state illustration enhancement */
+.empty-state svg {
+  opacity: 0.6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .business-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .action-buttons {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Focus states for accessibility */
+.create-business-btn:focus,
+.action-btn:focus,
+.action-btn-danger:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #2563eb;
+}
+
+/* Print styles */
+@media print {
+  .action-buttons {
+    display: none;
+  }
+  
+  .create-business-btn {
+    display: none;
+  }
+}

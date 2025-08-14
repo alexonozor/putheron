@@ -1,0 +1,157 @@
+<div class="p-6 bg-gray-50 min-h-full">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Admin Overview</h1>
+        <p class="text-gray-600 mt-1">Welcome back, {{ (user()?.first_name + ' ' + (user()?.last_name || '')).trim() || user()?.email }}</p>
+      </div>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="refreshStats()"
+        [disabled]="loading()">
+        <mat-icon>refresh</mat-icon>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex items-center justify-center h-64">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else {
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Total Users -->
+      <mat-card class="p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white !text-lg">people</mat-icon>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Users</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ stats().totalUsers | number }}</p>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Total Businesses -->
+      <mat-card class="p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white !text-lg">business</mat-icon>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Businesses</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ stats().totalBusinesses | number }}</p>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Total Projects -->
+      <mat-card class="p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white !text-lg">work</mat-icon>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Projects</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ stats().totalProjects | number }}</p>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Total Revenue -->
+      <mat-card class="p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+              <mat-icon class="text-white !text-lg">attach_money</mat-icon>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500">Total Revenue</p>
+            <p class="text-2xl font-semibold text-gray-900">${{ stats().totalRevenue | number }}</p>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Activity Overview -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Project Status -->
+      <mat-card class="p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Project Status</h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+              <span class="text-sm text-gray-600">Active Projects</span>
+            </div>
+            <span class="text-sm font-semibold text-gray-900">{{ stats().activeProjects | number }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+              <span class="text-sm text-gray-600">Completed Projects</span>
+            </div>
+            <span class="text-sm font-semibold text-gray-900">{{ stats().completedProjects | number }}</span>
+          </div>
+        </div>
+      </mat-card>
+
+      <!-- Business Overview -->
+      <mat-card class="p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Business Overview</h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-3 h-3 bg-orange-500 rounded-full mr-3"></div>
+              <span class="text-sm text-gray-600">Pending Approval</span>
+            </div>
+            <span class="text-sm font-semibold text-gray-900">{{ stats().pendingBusinesses | number }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+              <span class="text-sm text-gray-600">Total Reviews</span>
+            </div>
+            <span class="text-sm font-semibold text-gray-900">{{ stats().totalReviews | number }}</span>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <mat-card class="p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <button mat-stroked-button class="h-20 flex flex-col items-center justify-center">
+          <mat-icon class="mb-2">people</mat-icon>
+          <span class="text-sm">Manage Users</span>
+        </button>
+        <button mat-stroked-button class="h-20 flex flex-col items-center justify-center">
+          <mat-icon class="mb-2">business</mat-icon>
+          <span class="text-sm">Manage Businesses</span>
+        </button>
+        <button mat-stroked-button class="h-20 flex flex-col items-center justify-center">
+          <mat-icon class="mb-2">category</mat-icon>
+          <span class="text-sm">Manage Categories</span>
+        </button>
+        <button mat-stroked-button class="h-20 flex flex-col items-center justify-center">
+          <mat-icon class="mb-2">analytics</mat-icon>
+          <span class="text-sm">View Reports</span>
+        </button>
+      </div>
+    </mat-card>
+  }
+</div>
