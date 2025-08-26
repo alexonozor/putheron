@@ -1,0 +1,427 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Reviews Management</h1>
+      <p class="text-gray-600 mt-1">Manage and moderate customer reviews</p>
+    </div>
+    <div class="flex gap-3">
+      <button 
+        (click)="exportReviews()"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        Export Reviews
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  @if (stats(); as reviewStats) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="p-3 bg-blue-50 rounded-lg">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10m0 0V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2m10 0v10a2 2 0 01-2 2H9a2 2 0 01-2-2V8"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Total Reviews</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ reviewStats.total | number }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="p-3 bg-green-50 rounded-lg">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Verified</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ reviewStats.verified | number }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="p-3 bg-red-50 rounded-lg">
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Flagged</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ reviewStats.flagged | number }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="p-3 bg-yellow-50 rounded-lg">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Pending</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ reviewStats.total - reviewStats.verified - reviewStats.flagged | number }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="p-3 bg-purple-50 rounded-lg">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600">Avg Rating</p>
+            <p class="text-2xl font-semibold text-gray-900">{{ reviewStats.averageRating | number:'1.1-1' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Filters -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+    <form [formGroup]="filterForm" (ngSubmit)="onFiltersChange()">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div>
+          <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <input
+            id="search"
+            type="text"
+            formControlName="search"
+            placeholder="Search reviews, users, businesses..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+
+        <div>
+          <label for="rating" class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+          <select
+            id="rating"
+            formControlName="rating"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <option value="">All Ratings</option>
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="dateFrom" class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
+          <input
+            id="dateFrom"
+            type="date"
+            formControlName="dateFrom"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+
+        <div>
+          <label for="dateTo" class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
+          <input
+            id="dateTo"
+            type="date"
+            formControlName="dateTo"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div>
+          <label for="isVerified" class="block text-sm font-medium text-gray-700 mb-1">Verification Status</label>
+          <select
+            id="isVerified"
+            formControlName="isVerified"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <option value="">All Reviews</option>
+            <option value="true">Verified Only</option>
+            <option value="false">Unverified Only</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="isFlagged" class="block text-sm font-medium text-gray-700 mb-1">Flag Status</label>
+          <select
+            id="isFlagged"
+            formControlName="isFlagged"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <option value="">All Reviews</option>
+            <option value="true">Flagged Only</option>
+            <option value="false">Not Flagged</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+          <select
+            id="sortBy"
+            formControlName="sortBy"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <option value="createdAt">Date Created</option>
+            <option value="rating">Rating</option>
+            <option value="user_id">User</option>
+            <option value="business_id">Business</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="sortOrder" class="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
+          <select
+            id="sortOrder"
+            formControlName="sortOrder"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button
+          type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+          Apply Filters
+        </button>
+        <button
+          type="button"
+          (click)="clearFilters()"
+          class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+          Clear Filters
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Bulk Actions -->
+  @if (showBulkActions()) {
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span class="text-sm font-medium text-blue-800">
+            {{ selectedReviews().size }} review(s) selected
+          </span>
+        </div>
+        <div class="flex gap-2">
+          <button
+            (click)="bulkVerifyReviews()"
+            class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
+            Verify Selected
+          </button>
+          <button
+            (click)="bulkFlagReviews()"
+            class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors">
+            Flag Selected
+          </button>
+          <button
+            (click)="deleteSelectedReviews()"
+            class="px-3 py-1 bg-red-800 text-white text-sm rounded hover:bg-red-900 transition-colors">
+            Delete Selected
+          </button>
+          <button
+            (click)="deselectAllReviews()"
+            class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
+            Deselect All
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Error Message -->
+  @if (error()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="flex">
+        <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+        <span class="text-sm text-red-800">{{ error() }}</span>
+      </div>
+    </div>
+  }
+
+  <!-- Reviews Table -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    @if (loading()) {
+      <div class="p-8 text-center">
+        <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-blue-500 bg-white">
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Loading reviews...
+        </div>
+      </div>
+    } @else if (reviews().length === 0) {
+      <div class="p-8 text-center">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10m0 0V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2m10 0v10a2 2 0 01-2 2H9a2 2 0 01-2-2V8"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No reviews found</h3>
+        <p class="mt-1 text-sm text-gray-500">No reviews match your current filters.</p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left">
+                <input
+                  type="checkbox"
+                  [checked]="selectedReviews().size === reviews().length && reviews().length > 0"
+                  [indeterminate]="selectedReviews().size > 0 && selectedReviews().size < reviews().length"
+                  (change)="onSelectAllChange($event)"
+                  class="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Review</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            @for (review of reviews(); track review._id) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedReviews().has(review._id)"
+                    (change)="toggleReviewSelection(review._id)"
+                    class="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                </td>
+                <td class="px-6 py-4">
+                  <div class="max-w-xs">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ getProjectTitle(review.project_id) }}</p>
+                    <p class="text-sm text-gray-500 line-clamp-2">{{ review.review_text }}</p>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center">
+                    <div [innerHTML]="generateStarDisplay(review.rating)"></div>
+                    <span class="ml-2 text-sm font-medium text-gray-900">{{ review.rating }}</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-gray-900">{{ getUserName(review.user_id) }}</div>
+                  @if (hasUserEmail(review.user_id)) {
+                    <div class="text-sm text-gray-500">{{ getUserEmail(review.user_id) }}</div>
+                  }
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-gray-900">{{ getBusinessName(review.business_id) }}</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex flex-col gap-1">
+                    <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + getStatusColor(review.is_verified, review.is_flagged)">
+                      {{ getStatusLabel(review.is_verified, review.is_flagged) }}
+                    </span>
+                    @if (review.is_flagged && review.flagged_reason) {
+                      <span class="text-xs text-red-600" [title]="review.flagged_reason">
+                        {{ review.flagged_reason.length > 20 ? (review.flagged_reason | slice:0:20) + '...' : review.flagged_reason }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900">{{ formatDate(review.createdAt) }}</div>
+                  @if (review.updatedAt && review.updatedAt !== review.createdAt) {
+                    <div class="text-xs text-gray-500">Updated: {{ formatDate(review.updatedAt) }}</div>
+                  }
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center space-x-2">
+                    <button
+                      (click)="viewReviewDetails(review)"
+                      class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                      View
+                    </button>
+                    @if (!review.is_verified) {
+                      <button
+                        (click)="quickVerifyReview(review._id)"
+                        class="text-green-600 hover:text-green-800 text-sm font-medium">
+                        Verify
+                      </button>
+                    }
+                    @if (!review.is_flagged) {
+                      <button
+                        (click)="quickFlagReview(review._id)"
+                        class="text-red-600 hover:text-red-800 text-sm font-medium">
+                        Flag
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <p class="text-sm text-gray-700">
+              Showing {{ (pagination().currentPage - 1) * pagination().perPage + 1 }} to 
+              {{ Math.min(pagination().currentPage * pagination().perPage, pagination().total) }} of 
+              {{ pagination().total }} results
+            </p>
+            <div class="ml-4">
+              <select
+                [value]="pagination().perPage"
+                (change)="onPerPageChangeEvent($event)"
+                class="text-sm border border-gray-300 rounded px-2 py-1">
+                <option value="10">10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-2">
+            <button
+              [disabled]="!pagination().hasPrev"
+              (click)="onPageChange(pagination().currentPage - 1)"
+              [class]="'px-3 py-2 text-sm font-medium rounded-md ' + (pagination().hasPrev ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50' : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed')">
+              Previous
+            </button>
+            
+            @for (i of Array(Math.min(5, pagination().totalPages)).fill(0); track i; let idx = $index) {
+              @if (pagination().totalPages <= 5 || idx === 0 || idx === Math.min(5, pagination().totalPages) - 1 || Math.abs(pagination().currentPage - (idx + 1)) <= 1) {
+                <button
+                  (click)="onPageChange(idx + 1)"
+                  [class]="'px-3 py-2 text-sm font-medium rounded-md ' + (pagination().currentPage === idx + 1 ? 'bg-blue-600 text-white' : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50')">
+                  {{ idx + 1 }}
+                </button>
+              }
+            }
+            
+            <button
+              [disabled]="!pagination().hasNext"
+              (click)="onPageChange(pagination().currentPage + 1)"
+              [class]="'px-3 py-2 text-sm font-medium rounded-md ' + (pagination().hasNext ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50' : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed')">
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

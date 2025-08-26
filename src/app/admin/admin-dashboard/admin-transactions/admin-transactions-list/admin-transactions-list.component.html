@@ -1,0 +1,320 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <div class="mb-6 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-900">Transaction Management</h1>
+    <div class="flex space-x-3">
+      <button 
+        (click)="exportTransactions()" 
+        [disabled]="loading()"
+        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6" *ngIf="stats()">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="text-2xl font-bold text-gray-900">{{ (stats()?.total ?? 0) | number }}</div>
+      <div class="text-sm text-gray-500 uppercase tracking-wide">Total Transactions</div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 border-l-4 border-l-green-500">
+      <div class="text-2xl font-bold text-green-600">{{ (stats()?.totalAmount ?? 0) | currency:'USD' }}</div>
+      <div class="text-sm text-gray-500 uppercase tracking-wide">Total Amount</div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="text-2xl font-bold text-gray-900">{{ (stats()?.byStatus?.pending ?? 0) | number }}</div>
+      <div class="text-sm text-gray-500 uppercase tracking-wide">Pending</div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 border-l-4 border-l-green-500">
+      <div class="text-2xl font-bold text-green-600">{{ (stats()?.byStatus?.completed ?? 0) | number }}</div>
+      <div class="text-sm text-gray-500 uppercase tracking-wide">Completed</div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 border-l-4 border-l-yellow-500">
+      <div class="text-2xl font-bold text-yellow-600">{{ (stats()?.byStatus?.failed ?? 0) | number }}</div>
+      <div class="text-sm text-gray-500 uppercase tracking-wide">Failed</div>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+    <form [formGroup]="filterForm" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="lg:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+          <div class="relative">
+            <input
+              type="text"
+              formControlName="search"
+              placeholder="Transaction ID, user email, or amount"
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+          <select formControlName="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="failed">Failed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+          <select formControlName="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">All Types</option>
+            <option value="payment">Payment</option>
+            <option value="withdrawal">Withdrawal</option>
+            <option value="refund">Refund</option>
+            <option value="fee">Fee</option>
+            <option value="escrow">Escrow</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
+          <input
+            type="date"
+            formControlName="dateFrom"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+      </div>
+
+      <div class="flex space-x-3 pt-4">
+        <button
+          type="button"
+          (click)="applyFilters()"
+          [disabled]="loading()"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-sm font-medium rounded-lg">
+          Apply Filters
+        </button>
+        <button
+          type="button"
+          (click)="resetFilters()"
+          [disabled]="loading()"
+          class="inline-flex items-center px-4 py-2 border border-gray-300 hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 text-sm font-medium rounded-lg">
+          Reset
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Bulk Actions -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex justify-between items-center" *ngIf="selectedTransactions().size > 0">
+    <div class="text-blue-800 font-medium">
+      {{ selectedTransactions().size }} transaction(s) selected
+    </div>
+    <div class="flex space-x-2">
+      <button
+        (click)="bulkUpdateStatus('completed')"
+        class="px-3 py-1.5 text-sm bg-white border border-blue-300 text-blue-700 rounded-md hover:bg-blue-50">
+        Mark as Completed
+      </button>
+      <button
+        (click)="bulkUpdateStatus('failed')"
+        class="px-3 py-1.5 text-sm bg-white border border-blue-300 text-blue-700 rounded-md hover:bg-blue-50">
+        Mark as Failed
+      </button>
+      <button
+        (click)="bulkDeleteTransactions()"
+        class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-md hover:bg-red-700">
+        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+        Delete Selected
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="flex flex-col items-center justify-center py-12" *ngIf="loading()">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <p class="text-gray-600 mt-4">Loading transactions...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-center" *ngIf="error()">
+    <svg class="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <span class="text-red-800">{{ error() }}</span>
+  </div>
+
+  <!-- Transactions Table -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" *ngIf="!loading() && !error() && transactions().length > 0">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <input
+                type="checkbox"
+                [checked]="selectedTransactions().size === transactions().length && transactions().length > 0"
+                [indeterminate]="selectedTransactions().size > 0 && selectedTransactions().size < transactions().length"
+                (change)="toggleAllTransactions()"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr 
+            *ngFor="let transaction of transactions()" 
+            class="hover:bg-gray-50 cursor-pointer transition-colors"
+            (click)="viewTransactionDetails(transaction._id)">
+            <td class="px-6 py-4 whitespace-nowrap" (click)="$event.stopPropagation()">
+              <input
+                type="checkbox"
+                [checked]="selectedTransactions().has(transaction._id)"
+                (change)="onCheckboxChange($event, transaction._id)"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-xs font-mono text-gray-600 truncate max-w-32">{{ transaction._id }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div *ngIf="transaction.user; else noUser" class="text-sm">
+                <div class="font-medium text-gray-900">{{ transaction.user.firstName }} {{ transaction.user.lastName }}</div>
+                <div class="text-gray-500 text-xs">{{ transaction.user.email }}</div>
+              </div>
+              <ng-template #noUser>
+                <div class="text-sm text-gray-400 italic">N/A</div>
+              </ng-template>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm">
+                <div class="font-semibold text-gray-900 text-lg">{{ transaction.amount | currency:'USD' }}</div>
+                <div class="text-xs text-gray-500">{{ transaction.currency }}</div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span 
+                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                [ngClass]="{
+                  'bg-green-100 text-green-800': transaction.type === 'payment',
+                  'bg-orange-100 text-orange-800': transaction.type === 'withdrawal',
+                  'bg-purple-100 text-purple-800': transaction.type === 'refund',
+                  'bg-blue-100 text-blue-800': transaction.type === 'fee',
+                  'bg-pink-100 text-pink-800': transaction.type === 'escrow',
+                  'bg-gray-100 text-gray-800': !transaction.type || !['payment', 'withdrawal', 'refund', 'fee', 'escrow'].includes(transaction.type)
+                }">
+                {{ (transaction.type || 'unknown') | titlecase }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span 
+                class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                [ngClass]="{
+                  'bg-yellow-100 text-yellow-800': transaction.status === 'pending',
+                  'bg-green-100 text-green-800': transaction.status === 'completed',
+                  'bg-red-100 text-red-800': transaction.status === 'failed',
+                  'bg-gray-100 text-gray-800': transaction.status === 'cancelled'
+                }">
+                {{ transaction.status | titlecase }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <div class="text-gray-900">{{ transaction.createdAt | date:'shortDate' }}</div>
+              <div class="text-gray-500 text-xs">{{ transaction.createdAt | date:'shortTime' }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" (click)="$event.stopPropagation()">
+              <div class="relative inline-block text-left">
+                <button
+                  type="button"
+                  class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  [attr.aria-expanded]="false">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                  </svg>
+                </button>
+                <!-- Dropdown menu would go here with proper toggle logic -->
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- No Data Message -->
+  <div class="text-center py-12" *ngIf="!loading() && !error() && transactions().length === 0">
+    <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+    </svg>
+    <h3 class="mt-4 text-lg font-medium text-gray-900">No transactions found</h3>
+    <p class="mt-2 text-gray-500">There are no transactions matching your current filters.</p>
+  </div>
+
+  <!-- Pagination -->
+  <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-6 rounded-lg shadow-sm" *ngIf="!loading() && !error() && transactions().length > 0">
+    <div class="flex-1 flex justify-between sm:hidden">
+      <button
+        [disabled]="!pagination().hasPrev"
+        (click)="goToPreviousPage()"
+        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+        Previous
+      </button>
+      <button
+        [disabled]="!pagination().hasNext"
+        (click)="goToNextPage()"
+        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+        Next
+      </button>
+    </div>
+    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+      <div>
+        <p class="text-sm text-gray-700">
+          Showing page <span class="font-medium">{{ pagination().currentPage }}</span> of <span class="font-medium">{{ pagination().totalPages }}</span>
+          (<span class="font-medium">{{ pagination().totalCount }}</span> total results)
+        </p>
+      </div>
+      <div>
+        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+          <button
+            [disabled]="!pagination().hasPrev"
+            (click)="goToPreviousPage()"
+            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          
+          <!-- Page numbers would go here -->
+          <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+            {{ pagination().currentPage }} / {{ pagination().totalPages }}
+          </span>
+          
+          <button
+            [disabled]="!pagination().hasNext"
+            (click)="goToNextPage()"
+            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>

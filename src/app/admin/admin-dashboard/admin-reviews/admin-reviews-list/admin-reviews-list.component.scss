@@ -1,0 +1,68 @@
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// Star rating animations
+.star-rating {
+  transition: all 0.2s ease-in-out;
+}
+
+.star-rating:hover {
+  transform: scale(1.05);
+}
+
+// Custom checkbox styles
+input[type="checkbox"]:indeterminate {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='8' height='2' x='4' y='7' rx='1'/%3E%3C/svg%3E");
+}
+
+// Table hover effects
+tr:hover .action-buttons {
+  opacity: 1;
+  visibility: visible;
+}
+
+.action-buttons {
+  opacity: 0.7;
+  visibility: visible;
+  transition: all 0.2s ease-in-out;
+}
+
+// Loading animation
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+// Rating color utilities
+.text-rating-5 {
+  color: #10b981; // green-500
+}
+
+.text-rating-4 {
+  color: #84cc16; // lime-500
+}
+
+.text-rating-3 {
+  color: #eab308; // yellow-500
+}
+
+.text-rating-2 {
+  color: #f97316; // orange-500
+}
+
+.text-rating-1 {
+  color: #ef4444; // red-500
+}

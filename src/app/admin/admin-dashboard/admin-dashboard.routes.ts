@@ -55,6 +55,20 @@ export const adminDashboardRoutes: Routes = [
             (c) => c.adminProjectsRoutes
           ),
       },
+      {
+        path: 'reviews',
+        loadChildren: () =>
+          import('./admin-reviews/admin-reviews.routes').then(
+            (c) => c.ADMIN_REVIEWS_ROUTES
+          ),
+      },
+      {
+        path: 'transactions',
+        loadChildren: () =>
+          import('./admin-transactions/admin-transactions.routes').then(
+            (c) => c.adminTransactionsRoutes
+          ),
+      },
     ],
   },
 ];
