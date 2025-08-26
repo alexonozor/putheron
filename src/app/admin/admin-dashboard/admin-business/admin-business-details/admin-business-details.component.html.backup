@@ -1,0 +1,617 @@
+<div class="h-full bg-gray-50 flex flex-col">
+  <!-- Header Section -->
+  <div class="bg-white border-b border-gray-200 px-6 py-6 flex-shrink-0">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <button mat-icon-button (click)="goBack()" matTooltip="Go back">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Business Details</h1>
+          <p class="text-gray-600 mt-1">View and manage business information</p>
+        </div>
+      </div>
+      @if (business()) {
+        <div class="flex items-center space-x-2">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                [ngClass]="{
+                  'bg-green-100 text-green-800': business()!.status === 'approved',
+                  'bg-yellow-100 text-yellow-800': business()!.status === 'pending',
+                  'bg-red-100 text-red-800': business()!.status === 'rejected',
+                  'bg-gray-100 text-gray-800': business()!.status === 'suspended'
+                }">
+            <mat-icon class="w-4 h-4 mr-1 !text-sm">
+              {{ business()!.status === 'approved' ? 'verified' : 
+                 business()!.status === 'pending' ? 'schedule' : 
+                 business()!.status === 'rejected' ? 'cancel' : 'pause' }}
+            </mat-icon>
+            {{ business()!.status | titlecase }}
+          </span>
+          @if (business()!.is_featured) {
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              <mat-icon class="w-4 h-4 mr-1 !text-sm">star</mat-icon>
+              Featured
+            </span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex-1 flex items-center justify-center">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (business()) {
+    <!-- Main Content -->
+    <div class="flex-1 p-6 overflow-auto">
+      <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          
+          <!-- Main Content Area -->
+          <div class="lg:col-span-3 space-y-6">
+            
+            <!-- Business Hero Section -->
+            <mat-card class="overflow-hidden">
+              <!-- Cover Image or Banner -->
+              @if (business()!.banner_url || business()!.cover_image_url) {
+                <div class="h-48 bg-gradient-to-r from-blue-500 to-purple-600 relative">
+                  <img 
+                    [src]="business()!.banner_url || business()!.cover_image_url" 
+                    [alt]="business()!.name + ' banner'"
+                    class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+                </div>
+              } @else {
+                <div class="h-48 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+              }
+              
+              <!-- Business Basic Info -->
+              <div class="p-6">
+                <div class="flex items-start space-x-6">
+                  <!-- Logo -->
+                  <div class="flex-shrink-0 -mt-16 relative">
+                    @if (business()!.logo_url) {
+                      <img 
+                        [src]="business()!.logo_url" 
+                        [alt]="business()!.name + ' logo'"
+                        class="w-24 h-24 rounded-xl object-cover border-4 border-white shadow-lg bg-white">
+                    } @else {
+                      <div class="w-24 h-24 rounded-xl bg-white border-4 border-white shadow-lg flex items-center justify-center">
+                        <mat-icon class="text-3xl text-gray-400">business</mat-icon>
+                      </div>
+                    }
+                  </div>
+                  
+                  <!-- Business Details -->
+                  <div class="flex-1 min-w-0">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ business()!.name }}</h2>
+                    <p class="text-lg text-gray-600 mb-3">{{ getCategoryName(business()!.category_id) }}</p>
+                    
+                    <!-- Location and Contact -->
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
+                      @if (business()!.city && business()!.state) {
+                        <div class="flex items-center">
+                          <mat-icon class="w-4 h-4 mr-1 !text-sm">location_on</mat-icon>
+                          {{ business()!.city }}, {{ business()!.state }}
+                        </div>
+                      }
+                      @if (business()!.contact_email) {
+                        <div class="flex items-center">
+                          <mat-icon class="w-4 h-4 mr-1 !text-sm">email</mat-icon>
+                          {{ business()!.contact_email }}
+                        </div>
+                      }
+                      @if (business()!.contact_phone) {
+                        <div class="flex items-center">
+                          <mat-icon class="w-4 h-4 mr-1 !text-sm">phone</mat-icon>
+                          {{ business()!.contact_phone }}
+                        </div>
+                      }
+                      @if (business()!.website) {
+                        <div class="flex items-center">
+                          <mat-icon class="w-4 h-4 mr-1 !text-sm">language</mat-icon>
+                          <a [href]="business()!.website" target="_blank" class="text-blue-600 hover:text-blue-800">
+                            Website
+                          </a>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Rating and Stats -->
+                    <div class="flex items-center space-x-6">
+                      <div class="flex items-center">
+                        <div class="flex items-center mr-2">
+                          @for (star of [1,2,3,4,5]; track star) {
+                            <mat-icon 
+                              class="w-5 h-5 !text-base"
+                              [ngClass]="star <= (business()!.rating || 0) ? 'text-yellow-400' : 'text-gray-300'">
+                              star
+                            </mat-icon>
+                          }
+                        </div>
+                        <span class="font-medium text-gray-900">{{ business()!.rating || 0 }}</span>
+                        <span class="text-gray-500 ml-1">({{ business()!.review_count || 0 }} reviews)</span>
+                      </div>
+                      <div class="text-sm text-gray-600">
+                        <mat-icon class="w-4 h-4 mr-1 !text-sm">visibility</mat-icon>
+                        {{ business()!.view_count || 0 }} views
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Description -->
+                @if (business()!.description) {
+                  <div class="mt-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">About</h3>
+                    <p class="text-gray-700 leading-relaxed">{{ business()!.description }}</p>
+                  </div>
+                }
+              </div>
+            </mat-card>
+
+            <!-- Detailed Information Tabs -->
+            <mat-card class="p-0">
+              <mat-tab-group class="min-h-96">
+                
+                <!-- Contact & Location Tab -->
+                <mat-tab label="Contact & Location">
+                  <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <!-- Contact Information -->
+                      <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h4>
+                        <div class="space-y-4">
+                          @if (business()!.contact_email) {
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                              <div class="flex items-center text-gray-900">
+                                <mat-icon class="w-5 h-5 mr-2 text-gray-400">email</mat-icon>
+                                <a [href]="'mailto:' + business()!.contact_email" class="text-blue-600 hover:text-blue-800">
+                                  {{ business()!.contact_email }}
+                                </a>
+                              </div>
+                            </div>
+                          }
+                          @if (business()!.contact_phone) {
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                              <div class="flex items-center text-gray-900">
+                                <mat-icon class="w-5 h-5 mr-2 text-gray-400">phone</mat-icon>
+                                <a [href]="'tel:' + business()!.contact_phone" class="text-blue-600 hover:text-blue-800">
+                                  {{ business()!.contact_phone }}
+                                </a>
+                              </div>
+                            </div>
+                          }
+                          @if (business()!.website) {
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                              <div class="flex items-center text-gray-900">
+                                <mat-icon class="w-5 h-5 mr-2 text-gray-400">language</mat-icon>
+                                <a [href]="business()!.website" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                  {{ business()!.website }}
+                                </a>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+
+                      <!-- Location Information -->
+                      <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Location</h4>
+                        <div class="space-y-4">
+                          @if (business()!.address) {
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+                              <div class="flex items-start text-gray-900">
+                                <mat-icon class="w-5 h-5 mr-2 text-gray-400 mt-0.5">location_on</mat-icon>
+                                <span>{{ business()!.address }}</span>
+                              </div>
+                            </div>
+                          }
+                          <div class="grid grid-cols-2 gap-4">
+                            @if (business()!.city) {
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                <p class="text-gray-900">{{ business()!.city }}</p>
+                              </div>
+                            }
+                            @if (business()!.state) {
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                                <p class="text-gray-900">{{ business()!.state }}</p>
+                              </div>
+                            }
+                            @if (business()!.postal_code) {
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+                                <p class="text-gray-900">{{ business()!.postal_code }}</p>
+                              </div>
+                            }
+                            @if (business()!.country) {
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                                <p class="text-gray-900">{{ business()!.country }}</p>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Social Links -->
+                    @if (business()!.social_links) {
+                      <div class="mt-8">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Social Media</h4>
+                        <div class="flex flex-wrap gap-3">
+                          @if (business()!.social_links?.facebook) {
+                            <a [href]="business()!.social_links!.facebook" target="_blank" 
+                               class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
+                              <mat-icon class="w-5 h-5 mr-2">facebook</mat-icon>
+                              Facebook
+                            </a>
+                          }
+                          @if (business()!.social_links?.twitter) {
+                            <a [href]="business()!.social_links!.twitter" target="_blank" 
+                               class="inline-flex items-center px-3 py-2 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 transition-colors">
+                              <mat-icon class="w-5 h-5 mr-2">tag</mat-icon>
+                              Twitter
+                            </a>
+                          }
+                          @if (business()!.social_links?.instagram) {
+                            <a [href]="business()!.social_links!.instagram" target="_blank" 
+                               class="inline-flex items-center px-3 py-2 rounded-lg bg-pink-50 text-pink-700 hover:bg-pink-100 transition-colors">
+                              <mat-icon class="w-5 h-5 mr-2">camera_alt</mat-icon>
+                              Instagram
+                            </a>
+                          }
+                          @if (business()!.social_links?.linkedin) {
+                            <a [href]="business()!.social_links!.linkedin" target="_blank" 
+                               class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
+                              <mat-icon class="w-5 h-5 mr-2">work</mat-icon>
+                              LinkedIn
+                            </a>
+                          }
+                          @if (business()!.social_links?.youtube) {
+                            <a [href]="business()!.social_links!.youtube" target="_blank" 
+                               class="inline-flex items-center px-3 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors">
+                              <mat-icon class="w-5 h-5 mr-2">play_circle</mat-icon>
+                              YouTube
+                            </a>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </mat-tab>
+
+                <!-- Business Hours Tab -->
+                <mat-tab label="Business Hours">
+                  <div class="p-6">
+                    @if (business()!.business_hours) {
+                      <div class="max-w-md">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Operating Hours</h4>
+                        <div class="space-y-3">
+                          @for (day of ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']; track day) {
+                            @if (getBusinessHours(day)) {
+                              <div class="flex justify-between items-center py-3 px-4 rounded-lg border border-gray-200">
+                                <span class="font-medium capitalize text-gray-900">{{ day }}</span>
+                                @if (getBusinessHours(day)?.closed) {
+                                  <span class="text-red-600 font-medium">Closed</span>
+                                } @else {
+                                  <span class="text-gray-700">{{ getBusinessHours(day)?.open }} - {{ getBusinessHours(day)?.close }}</span>
+                                }
+                              </div>
+                            }
+                          }
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="text-center py-12">
+                        <mat-icon class="text-gray-400 text-6xl mb-4">schedule</mat-icon>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Business Hours</h3>
+                        <p class="text-gray-500">Business hours have not been specified yet.</p>
+                      </div>
+                    }
+                  </div>
+                </mat-tab>
+
+                <!-- Documents Tab -->
+                <mat-tab label="Documents">
+                  <div class="p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Uploaded Documents</h4>
+                    
+                    <!-- SOS Certification Documents -->
+                    @if (business()!.sos_certification_url || business()!.sos_certification_urls?.length) {
+                      <div class="mb-8">
+                        <h5 class="text-base font-medium text-gray-900 mb-3">SOS Certification Documents</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          
+                          <!-- Single SOS Certification -->
+                          @if (business()!.sos_certification_url) {
+                            <div class="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+                              <div class="flex items-center mb-3">
+                                <mat-icon class="text-blue-600 mr-2">description</mat-icon>
+                                <span class="font-medium text-gray-900">SOS Certification</span>
+                              </div>
+                              <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-600">Document</span>
+                                <div class="flex space-x-2">
+                                  <a [href]="business()!.sos_certification_url" target="_blank" 
+                                     mat-icon-button matTooltip="View Document">
+                                    <mat-icon>visibility</mat-icon>
+                                  </a>
+                                  <a [href]="business()!.sos_certification_url" [download]="business()!.name + '_sos_certification'" 
+                                     mat-icon-button matTooltip="Download Document">
+                                    <mat-icon>download</mat-icon>
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                          }
+
+                          <!-- Multiple SOS Certifications -->
+                          @if (business()!.sos_certification_urls?.length) {
+                            @for (certUrl of business()!.sos_certification_urls; track certUrl; let i = $index) {
+                              <div class="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+                                <div class="flex items-center mb-3">
+                                  <mat-icon class="text-blue-600 mr-2">description</mat-icon>
+                                  <span class="font-medium text-gray-900">SOS Certification {{ i + 1 }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                  <span class="text-sm text-gray-600">Document</span>
+                                  <div class="flex space-x-2">
+                                    <a [href]="certUrl" target="_blank" 
+                                       mat-icon-button matTooltip="View Document">
+                                      <mat-icon>visibility</mat-icon>
+                                    </a>
+                                    <a [href]="certUrl" [download]="business()!.name + '_sos_certification_' + (i + 1)" 
+                                       mat-icon-button matTooltip="Download Document">
+                                      <mat-icon>download</mat-icon>
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                            }
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    <!-- Business Images -->
+                    @if (business()!.images?.length) {
+                      <div class="mb-8">
+                        <h5 class="text-base font-medium text-gray-900 mb-3">Business Images</h5>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                          @for (imageUrl of business()!.images; track imageUrl; let i = $index) {
+                            <div class="relative group">
+                              <img [src]="imageUrl" [alt]="business()!.name + ' image ' + (i + 1)"
+                                   class="w-full h-32 object-cover rounded-lg border border-gray-200">
+                              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all duration-200 flex items-center justify-center">
+                                <a [href]="imageUrl" target="_blank" 
+                                   class="opacity-0 group-hover:opacity-100 text-white p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-75 transition-all">
+                                  <mat-icon>zoom_in</mat-icon>
+                                </a>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    <!-- No Documents State -->
+                    @if (!business()!.sos_certification_url && !business()!.sos_certification_urls?.length && !business()!.images?.length) {
+                      <div class="text-center py-12">
+                        <mat-icon class="text-gray-400 text-6xl mb-4">folder_open</mat-icon>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Documents</h3>
+                        <p class="text-gray-500">No documents have been uploaded for this business yet.</p>
+                      </div>
+                    }
+                  </div>
+                </mat-tab>
+
+                <!-- Business Information Tab -->
+                <mat-tab label="Business Info">
+                  <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Business Details</h4>
+                        <div class="space-y-4">
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Business Type</label>
+                            <p class="text-gray-900 capitalize">{{ business()!.business_type }}</p>
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <p class="text-gray-900">{{ getCategoryName(business()!.category_id) }}</p>
+                          </div>
+                          @if (business()!.subcategory_id) {
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Subcategory</label>
+                              <p class="text-gray-900">{{ getCategoryName(business()!.subcategory_id) }}</p>
+                            </div>
+                          }
+                          @if (business()!.tags?.length) {
+                            <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                              <div class="flex flex-wrap gap-2">
+                                @for (tag of business()!.tags; track tag) {
+                                  <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
+                                    {{ tag }}
+                                  </span>
+                                }
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">Account Information</h4>
+                        <div class="space-y-4">
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Owner</label>
+                            <p class="text-gray-900">{{ getOwnerName(business()!.owner_id) }}</p>
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Created Date</label>
+                            <p class="text-gray-900">{{ formatDate(business()!.createdAt) }}</p>
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
+                            <p class="text-gray-900">{{ formatDate(business()!.updatedAt) }}</p>
+                          </div>
+                          <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Active Status</label>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                                  [ngClass]="business()!.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                              {{ business()!.is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </mat-tab>
+              </mat-tab-group>
+            </mat-card>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="space-y-6">
+            
+            <!-- Quick Stats Card -->
+            <mat-card class="p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Overall Rating</span>
+                  <div class="flex items-center">
+                    <mat-icon class="text-yellow-400 w-5 h-5 mr-1">star</mat-icon>
+                    <span class="font-semibold text-gray-900">{{ business()!.rating || 0 }}</span>
+                  </div>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Total Reviews</span>
+                  <span class="font-semibold text-gray-900">{{ business()!.review_count || 0 }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Profile Views</span>
+                  <span class="font-semibold text-gray-900">{{ business()!.view_count || 0 }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Services Offered</span>
+                  <span class="font-semibold text-gray-900">{{ business()!.services?.length || 0 }}</span>
+                </div>
+              </div>
+            </mat-card>
+
+            <!-- Admin Actions Card -->
+            <mat-card class="p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Admin Actions</h3>
+              <div class="space-y-3">
+                
+                <!-- Status Actions -->
+                @if (business()!.status === 'pending') {
+                  <button 
+                    mat-raised-button 
+                    color="primary" 
+                    (click)="verifyBusiness()"
+                    [disabled]="loading()"
+                    class="w-full">
+                    <mat-icon>verified</mat-icon>
+                    Verify Business
+                  </button>
+
+                  <button 
+                    mat-stroked-button 
+                    color="warn" 
+                    (click)="rejectBusiness()"
+                    [disabled]="loading()"
+                    class="w-full">
+                    <mat-icon>cancel</mat-icon>
+                    Reject Verification
+                  </button>
+                } @else if (business()!.status === 'approved') {
+                  <div class="text-center p-3 bg-green-50 rounded-lg">
+                    <mat-icon class="text-green-600 mb-2">verified</mat-icon>
+                    <p class="text-sm text-green-800 font-medium">Business is verified</p>
+                  </div>
+                } @else if (business()!.status === 'rejected') {
+                  <div class="text-center p-3 bg-red-50 rounded-lg">
+                    <mat-icon class="text-red-600 mb-2">cancel</mat-icon>
+                    <p class="text-sm text-red-800 font-medium">Business verification rejected</p>
+                  </div>
+                }
+
+                <mat-divider></mat-divider>
+
+                <!-- Featured Toggle -->
+                <button 
+                  mat-stroked-button 
+                  [color]="business()!.is_featured ? 'accent' : 'primary'"
+                  (click)="toggleFeatured()"
+                  [disabled]="loading()"
+                  class="w-full">
+                  <mat-icon>{{ business()!.is_featured ? 'star' : 'star_border' }}</mat-icon>
+                  {{ business()!.is_featured ? 'Remove Featured' : 'Make Featured' }}
+                </button>
+
+                <mat-divider></mat-divider>
+
+                <!-- Danger Zone -->
+                <div class="border border-red-200 rounded-lg p-4 bg-red-50">
+                  <h4 class="text-sm font-medium text-red-800 mb-2">Danger Zone</h4>
+                  <button 
+                    mat-stroked-button 
+                    color="warn" 
+                    (click)="deleteBusiness()"
+                    [disabled]="loading()"
+                    class="w-full">
+                    <mat-icon>delete</mat-icon>
+                    Delete Business
+                  </button>
+                </div>
+              </div>
+            </mat-card>
+
+            <!-- Owner Information Card -->
+            <mat-card class="p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Owner Information</h3>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Owner Name</label>
+                  <p class="text-gray-900">{{ getOwnerName(business()!.owner_id) }}</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Business Created</label>
+                  <p class="text-gray-900">{{ formatDate(business()!.createdAt) }}</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
+                  <p class="text-gray-900">{{ formatDate(business()!.updatedAt) }}</p>
+                </div>
+              </div>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Error State -->
+    <div class="flex-1 flex items-center justify-center">
+      <div class="text-center py-12">
+        <mat-icon class="text-gray-400 text-6xl mb-4">error</mat-icon>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Business Not Found</h3>
+        <p class="text-gray-500 mb-4">The business you're looking for could not be found.</p>
+        <button mat-raised-button color="primary" (click)="goBack()">
+          Go Back to Business List
+        </button>
+      </div>
+    </div>
+  }
+</div>

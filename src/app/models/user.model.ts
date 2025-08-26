@@ -19,6 +19,16 @@ export interface User {
   date_of_birth?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+  
+  // Admin management fields
+  is_banned?: boolean;
+  email_verified?: boolean;
+  ban_reason?: string;
+  
+  // Stripe fields
+  stripe_account_id?: string;
+  stripe_payouts_enabled?: boolean;
+  stripe_requirements_due?: string[];
 }
 
 // Request interfaces for API calls
@@ -87,4 +97,31 @@ export interface UserSession {
   access_token: string;
   refresh_token?: string;
   expires_at?: number;
+}
+
+// Admin-specific interfaces
+export interface AdminUser extends User {
+  // Additional computed properties for admin views
+  status?: 'active' | 'inactive' | 'banned';
+  role?: string;
+  last_login?: Date;
+  profile_picture?: string; // Alias for avatar_url
+  created_at?: Date; // Alias for createdAt
+}
+
+export interface BulkUserAction {
+  action: 'ban' | 'unban' | 'activate' | 'deactivate' | 'delete';
+  userIds: string[];
+  reason?: string;
+}
+
+export interface UserActivity {
+  _id: string;
+  user_id: string;
+  action: string;
+  description: string;
+  ip_address?: string;
+  user_agent?: string;
+  createdAt: Date;
+  created_at?: Date; // Alias for createdAt
 }

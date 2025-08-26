@@ -27,6 +27,34 @@ export const adminDashboardRoutes: Routes = [
             (c) => c.adminBusinessRoutes
           ),
       },
+      {
+        path: 'users',
+        loadChildren: () =>
+          import('./admin-users/admin-users.routes').then(
+            (c) => c.adminUsersRoutes
+          ),
+      },
+      {
+        path: 'services',
+        loadChildren: () =>
+          import('./admin-services/admin-services.routes').then(
+            (c) => c.adminServicesRoutes
+          ),
+      },
+      {
+        path: 'categories',
+        loadChildren: () =>
+          import('./admin-categories/admin-categories.routes').then(
+            (c) => c.adminCategoriesRoutes
+          ),
+      },
+      {
+        path: 'projects',
+        loadChildren: () =>
+          import('./admin-projects/admin-projects.routes').then(
+            (c) => c.adminProjectsRoutes
+          ),
+      },
     ],
   },
 ];

@@ -200,7 +200,7 @@
               <!-- Action Buttons -->
               @if (!editMode()) {
                 <div class="flex flex-wrap gap-3 mt-6">
-                  @if (business()!.status !== 'suspended') {
+                  @if (!business()!.is_banned) {
                     <button 
                       (click)="toggleBusinessStatus()"
                       [class]="business()!.is_active ? 'text-red-600 bg-red-50 hover:bg-red-100' : 'text-green-600 bg-green-50 hover:bg-green-100'"

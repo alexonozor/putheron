@@ -1,0 +1,396 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  <div class="p-6 max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+            Categories Management
+          </h1>
+          <p class="text-slate-600 mt-2">Manage categories and subcategories for your platform</p>
+        </div>
+        <button 
+          (click)="showCreateModal.set(true)"
+          class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+          <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Add Category
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-500 text-sm font-medium">Total Categories</p>
+            <p class="text-3xl font-bold text-gray-900">{{ totalCategories() }}</p>
+          </div>
+          <div class="bg-blue-100 p-3 rounded-lg">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-500 text-sm font-medium">Active Categories</p>
+            <p class="text-3xl font-bold text-green-600">{{ activeCategories() }}</p>
+          </div>
+          <div class="bg-green-100 p-3 rounded-lg">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-500 text-sm font-medium">Total Subcategories</p>
+            <p class="text-3xl font-bold text-purple-600">{{ totalSubcategories() }}</p>
+          </div>
+          <div class="bg-purple-100 p-3 rounded-lg">
+            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters and Actions -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="flex flex-col sm:flex-row gap-4 flex-1">
+          <!-- Search -->
+          <div class="relative flex-1 max-w-md">
+            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input 
+              type="text" 
+              (input)="onSearchChange($event)"
+              [value]="searchQuery()"
+              placeholder="Search categories..." 
+              class="pl-10 pr-4 py-3 w-full border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+          </div>
+
+          <!-- Status Filter -->
+          <select 
+            (change)="onStatusFilterChange($event)"
+            [value]="statusFilter()"
+            class="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+            <option value="all">All Status</option>
+            <option value="active">Active Only</option>
+            <option value="inactive">Inactive Only</option>
+          </select>
+
+          <!-- Sort -->
+          <select 
+            (change)="onSortChange($event)"
+            [value]="sortBy() + '-' + sortOrder()"
+            class="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+            <option value="name-asc">Name A-Z</option>
+            <option value="name-desc">Name Z-A</option>
+            <option value="createdAt-desc">Newest First</option>
+            <option value="createdAt-asc">Oldest First</option>
+            <option value="subcategory_count-desc">Most Subcategories</option>
+            <option value="subcategory_count-asc">Least Subcategories</option>
+          </select>
+        </div>
+
+        <!-- Bulk Actions -->
+        @if (selectedCategories().size > 0) {
+          <div class="flex gap-2">
+            <button 
+              (click)="bulkToggleStatus()"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 text-sm font-medium">
+              Toggle Status ({{ selectedCategories().size }})
+            </button>
+            <button 
+              (click)="bulkDelete()"
+              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 text-sm font-medium">
+              Delete ({{ selectedCategories().size }})
+            </button>
+            <button 
+              (click)="deselectAllCategories()"
+              class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 text-sm font-medium">
+              Clear Selection
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+          </svg>
+          {{ error() }}
+        </div>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex items-center justify-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span class="ml-3 text-gray-600">Loading categories...</span>
+      </div>
+    }
+
+    <!-- Categories Table -->
+    @if (!loading() && filteredCategories().length > 0) {
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <!-- Table Header -->
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">
+              Categories ({{ filteredCategories().length }})
+            </h3>
+            <div class="flex items-center gap-3">
+              @if (filteredCategories().length > 0) {
+                <button 
+                  (click)="selectedCategories().size === filteredCategories().length ? deselectAllCategories() : selectAllCategories()"
+                  class="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                  {{ selectedCategories().size === filteredCategories().length ? 'Deselect All' : 'Select All' }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Content -->
+        <div class="overflow-x-auto">
+          @for (category of filteredCategories(); track category._id) {
+            <div class="border-b border-gray-100 last:border-b-0">
+              <!-- Category Row -->
+              <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <!-- Selection Checkbox -->
+                    <input 
+                      type="checkbox"
+                      [checked]="selectedCategories().has(category._id)"
+                      (change)="toggleCategorySelection(category._id)"
+                      class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    
+                    <!-- Category Info -->
+                    <div class="flex items-center gap-4">
+                      @if (category.icon) {
+                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <i [class]="category.icon" class="text-2xl text-gray-600"></i>
+                        </div>
+                      } @else {
+                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                          </svg>
+                        </div>
+                      }
+                      <div>
+                        <h4 class="text-lg font-semibold text-gray-900">{{ category.name }}</h4>
+                        @if (category.description) {
+                          <p class="text-sm text-gray-500 mt-1">{{ category.description }}</p>
+                        }
+                        <div class="flex items-center gap-4 mt-2">
+                          <span class="text-xs text-gray-400">{{ category.slug }}</span>
+                          <span class="text-xs text-gray-400">{{ formatDate(category.createdAt) }}</span>
+                          <span class="text-xs text-gray-400">{{ category.subcategories?.length || 0 }} subcategories</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <!-- Status Badge -->
+                    <span [class]="category.is_active ? 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800' : 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800'">
+                      {{ category.is_active ? 'Active' : 'Inactive' }}
+                    </span>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-1">
+                      <!-- View Details -->
+                      <button 
+                        (click)="viewCategoryDetails(category._id)"
+                        class="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                        title="View Details">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                      </button>
+
+                      <!-- Edit Category -->
+                      <button 
+                        (click)="openEditCategoryModal(category)"
+                        class="p-2 text-gray-400 hover:text-green-600 transition-colors"
+                        title="Edit Category">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                      </button>
+
+                      <!-- Add Subcategory -->
+                      <button 
+                        (click)="openCreateSubcategoryModal(category._id)"
+                        class="p-2 text-gray-400 hover:text-purple-600 transition-colors"
+                        title="Add Subcategory">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                      </button>
+
+                      <!-- Toggle Status -->
+                      <button 
+                        (click)="toggleCategoryStatus(category)"
+                        [title]="category.is_active ? 'Deactivate' : 'Activate'"
+                        [class]="category.is_active ? 'p-2 text-red-400 hover:text-red-600 transition-colors' : 'p-2 text-green-400 hover:text-green-600 transition-colors'">
+                        @if (category.is_active) {
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
+                          </svg>
+                        } @else {
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                        }
+                      </button>
+
+                      <!-- Delete -->
+                      <button 
+                        (click)="deleteCategory(category._id)"
+                        class="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                        title="Delete Category">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Subcategories -->
+              @if (category.subcategories && category.subcategories.length > 0) {
+                <div class="bg-gray-50 border-t border-gray-100">
+                  <div class="px-6 py-3">
+                    <h5 class="text-sm font-medium text-gray-700 mb-3">
+                      Subcategories ({{ category.subcategories.length }})
+                    </h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      @for (subcategory of category.subcategories; track subcategory._id) {
+                        <div class="bg-white border border-gray-200 rounded-lg p-3 hover:border-gray-300 transition-colors">
+                          <div class="flex items-center justify-between">
+                            <div class="flex-1 min-w-0">
+                              <h6 class="text-sm font-medium text-gray-900 truncate">{{ subcategory.name }}</h6>
+                              @if (subcategory.description) {
+                                <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ subcategory.description }}</p>
+                              }
+                            </div>
+                            <div class="flex items-center gap-1 ml-2">
+                              <span [class]="subcategory.is_active ? 'w-2 h-2 bg-green-400 rounded-full' : 'w-2 h-2 bg-red-400 rounded-full'"></span>
+                              
+                              <!-- Edit Subcategory -->
+                              <button 
+                                (click)="openEditSubcategoryModal(subcategory)"
+                                class="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                title="Edit Subcategory">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                              </button>
+
+                              <!-- Toggle Subcategory Status -->
+                              <button 
+                                (click)="toggleSubcategoryStatus(subcategory)"
+                                [title]="subcategory.is_active ? 'Deactivate' : 'Activate'"
+                                class="p-1 text-gray-400 hover:text-gray-600 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                              </button>
+                              
+                              <button 
+                                (click)="deleteSubcategory(subcategory._id)"
+                                class="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                                title="Delete Subcategory">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!loading() && filteredCategories().length === 0) {
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+        </svg>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No categories found</h3>
+        <p class="text-gray-500 mb-6">Get started by creating your first category.</p>
+        <button 
+          (click)="showCreateModal.set(true)"
+          class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+          Create First Category
+        </button>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Category Form Modal -->
+<app-category-form-modal
+  [isOpen]="showCreateModal()"
+  [category]="null"
+  (close)="showCreateModal.set(false)"
+  (categoryCreated)="onCategoryCreated($event)"
+/>
+
+<app-category-form-modal
+  [isOpen]="showEditModal()"
+  [category]="selectedCategoryForEdit()"
+  (close)="showEditModal.set(false)"
+  (categoryUpdated)="onCategoryUpdated($event)"
+/>
+
+<!-- Subcategory Form Modal -->
+<app-subcategory-form-modal
+  [isOpen]="showCreateSubcategoryModal()"
+  [subcategory]="null"
+  [categories]="categoriesForDropdown()"
+  [selectedCategoryId]="selectedCategoryForSub()"
+  (close)="showCreateSubcategoryModal.set(false)"
+  (subcategoryCreated)="onSubcategoryCreated($event)"
+/>
+
+<app-subcategory-form-modal
+  [isOpen]="showEditSubcategoryModal()"
+  [subcategory]="selectedSubcategoryForEdit()"
+  [categories]="categoriesForDropdown()"
+  [selectedCategoryId]="null"
+  (close)="showEditSubcategoryModal.set(false)"
+  (subcategoryUpdated)="onSubcategoryUpdated($event)"
+/>

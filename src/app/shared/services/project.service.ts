@@ -49,12 +49,36 @@ export interface Project {
   }>;
   accepted_at?: Date | string;
   rejected_at?: Date | string;
+  business_completed_at?: Date | string;
+  client_approved_at?: Date | string;
   completed_at?: Date | string;
+  settled_at?: Date | string;
   cancelled_at?: Date | string;
   rejection_reason?: string;
   cancellation_reason?: string;
   chat_room_id?: string;
   is_archived: boolean;
+  
+  // Payment Information
+  additional_payments_total?: number;
+  additional_payment_requests?: Array<{
+    amount: number;
+    description: string;
+    requested_at: Date | string;
+    status: 'pending' | 'approved' | 'rejected' | 'paid';
+    stripe_payment_intent_id?: string;
+    paid_at?: Date | string;
+    rejected_reason?: string;
+  }>;
+  stripe_payment_intent_id?: string;
+  stripe_client_secret?: string;
+  payment_status?: 'pending' | 'processing' | 'succeeded' | 'failed' | 'cancelled';
+  stripe_fee?: number;
+  paid_at?: Date | string;
+  
+  // Admin fields
+  admin_notes?: string;
+  
   createdAt: Date | string;
   updatedAt: Date | string;
 }

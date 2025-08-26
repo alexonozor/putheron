@@ -1,20 +1,7 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTableModule } from '@angular/material/table';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
 import { BusinessService, Business } from '../../../../shared/services/business.service';
 
 @Component({
@@ -22,20 +9,7 @@ import { BusinessService, Business } from '../../../../shared/services/business.
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatTableModule,
-    MatTooltipModule,
-    MatCheckboxModule,
-    MatMenuModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatChipsModule,
-    MatDividerModule
+    FormsModule
   ],
   templateUrl: './admin-business-list.component.html',
   styleUrl: './admin-business-list.component.scss'
@@ -51,6 +25,32 @@ export class AdminBusinessListComponent implements OnInit {
   readonly searchQuery = signal('');
   readonly statusFilter = signal('all');
   readonly featuredFilter = signal('all');
+
+  // Computed properties for statistics
+  readonly approvedBusinesses = computed(() => 
+    this.businesses().filter(business => business.status === 'approved').length
+  );
+  
+  readonly pendingBusinesses = computed(() => 
+    this.businesses().filter(business => business.status === 'pending').length
+  );
+  
+  readonly featuredBusinesses = computed(() => 
+    this.businesses().filter(business => business.is_featured).length
+  );
+
+  // Selection computed properties
+  readonly allSelected = computed(() => {
+    const filtered = this.filteredBusinesses();
+    const selected = this.selectedBusinesses();
+    return filtered.length > 0 && filtered.every(business => selected.has(business._id));
+  });
+
+  readonly someSelected = computed(() => {
+    const filtered = this.filteredBusinesses();
+    const selected = this.selectedBusinesses();
+    return selected.size > 0 && selected.size < filtered.length;
+  });
 
   displayedColumns: string[] = ['select', 'name', 'owner', 'status', 'rating', 'actions'];
 
@@ -115,6 +115,15 @@ export class AdminBusinessListComponent implements OnInit {
     this.setupFilters();
   }
 
+  onSearch(query: string) {
+    this.searchQuery.set(query);
+    this.setupFilters();
+  }
+
+  onFilter() {
+    this.setupFilters();
+  }
+
   onStatusFilterChange(status: string) {
     this.statusFilter.set(status);
     this.setupFilters();
@@ -123,6 +132,46 @@ export class AdminBusinessListComponent implements OnInit {
   onFeaturedFilterChange(featured: string) {
     this.featuredFilter.set(featured);
     this.setupFilters();
+  }
+
+  // Add missing methods for the new template
+  exportBusinesses(format: string) {
+    console.log('Exporting businesses in format:', format);
+    // TODO: Implement export functionality
+  }
+
+  clearFilters() {
+    this.searchQuery.set('');
+    this.statusFilter.set('all');
+    this.featuredFilter.set('all');
+    this.setupFilters();
+  }
+
+  bulkAction(action: string) {
+    const selectedIds = Array.from(this.selectedBusinesses());
+    if (selectedIds.length === 0) return;
+
+    switch (action) {
+      case 'verify':
+        this.bulkVerifyBusinesses();
+        break;
+      case 'feature':
+        this.bulkToggleFeatured(true);
+        break;
+      case 'delete':
+        this.bulkDeleteBusinesses();
+        break;
+    }
+  }
+
+  selectAll(event: any) {
+    const isChecked = event.target.checked;
+    if (isChecked) {
+      const allIds = new Set(this.filteredBusinesses().map(b => b._id));
+      this.selectedBusinesses.set(allIds);
+    } else {
+      this.selectedBusinesses.set(new Set());
+    }
   }
 
   async loadBusinesses() {
@@ -278,7 +327,7 @@ export class AdminBusinessListComponent implements OnInit {
   }
 
   viewBusinessDetails(businessId: string) {
-    // Fix the navigation to match the new route structure
+    // Navigate to business details using the correct admin route
     this.router.navigate(['/admin/dashboard/businesses/details', businessId]);
   }
 
@@ -349,7 +398,8 @@ export class AdminBusinessListComponent implements OnInit {
     }
   }
 
-  formatDate(date: Date): string {
+  formatDate(date: Date | string): string {
+    if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
   }
 

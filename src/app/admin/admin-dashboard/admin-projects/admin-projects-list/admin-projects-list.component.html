@@ -1,0 +1,567 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  <div class="p-6 max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+            Projects Management
+          </h1>
+          <p class="text-slate-600 mt-2">Manage all projects across the platform</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button 
+            (click)="exportProjects()"
+            class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+            <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+            </svg>
+            Export
+          </button>
+          <div class="flex items-center border border-gray-300 rounded-lg bg-white">
+            <button 
+              (click)="viewMode.set('list')"
+              [class]="viewMode() === 'list' ? 'px-3 py-2 bg-blue-100 text-blue-700 rounded-l-lg' : 'px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-l-lg'">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+              </svg>
+            </button>
+            <button 
+              (click)="viewMode.set('grid')"
+              [class]="viewMode() === 'grid' ? 'px-3 py-2 bg-blue-100 text-blue-700 rounded-r-lg' : 'px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-r-lg'">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    @if (stats()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600">Total Projects</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats()!.total | number }}</p>
+              <p class="text-sm text-green-600 mt-1">{{ formatCurrency(stats()!.total_value) }} total value</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600">Active Projects</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats()!.in_progress | number }}</p>
+              <p class="text-sm text-purple-600 mt-1">{{ stats()!.accepted | number }} accepted</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600">Completed</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ stats()!.completed | number }}</p>
+              <p class="text-sm text-emerald-600 mt-1">{{ stats()!.settled | number }} settled</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-600">Completion Rate</p>
+              <p class="text-3xl font-bold text-gray-900 mt-2">{{ completionRate() }}%</p>
+              <p class="text-sm text-blue-600 mt-1">{{ stats()!.monthly_projects | number }} this month</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Filters Section -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-gray-900">Filters & Search</h3>
+          <button 
+            (click)="showAdvancedFilters.set(!showAdvancedFilters())"
+            class="text-blue-600 hover:text-blue-700 font-medium">
+            {{ showAdvancedFilters() ? 'Hide' : 'Show' }} Advanced Filters
+          </button>
+        </div>
+      </div>
+
+      <form [formGroup]="filterForm" class="p-6 space-y-4">
+        <!-- Basic Filters -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+            <input 
+              type="text" 
+              id="search"
+              formControlName="search"
+              placeholder="Search by title, client, business..."
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+          </div>
+          <div>
+            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <select 
+              id="status"
+              formControlName="status"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="accepted">Accepted</option>
+              <option value="rejected">Rejected</option>
+              <option value="in_progress">In Progress</option>
+              <option value="awaiting_client_approval">Awaiting Approval</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="settled">Settled</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <button 
+              type="button"
+              (click)="clearFilters()"
+              class="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+              Clear
+            </button>
+            <button 
+              type="button"
+              (click)="loadProjects()"
+              class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold">
+              Apply Filters
+            </button>
+          </div>
+        </div>
+
+        <!-- Advanced Filters -->
+        @if (showAdvancedFilters()) {
+          <div class="pt-4 border-t border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label for="dateFrom" class="block text-sm font-medium text-gray-700 mb-2">From Date</label>
+                <input 
+                  type="date" 
+                  id="dateFrom"
+                  formControlName="dateFrom"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+              </div>
+              <div>
+                <label for="dateTo" class="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+                <input 
+                  type="date" 
+                  id="dateTo"
+                  formControlName="dateTo"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+              </div>
+              <div>
+                <label for="minAmount" class="block text-sm font-medium text-gray-700 mb-2">Min Amount ($)</label>
+                <input 
+                  type="number" 
+                  id="minAmount"
+                  formControlName="minAmount"
+                  placeholder="0"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+              </div>
+              <div>
+                <label for="maxAmount" class="block text-sm font-medium text-gray-700 mb-2">Max Amount ($)</label>
+                <input 
+                  type="number" 
+                  id="maxAmount"
+                  formControlName="maxAmount"
+                  placeholder="10000"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+              </div>
+            </div>
+          </div>
+        }
+      </form>
+    </div>
+
+    <!-- Error Message -->
+    @if (error()) {
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+          </svg>
+          {{ error() }}
+        </div>
+      </div>
+    }
+
+    <!-- Bulk Actions -->
+    @if (selectedCount() > 0) {
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <span class="text-sm font-medium text-gray-700">{{ selectedCount() }} projects selected</span>
+            <button 
+              (click)="clearSelection()"
+              class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+              Clear Selection
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <select 
+              (change)="bulkUpdateStatus($any($event).target.value)"
+              class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+              <option value="">Update Status</option>
+              <option value="accepted">Mark as Accepted</option>
+              <option value="rejected">Mark as Rejected</option>
+              <option value="in_progress">Mark as In Progress</option>
+              <option value="completed">Mark as Completed</option>
+              <option value="cancelled">Mark as Cancelled</option>
+            </select>
+            <button 
+              (click)="bulkArchive(true)"
+              class="px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm font-medium">
+              Archive Selected
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Projects List -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <!-- Loading State -->
+      @if (loading()) {
+        <div class="flex items-center justify-center py-12">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span class="ml-3 text-gray-600">Loading projects...</span>
+        </div>
+      }
+
+      @if (!loading() && projects() && projects().length > 0) {
+        @if (viewMode() === 'list') {
+          <!-- List View -->
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th class="px-6 py-4 text-left">
+                    <input 
+                      type="checkbox"
+                      [checked]="allProjectsSelected()"
+                      [indeterminate]="someProjectsSelected()"
+                      (change)="toggleAllSelection()"
+                      class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                  </th>
+                  <th class="px-6 py-4 text-left">
+                    <button 
+                      (click)="onSortChange('createdAt')"
+                      class="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                      Project
+                      @if (sortBy() === 'createdAt') {
+                        <svg [class]="sortOrder() === 'asc' ? 'w-4 h-4 text-blue-600' : 'w-4 h-4 text-blue-600 rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                        </svg>
+                      }
+                    </button>
+                  </th>
+                  <th class="px-6 py-4 text-left">
+                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Client/Business</span>
+                  </th>
+                  <th class="px-6 py-4 text-left">
+                    <button 
+                      (click)="onSortChange('offered_price')"
+                      class="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                      Value
+                      @if (sortBy() === 'offered_price') {
+                        <svg [class]="sortOrder() === 'asc' ? 'w-4 h-4 text-blue-600' : 'w-4 h-4 text-blue-600 rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                        </svg>
+                      }
+                    </button>
+                  </th>
+                  <th class="px-6 py-4 text-left">
+                    <button 
+                      (click)="onSortChange('status')"
+                      class="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                      Status
+                      @if (sortBy() === 'status') {
+                        <svg [class]="sortOrder() === 'asc' ? 'w-4 h-4 text-blue-600' : 'w-4 h-4 text-blue-600 rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                        </svg>
+                      }
+                    </button>
+                  </th>
+                  <th class="px-6 py-4 text-left">
+                    <button 
+                      (click)="onSortChange('deadline')"
+                      class="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                      Deadline
+                      @if (sortBy() === 'deadline') {
+                        <svg [class]="sortOrder() === 'asc' ? 'w-4 h-4 text-blue-600' : 'w-4 h-4 text-blue-600 rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                        </svg>
+                      }
+                    </button>
+                  </th>
+                  <th class="px-6 py-4 text-right">
+                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                @for (project of projects() || []; track project._id) {
+                  <tr [class]="'hover:bg-gray-50 transition-colors ' + getProjectPriorityColor(project)">
+                    <td class="px-6 py-4">
+                      <input 
+                        type="checkbox"
+                        [checked]="selectedProjects().has(project._id)"
+                        (change)="toggleProjectSelection(project._id)"
+                        class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="flex items-start">
+                        <div class="flex-1 min-w-0">
+                          <h4 class="text-sm font-semibold text-gray-900 truncate cursor-pointer hover:text-blue-600" 
+                              (click)="viewProjectDetails(project._id)">
+                            {{ project.title }}
+                          </h4>
+                          @if (project.description) {
+                            <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ project.description }}</p>
+                          }
+                          <p class="text-xs text-gray-400 mt-1">{{ formatDate(project.createdAt) }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="text-sm">
+                        <div class="font-medium text-gray-900">{{ getClientName(project) }}</div>
+                        <div class="text-gray-500">{{ getBusinessName(project) }}</div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="text-lg font-semibold text-gray-900">{{ formatCurrency(project.offered_price) }}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ' + getStatusColor(project.status)">
+                        {{ getStatusLabel(project.status) }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="text-sm">
+                        @if (project.deadline) {
+                          <div [class]="getDaysUntilDeadline(project)! < 0 ? 'text-red-600 font-medium' : getDaysUntilDeadline(project)! <= 3 ? 'text-orange-600 font-medium' : 'text-gray-700'">
+                            {{ getDeadlineText(project) }}
+                          </div>
+                          <div class="text-gray-500 text-xs">{{ formatDate(project.deadline) }}</div>
+                        } @else {
+                          <span class="text-gray-400">No deadline</span>
+                        }
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <button 
+                          (click)="viewProjectDetails(project._id)"
+                          class="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                          title="View Details">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                          </svg>
+                        </button>
+                        <button 
+                          (click)="toggleArchiveProject(project)"
+                          [class]="project.is_archived ? 'p-2 text-gray-400 hover:text-green-600 transition-colors' : 'p-2 text-gray-400 hover:text-orange-600 transition-colors'"
+                          [title]="project.is_archived ? 'Unarchive' : 'Archive'">
+                          @if (project.is_archived) {
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                          } @else {
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                            </svg>
+                          }
+                        </button>
+                        <button 
+                          (click)="deleteProject(project)"
+                          class="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                          title="Delete">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <!-- Grid View -->
+          <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              @for (project of projects() || []; track project._id) {
+                <div [class]="'bg-white border border-gray-200 rounded-xl p-6 hover:border-gray-300 transition-colors ' + getProjectPriorityColor(project)">
+                  <div class="flex items-start justify-between mb-4">
+                    <input 
+                      type="checkbox"
+                      [checked]="selectedProjects().has(project._id)"
+                      (change)="toggleProjectSelection(project._id)"
+                      class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <span [class]="'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ' + getStatusColor(project.status)">
+                      {{ getStatusLabel(project.status) }}
+                    </span>
+                  </div>
+                  
+                  <h4 class="text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-blue-600" 
+                      (click)="viewProjectDetails(project._id)">
+                    {{ project.title }}
+                  </h4>
+                  
+                  @if (project.description) {
+                    <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ project.description }}</p>
+                  }
+                  
+                  <div class="space-y-2 mb-4">
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-500">Client:</span>
+                      <span class="font-medium">{{ getClientName(project) }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-500">Business:</span>
+                      <span class="font-medium">{{ getBusinessName(project) }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-500">Value:</span>
+                      <span class="font-semibold text-lg">{{ formatCurrency(project.offered_price) }}</span>
+                    </div>
+                    @if (project.deadline) {
+                      <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">Deadline:</span>
+                        <span [class]="getDaysUntilDeadline(project)! < 0 ? 'text-red-600 font-medium' : getDaysUntilDeadline(project)! <= 3 ? 'text-orange-600 font-medium' : 'text-gray-700'">
+                          {{ getDeadlineText(project) }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+                  
+                  <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                    <span class="text-xs text-gray-500">{{ formatDate(project.createdAt) }}</span>
+                    <div class="flex items-center gap-2">
+                      <button 
+                        (click)="viewProjectDetails(project._id)"
+                        class="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                        title="View Details">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                      </button>
+                      <button 
+                        (click)="toggleArchiveProject(project)"
+                        [class]="project.is_archived ? 'p-2 text-gray-400 hover:text-green-600 transition-colors' : 'p-2 text-gray-400 hover:text-orange-600 transition-colors'"
+                        [title]="project.is_archived ? 'Unarchive' : 'Archive'">
+                        @if (project.is_archived) {
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                        } @else {
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                          </svg>
+                        }
+                      </button>
+                      <button 
+                        (click)="deleteProject(project)"
+                        class="p-2 text-gray-400 hover:text-red-600 transition-colors"
+                        title="Delete">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-700">
+                Showing {{ ((currentPage() - 1) * perPage) + 1 }} to {{ Math.min(currentPage() * perPage, totalProjects()) }} of {{ totalProjects() }} projects
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button 
+                (click)="onPageChange(currentPage() - 1)"
+                [disabled]="currentPage() === 1"
+                class="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                Previous
+              </button>
+              
+              @for (page of [].constructor(totalPages()); let i = $index; track i) {
+                <button 
+                  (click)="onPageChange(i + 1)"
+                  [class]="currentPage() === (i + 1) ? 'px-3 py-2 bg-blue-600 text-white rounded-lg' : 'px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors'">
+                  {{ i + 1 }}
+                </button>
+              }
+              
+              <button 
+                (click)="onPageChange(currentPage() + 1)"
+                [disabled]="currentPage() === totalPages()"
+                class="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                Next
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Empty State -->
+      @if (!loading() && (!projects() || projects().length === 0)) {
+        <div class="p-12 text-center">
+          <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">No projects found</h3>
+          <p class="text-gray-500 mb-6">Try adjusting your search criteria or filters.</p>
+          <button 
+            (click)="clearFilters()"
+            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold">
+            Clear Filters
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>
