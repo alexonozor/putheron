@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center py-4">
             <div class="flex items-center">
                 <a routerLink="/" class="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors">
-                    PutHerOn
+                    VouchHer
                 </a>
             </div>
             <div class="hidden md:flex items-center space-x-8">
@@ -95,12 +95,7 @@
                     </div>
                 } @else {
                     <!-- Guest User -->
-                    <a 
-                        (click)="navigateToOwnBusiness()" 
-                        class="text-gray-700 hover:text-blue-600 transition-colors cursor-pointer"
-                    >
-                        Own a Business
-                    </a>
+                
                     <a routerLink="/auth" class="text-gray-700 hover:text-blue-600 transition-colors">
                         Sign In
                     </a>

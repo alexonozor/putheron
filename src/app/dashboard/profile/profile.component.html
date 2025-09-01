@@ -103,7 +103,7 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="w-full">
-                  <mat-label>Country of Origin</mat-label>
+                  <mat-label>Heritage</mat-label>
                   <mat-select formControlName="country_of_origin">
                     @for (country of countries; track country.code) {
                       <mat-option [value]="country.code">{{ country.name }}</mat-option>
@@ -111,7 +111,7 @@
                   </mat-select>
                   <mat-icon matSuffix>home</mat-icon>
                   @if (profileForm.get('country_of_origin')?.hasError('required') && profileForm.get('country_of_origin')?.touched) {
-                    <mat-error>Country of origin is required</mat-error>
+                    <mat-error>Heritage is required</mat-error>
                   }
                 </mat-form-field>
               </div>

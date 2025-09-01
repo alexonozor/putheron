@@ -7,10 +7,16 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   --mdc-outlined-text-field-hover-outline-color: transparent;
   --mdc-outlined-text-field-focus-outline-color: transparent;
 }
-
- .hero-video {
-            filter: brightness(0.9);
-        }
+:root {
+    --brand-bg: #0b0b0e;   /* default dark */
+    --brand-emerald: #2E8B57;
+    --brand-terracotta: #E2725B;
+    --brand-purple: #6A0DAD; /* optional accent */
+  }
+  
+  .hero-bg {
+    background: #0b0b0e; /* your dark color */
+  }
         .search-input {
             transition: all 0.3s ease;
         }

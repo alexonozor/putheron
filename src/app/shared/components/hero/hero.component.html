@@ -1,31 +1,13 @@
-<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
-    <!-- Background Video -->
-    <video 
-        class="absolute inset-0 w-full h-full object-cover hero-video"
-        autoplay 
-        muted 
-        loop
-        playsinline
-    >
-        <source src="https://fiverr-res.cloudinary.com/video/upload/v1/video-attachments/generic_asset/asset/18ad23debdc5ce914d67939eceb5fc27-1738830703211/Desktop%20Header%20new%20version" type="video/mp4">
-        <source src="https://fiverr-res.cloudinary.com/video/upload/v1/video-attachments/generic_asset/asset/18ad23debdc5ce914d67939eceb5fc27-1738830703211/Desktop%20Header%20new%20version" type="video/mp4">
-        <!-- Fallback -->
-        <source src="https://fiverr-res.cloudinary.com/video/upload/v1/video-attachments/generic_asset/asset/18ad23debdc5ce914d67939eceb5fc27-1738830703211/Desktop%20Header%20new%20version" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden hero-bg">
 
-    <!-- Overlay -->
-    <div class="absolute inset-0 "></div>
-
-    <!-- Content -->
     <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center fade-in">
         <h2 class="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Find Her Business<br>
-            <span class="text-blue-400">Back Her Roots</span>
+            <br>
+            <span class="text-blue-400">Your Shortcut to Women-Owned Businesses</span>
         </h2>
         
         <p class="text-xl md:text-2xl text-gray-200 mb-12 max-w-3xl mx-auto">
-            Connect with verified women-owned and minority-owned businesses across America.
+            Discover, support and Vouch for women entrepreneurs across the U.S.
         </p>
 
         <!-- Search Bar with Country Selection -->
@@ -116,20 +98,27 @@
             </button>
             <button 
                 type="button"
-                (click)="onPopularSearch('Consulting')"
+                (click)="onPopularSearch('Financial Advisor')"
                 class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
             >
-                Consulting
+                Financial Advisor
             </button>
+            <button 
+            type="button"
+            (click)="onPopularSearch('Legal')"
+            class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
+        >
+            Legal
+        </button>
         </div>
 
         <!-- CTA Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <button class="cta-button text-white px-8 py-4 rounded-xl font-semibold text-lg">
-                Find Businesses
+                Find Her Business
             </button>
             <button class="bg-white/20 backdrop-blur-sm border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-gray-800 transition-all">
-                List Your Business
+                List A Business
             </button>
         </div>
 
@@ -144,8 +133,8 @@
                 <div class="text-sm">Businesses Listed</div>
             </div>
             <div class="text-center">
-                <div class="text-3xl font-bold text-blue-400">1million+</div>
-                <div class="text-sm">Verified WBE MBE Certified</div>
+                <div class="text-3xl font-bold text-blue-400">Countless</div>
+                <div class="text-sm">Connections made</div>
             </div>
         </div>
     </div>
