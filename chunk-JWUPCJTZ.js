@@ -1,0 +1,1 @@
+import"./chunk-QEZ3K4DX.js";var o=[{path:"",loadComponent:()=>import("./chunk-3KS63EXP.js").then(t=>t.AdminProjectsListComponent),title:"Admin Projects Management"},{path:":id",loadComponent:()=>import("./chunk-M55Y5JWR.js").then(t=>t.AdminProjectDetailsComponent),title:"Project Details"}];export{o as adminProjectsRoutes};
