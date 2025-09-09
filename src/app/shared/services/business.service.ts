@@ -968,5 +968,28 @@ export class BusinessService {
     }
     return response.data;
   }
+
+  // Admin method to get all businesses in the system
+  adminGetAllBusinesses(
+    page = 1, 
+    limit = 20, 
+    filters?: {
+      status?: string;
+      isFeatured?: boolean;
+      isActive?: boolean;
+      categoryId?: string;
+      search?: string;
+    }
+  ): Observable<ApiResponse<{ businesses: Business[], total: number, page: number, limit: number }>> {
+    let url = `${this.config.apiBaseUrl}/admin/businesses?page=${page}&limit=${limit}`;
+    
+    if (filters?.status) url += `&status=${filters.status}`;
+    if (filters?.isFeatured !== undefined) url += `&isFeatured=${filters.isFeatured}`;
+    if (filters?.isActive !== undefined) url += `&isActive=${filters.isActive}`;
+    if (filters?.categoryId) url += `&categoryId=${filters.categoryId}`;
+    if (filters?.search) url += `&search=${filters.search}`;
+
+    return this.http.get<ApiResponse<{ businesses: Business[], total: number, page: number, limit: number }>>(url);
+  }
 // }
 }

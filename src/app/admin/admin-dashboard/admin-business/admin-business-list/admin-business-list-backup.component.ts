@@ -74,7 +74,6 @@ export class AdminBusinessListComponent implements OnInit {
   }
 
   setupFilters() {
-    console.log('Setting up filters...');
     // Watch for changes in search and filters
     const updateFilters = () => {
       const query = this.searchQuery().toLowerCase();
@@ -82,7 +81,6 @@ export class AdminBusinessListComponent implements OnInit {
       const featured = this.featuredFilter();
       
       let filtered = this.businesses();
-      console.log('Current businesses in updateFilters:', filtered.length);
       
       // Apply search filter
       if (query) {
@@ -106,9 +104,7 @@ export class AdminBusinessListComponent implements OnInit {
         filtered = filtered.filter(business => !business.is_featured);
       }
       
-      console.log('Filtered businesses count:', filtered.length);
       this.filteredBusinesses.set(filtered);
-      console.log('After setting filteredBusinesses, filteredBusinesses():', this.filteredBusinesses());
     };
 
     // Initial filter setup
@@ -188,14 +184,8 @@ export class AdminBusinessListComponent implements OnInit {
       
       if (response?.success && response?.data) {
         console.log('Setting businesses:', response.data.businesses);
-        console.log('Businesses length:', response.data.businesses.length);
-        
         this.businesses.set(response.data.businesses);
-        console.log('After setting businesses signal, businesses():', this.businesses());
-        
-        this.setupFilters(); // Trigger filters to update filteredBusinesses
-        
-        console.log('After setupFilters, filteredBusinesses():', this.filteredBusinesses());
+        this.filteredBusinesses.set(response.data.businesses);
         console.log('Businesses set, count:', response.data.businesses.length);
       } else {
         console.log('Response not successful or no data:', response);
