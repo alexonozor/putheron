@@ -91,13 +91,13 @@ export class OwnBusinessComponent {
     {
       name: 'Sarah Johnson',
       business: 'Digital Marketing Consultant',
-      quote: 'PutHerOn helped me connect with clients I never would have reached otherwise. My revenue increased by 300% in just 6 months!',
+      quote: 'VouchHer helped me connect with clients I never would have reached otherwise. My revenue increased by 300% in just 6 months!',
       avatar: 'assets/images/testimonial-1.jpg'
     },
     {
       name: 'Michael Chen',
       business: 'Web Development Agency',
-      quote: 'The platform makes it so easy to showcase our work and manage client relationships. We\'ve landed several major contracts through PutHerOn.',
+      quote: 'The platform makes it so easy to showcase our work and manage client relationships. We\'ve landed several major contracts through VouchHer.',
       avatar: 'assets/images/testimonial-2.jpg'
     },
     {
