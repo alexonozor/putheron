@@ -10,7 +10,7 @@ import { businessModeGuard } from '../shared/guards/business-mode.guard';
 
 
 export const DASHBOARD_ROUTES: Routes = [
-  { path: '', redirectTo: 'projects', pathMatch: 'full' }, // Default to projects for all users
+  { path: '', redirectTo: 'overview', pathMatch: 'full' }, // Default to projects for all users
   { path: 'overview', component: OverviewsComponent, canActivate: [businessModeGuard] },
 
   { 
@@ -31,6 +31,10 @@ export const DASHBOARD_ROUTES: Routes = [
       path: 'messages',
       loadChildren: () => import('./messages/messages.route').then(m => m.MESSAGES_ROUTES)
     },
+  { 
+    path: 'favorites', 
+    loadComponent: () => import('./favorites/favorites.component').then(m => m.FavoritesComponent)
+  },
   { path: 'projects', component: ProjectsComponent },
   { path: 'projects/:id', component: ProjectDetailsComponent },
   { path: 'earnings', component: EarningsComponent, canActivate: [businessModeGuard] },

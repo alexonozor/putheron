@@ -1,0 +1,15 @@
+<button
+  mat-icon-button
+  [class]="buttonClass"
+  [disabled]="loading() || !isAuthenticated()"
+  [matTooltip]="getTooltipText()"
+  (click)="onFavoriteClick()">
+  
+  @if (loading()) {
+    <mat-icon class="animate-spin">refresh</mat-icon>
+  } @else {
+    <mat-icon [class]="getIconClass()">
+      {{ isFavorited() ? 'favorite' : 'favorite_border' }}
+    </mat-icon>
+  }
+</button>

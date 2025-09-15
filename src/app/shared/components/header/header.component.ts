@@ -7,7 +7,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../services/auth.service';
-import { NotificationNavComponent } from '../notification-nav.component';
+import { NotificationNavComponent } from '../notification-nav/notification-nav.component';
 
 @Component({
   selector: 'app-header',

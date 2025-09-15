@@ -1,0 +1,30 @@
+ <div class="p-6">
+      <div class="flex items-center mb-4">
+        @if (data.icon) {
+          <mat-icon 
+            [class]="getIconClass()"
+            class="mr-3 text-3xl">
+            {{ data.icon }}
+          </mat-icon>
+        }
+        <h2 class="text-xl font-semibold text-gray-900">{{ data.title }}</h2>
+      </div>
+      
+      <p class="text-gray-600 mb-6 leading-relaxed">{{ data.message }}</p>
+      
+      <div class="flex justify-end gap-3">
+        <button 
+          mat-stroked-button
+          (click)="onCancel()"
+          class="px-4 py-2">
+          {{ data.cancelText || 'Cancel' }}
+        </button>
+        <button 
+          mat-raised-button
+          [class]="getConfirmButtonClass()"
+          (click)="onConfirm()"
+          class="px-4 py-2">
+          {{ data.confirmText || 'Confirm' }}
+        </button>
+      </div>
+    </div>

@@ -125,6 +125,8 @@ export interface Business {
   rating: number;
   review_count: number;
   view_count: number;
+  favorites_count?: number; // Number of users who favorited this business
+  is_favorited?: boolean;   // Whether current user has favorited this business
   meta_title?: string;
   meta_description?: string;
   createdAt: Date;

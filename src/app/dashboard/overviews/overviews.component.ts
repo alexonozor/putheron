@@ -4,6 +4,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
 import { BusinessService, Business } from '../../shared/services/business.service';
 import { ProjectService } from '../../shared/services/project.service';
+import { FavoritesService } from '../../shared/services/favorites.service';
 
 @Component({
   selector: 'app-overviews',
@@ -18,11 +19,13 @@ export class OverviewsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly businessService = inject(BusinessService);
   private readonly projectService = inject(ProjectService);
+  private readonly favoritesService = inject(FavoritesService);
 
   // Signals for overview state
   readonly userBusinesses = signal<Business[]>([]);
   readonly userServices = signal<any[]>([]);
   readonly userProjects = signal<any[]>([]);
+  readonly businessesFavoritesCount = signal<{[businessId: string]: number}>({});
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly activeTab = signal<string>('overview');
@@ -82,6 +85,18 @@ export class OverviewsComponent implements OnInit {
         this.userProjects.set([]);
       }
 
+      // Load favorites count for user's businesses
+      if (businesses.length > 0) {
+        try {
+          const businessIds = businesses.map(b => b._id);
+          const favoritesCount = await this.favoritesService.getMultipleBusinessesFavoritesCount(businessIds);
+          this.businessesFavoritesCount.set(favoritesCount);
+        } catch (err) {
+          console.warn('Failed to load businesses favorites count:', err);
+          this.businessesFavoritesCount.set({});
+        }
+      }
+
     } catch (err: any) {
       console.error('Error loading dashboard data:', err);
       this.error.set(err.message || 'Failed to load dashboard data');
@@ -101,6 +116,11 @@ export class OverviewsComponent implements OnInit {
 
   getTotalProjects(): number {
     return this.totalProjects();
+  }
+
+  getTotalFavorites(): number {
+    const favoritesCount = this.businessesFavoritesCount();
+    return Object.values(favoritesCount).reduce((total, count) => total + count, 0);
   }
 
   // Navigation methods

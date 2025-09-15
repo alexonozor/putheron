@@ -2,8 +2,10 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { BusinessService, Business } from '../../../../shared/services/business.service';
+import { ConfigService } from '../../../../shared/services/config.service';
 
 @Component({
   selector: 'app-admin-business-list',
@@ -17,6 +19,8 @@ import { BusinessService, Business } from '../../../../shared/services/business.
 })
 export class AdminBusinessListComponent implements OnInit {
   private readonly businessService = inject(BusinessService);
+  private readonly http = inject(HttpClient);
+  private readonly config = inject(ConfigService);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
@@ -183,25 +187,50 @@ export class AdminBusinessListComponent implements OnInit {
     this.loading.set(true);
     try {
       console.log('Loading businesses...');
-      const response = await firstValueFrom(this.businessService.adminGetAllBusinesses(1, 1000));
-      console.log('API Response:', response);
       
-      if (response?.success && response?.data) {
-        console.log('Setting businesses:', response.data.businesses);
-        console.log('Businesses length:', response.data.businesses.length);
-        
-        this.businesses.set(response.data.businesses);
-        console.log('After setting businesses signal, businesses():', this.businesses());
-        
-        this.setupFilters(); // Trigger filters to update filteredBusinesses
-        
-        console.log('After setupFilters, filteredBusinesses():', this.filteredBusinesses());
-        console.log('Businesses set, count:', response.data.businesses.length);
+      // Make direct HTTP call to handle the actual response format
+      const url = `${this.config.apiBaseUrl}/admin/businesses?page=1&limit=1000`;
+      console.log('Making request to:', url);
+      
+      const response: any = await firstValueFrom(
+        this.http.get(url)
+      );
+      
+      console.log('Full API Response:', response);
+      
+      // Handle the actual response format from your API
+      let businessesData: any[] = [];
+      
+      if (response?.businesses && Array.isArray(response.businesses)) {
+        businessesData = response.businesses;
+        console.log('Found businesses in response.businesses');
+      } else if (response?.data?.businesses && Array.isArray(response.data.businesses)) {
+        businessesData = response.data.businesses;
+        console.log('Found businesses in response.data.businesses');
+      } else if (Array.isArray(response)) {
+        businessesData = response;
+        console.log('Response is direct array');
       } else {
-        console.log('Response not successful or no data:', response);
+        console.log('Could not find businesses in response');
+        console.log('Response keys:', Object.keys(response || {}));
       }
+      
+      console.log('Extracted businesses data:', businessesData);
+      console.log('Businesses length:', businessesData.length);
+      
+      this.businesses.set(businessesData);
+      console.log('After setting businesses signal, businesses():', this.businesses());
+      console.log('Businesses signal length:', this.businesses().length);
+      
+      this.setupFilters(); // Trigger filters to update filteredBusinesses
+      
+      console.log('After setupFilters, filteredBusinesses():', this.filteredBusinesses());
+      console.log('FilteredBusinesses length:', this.filteredBusinesses().length);
+      console.log('Businesses set, count:', businessesData.length);
+      
     } catch (error: any) {
       console.error('Error loading businesses:', error);
+      console.error('Error details:', error.message, error.status, error.error);
     } finally {
       this.loading.set(false);
     }

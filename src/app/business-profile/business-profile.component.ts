@@ -7,6 +7,7 @@ import { ProjectService, Project } from '../shared/services/project.service';
 import { ReviewService } from '../shared/services/review.service';
 import { User } from '../models/user.model';
 import { HeaderComponent } from '../shared/components/header/header.component';
+import { FavoriteButtonComponent } from '../shared/components/favorite-button/favorite-button.component';
 
 @Component({
   selector: 'app-business-profile',
@@ -14,6 +15,7 @@ import { HeaderComponent } from '../shared/components/header/header.component';
   imports: [
     CommonModule,
     HeaderComponent,
+    FavoriteButtonComponent,
   ],
   templateUrl: './business-profile.component.html',
   styleUrl: './business-profile.component.scss'

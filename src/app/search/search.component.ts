@@ -19,6 +19,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { HeaderComponent } from '../shared/components/header/header.component';
 import { BusinessService, Business } from '../shared/services/business.service';
 import { CategoryService } from '../shared/services/category-new.service';
+import { FavoriteButtonComponent } from '../shared/components/favorite-button/favorite-button.component';
 import { AuthService } from '../shared/services/auth.service';
 import { COUNTRIES } from '../shared/data/countries';
 
@@ -42,7 +43,8 @@ import { COUNTRIES } from '../shared/data/countries';
     MatExpansionModule,
     MatDividerModule,
     MatTooltipModule,
-    HeaderComponent
+    HeaderComponent,
+    FavoriteButtonComponent
   ],
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss']

@@ -28,7 +28,7 @@ import {
   WithdrawalMethod,
   CreateWithdrawalRequest 
 } from '../../models/withdrawal.model';
-import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../shared/components/confirmation-dialog.component';
+import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 interface WalletSummary {
   active_orders: number;        // Computed from accepted/in_progress projects

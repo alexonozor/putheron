@@ -1,0 +1,177 @@
+ <div class="min-h-screen bg-gray-50">
+      <!-- Header -->
+      <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                <mat-icon class="mr-3 text-red-500">favorite</mat-icon>
+                My Favorite Businesses
+              </h1>
+              <p class="mt-1 text-gray-600">
+                Businesses you've saved for easy access
+              </p>
+            </div>
+            
+            @if (validFavorites().length > 0) {
+              <div class="flex items-center space-x-4">
+                <span class="text-sm text-gray-500">
+                  {{ validFavorites().length }} {{ validFavorites().length === 1 ? 'favorite' : 'favorites' }}
+                </span>
+                <button
+                  mat-button
+                  color="primary"
+                  (click)="searchBusinesses()"
+                  class="text-blue-600 hover:text-blue-700">
+                  <mat-icon class="mr-2">search</mat-icon>
+                  Find More Businesses
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @if (loading()) {
+          <!-- Loading State -->
+          <div class="flex justify-center items-center py-20">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span class="ml-4 text-gray-600">Loading your favorites...</span>
+          </div>
+        } @else if (error()) {
+          <!-- Error State -->
+          <div class="text-center py-20">
+            <mat-icon class="text-gray-400 text-6xl mb-4">error_outline</mat-icon>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Failed to load favorites</h3>
+            <p class="text-gray-600 mb-6">{{ error() }}</p>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="loadFavorites()">
+              <mat-icon class="mr-2">refresh</mat-icon>
+              Try Again
+            </button>
+          </div>
+        } @else if (validFavorites().length === 0) {
+          <!-- Empty State -->
+          <div class="text-center py-20">
+            <mat-icon class="text-gray-400 text-6xl mb-4">favorite_border</mat-icon>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No favorites yet</h3>
+            <p class="text-gray-600 mb-6">
+              Start exploring and save businesses you're interested in for easy access later.
+            </p>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="searchBusinesses()">
+              <mat-icon class="mr-2">search</mat-icon>
+              Explore Businesses
+            </button>
+          </div>
+        } @else {
+          <!-- Favorites Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (favorite of validFavorites(); track favorite._id) {
+              <mat-card class="h-full hover:shadow-lg transition-shadow duration-200 cursor-pointer group"
+                        (click)="viewBusiness(getBusiness(favorite))">
+                
+                <!-- Business Banner -->
+                <div class="relative h-32 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                  @if (getBusiness(favorite)?.banner_url) {
+                    <img 
+                      [src]="getBusiness(favorite)?.banner_url" 
+                      [alt]="getBusiness(favorite)?.name + ' banner'"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                  } @else {
+                    <div class="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                      <mat-icon class="text-white text-4xl opacity-60">business</mat-icon>
+                    </div>
+                  }
+                  
+                  <!-- Favorite Button Overlay -->
+                  <div class="absolute top-3 right-3" (click)="$event.stopPropagation()">
+                    <app-favorite-button
+                      [businessId]="getBusiness(favorite)!._id"
+                      [businessName]="getBusiness(favorite)!.name"
+                      buttonClass="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-md">
+                    </app-favorite-button>
+                  </div>
+                </div>
+
+                <!-- Business Logo -->
+                <div class="flex justify-center -mt-8 mb-4 relative z-10">
+                  <div class="w-16 h-16 rounded-full bg-white shadow-lg ring-2 ring-white overflow-hidden">
+                    @if (getBusiness(favorite)?.logo_url) {
+                      <img 
+                        [src]="getBusiness(favorite)?.logo_url" 
+                        [alt]="getBusiness(favorite)?.name + ' logo'"
+                        class="w-full h-full object-cover">
+                    } @else {
+                      <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <mat-icon class="text-gray-400">business</mat-icon>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <mat-card-content class="text-center">
+                  <!-- Business Name -->
+                  <h3 class="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                    {{ getBusiness(favorite)!.name }}
+                  </h3>
+                  
+                  <!-- Category -->
+                  <p class="text-sm text-gray-600 mb-2">
+                    {{ getBusiness(favorite)!.category_id ? getBusiness(favorite)!.category_id!.name : 'Business' }}
+                  </p>
+                  
+                  <!-- Location -->
+                  @if (getBusiness(favorite)!.city && getBusiness(favorite)!.state) {
+                    <p class="text-xs text-gray-500 flex items-center justify-center mb-3">
+                      <mat-icon class="w-4 h-4 mr-1">location_on</mat-icon>
+                      {{ getBusiness(favorite)!.city }}, {{ getBusiness(favorite)!.state }}
+                    </p>
+                  }
+                  
+                  <!-- Description -->
+                  <p class="text-sm text-gray-600 mb-4 line-clamp-2">
+                    {{ getBusiness(favorite)!.description || 'Professional service provider' }}
+                  </p>
+                  
+                  <!-- Rating -->
+                  <div class="flex items-center justify-center mb-4">
+                    @if (getBusiness(favorite)!.rating && getBusiness(favorite)!.rating > 0) {
+                      <div class="flex items-center gap-1">
+                        <mat-icon class="text-yellow-400 text-sm">star</mat-icon>
+                        <span class="text-sm font-bold text-gray-900">{{ getBusiness(favorite)!.rating.toFixed(1) }}</span>
+                        <span class="text-xs text-gray-500">({{ getBusiness(favorite)!.review_count || 0 }} reviews)</span>
+                      </div>
+                    } @else {
+                      <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">New business</span>
+                    }
+                  </div>
+                  
+                  <!-- Added Date -->
+                  <div class="text-xs text-gray-500 bg-gray-50 px-3 py-1 rounded-full inline-block">
+                    Added {{ formatDate(favorite.createdAt) }}
+                  </div>
+                </mat-card-content>
+
+                <mat-card-actions class="flex justify-between px-4 pb-4">
+                  <button
+                    mat-button
+                    color="primary"
+                    (click)="$event.stopPropagation(); viewBusiness(getBusiness(favorite))"
+                    class="flex-1">
+                    <mat-icon class="mr-2">visibility</mat-icon>
+                    View Details
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            }
+          </div>
+        }
+      </div>
+    </div>

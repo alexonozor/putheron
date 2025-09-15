@@ -1,0 +1,32 @@
+.favorite-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.favorite-button:hover {
+  transform: scale(1.1);
+}
+
+.favorite-icon {
+  transition: color 0.2s ease-in-out;
+}
+
+.favorite-icon-active {
+  color: #ef4444; /* red-500 */
+}
+
+.favorite-icon-inactive {
+  color: #6b7280; /* gray-500 */
+}
+
+.favorite-icon-inactive:hover {
+  color: #ef4444; /* red-500 */
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

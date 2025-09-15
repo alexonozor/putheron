@@ -272,13 +272,26 @@
                   </div>
                 </div>
                 
-                <!-- View count or additional business info -->
-                @if (business.view_count > 0) {
-                  <div class="text-xs text-gray-500 flex items-center">
-                    <mat-icon class="w-3 h-3 mr-1 text-xs">visibility</mat-icon>
-                    {{ business.view_count }}
+                <!-- Favorite Button and View Count -->
+                <div class="flex items-center gap-2">
+                  <!-- Favorite Button (stops click propagation) -->
+                  <div (click)="$event.stopPropagation()">
+                    <app-favorite-button
+                      [businessId]="business._id"
+                      [businessName]="business.name"
+                      size="small"
+                      buttonClass="text-gray-500 hover:text-red-500 transition-colors p-1">
+                    </app-favorite-button>
                   </div>
-                }
+                  
+                  <!-- View count -->
+                  @if (business.view_count > 0) {
+                    <div class="text-xs text-gray-500 flex items-center">
+                      <mat-icon class="w-3 h-3 mr-1 text-xs">visibility</mat-icon>
+                      {{ business.view_count }}
+                    </div>
+                  }
+                </div>
               </div>
             </div>
           </div>

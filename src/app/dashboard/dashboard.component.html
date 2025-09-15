@@ -218,16 +218,37 @@
             </a>
           </li>
           
-          <!-- Find Business - Available to Both Modes -->
+          <!-- My Favorites - Available to Both Modes -->
+          <li>
+            <a 
+              routerLink="favorites"
+              routerLinkActive="bg-gray-900 text-white"
+              (click)="onNavigationClick()"
+              class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+              </svg>
+              My Favorites
+              <span class="ml-auto bg-gray-200 text-gray-700 py-0.5 px-2 rounded-full text-xs">
+                {{ favoritesCount() }}
+              </span>
+            </a>
+          </li>
+          
+          <!-- Search Other Businesses - Available to Both Modes -->
           <li>
             <a 
               routerLink="/search"
               (click)="onNavigationClick()"
-              class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900">
+              class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 group">
               <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
               </svg>
-              Find Business
+              Search Other Businesses
+              <!-- External link icon to show it navigates out of dashboard -->
+              <svg class="w-4 h-4 ml-auto text-blue-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
             </a>
           </li>
           

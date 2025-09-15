@@ -9,10 +9,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../shared/services/auth.service';
 import { BusinessService } from '../shared/services/business.service';
 import { ProjectService } from '../shared/services/project.service';
-import { NotificationNavComponent } from '../shared/components/notification-nav.component';
+import { NotificationNavComponent } from '../shared/components/notification-nav/notification-nav.component';
 import { SocketService } from '../shared/services/socket.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Subscription } from 'rxjs';
+import { FavoritesService } from '../shared/services/favorites.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,6 +40,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly projectService = inject(ProjectService);
   private readonly socketService = inject(SocketService);
   private readonly breakpointObserver = inject(BreakpointObserver);
+  private readonly favoritesService = inject(FavoritesService);
 
   // Signals for parent container state
   readonly sidenavOpened = signal<boolean>(false); // Default to false for mobile-first
@@ -46,6 +48,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly userBusinessCount = signal<number>(0);
   readonly totalServices = signal<number>(0);
   readonly totalProjects = signal<number>(0);
+  
+  // Computed signal for favorites count
+  readonly favoritesCount = computed(() => this.favoritesService.getFavoritesCount());
 
   // Computed signals
   readonly user = this.authService.user;

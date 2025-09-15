@@ -109,6 +109,16 @@
                       Add Service
                     </button>
                   } @else {
+                    <!-- Favorite Button for Non-Owners -->
+                    <div class="flex items-center">
+                      <app-favorite-button
+                        [businessId]="business()!._id"
+                        [businessName]="business()!.name"
+                        size="large"
+                        buttonClass="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-xl shadow-lg p-3 transition-all banner-button">
+                      </app-favorite-button>
+                    </div>
+                    
                     @if (!isOwner() && business()?.contact_email) {
                       <button (click)="startProject()"
                         [disabled]="activeServices().length === 0"
