@@ -1,0 +1,134 @@
+<div class="login-container">
+  <div class="text-center mb-8">
+    <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+    <p class="text-gray-600">Sign in to your account</p>
+  </div>
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    <!-- Email Field -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Email Address</mat-label>
+      <input
+        matInput
+        type="email"
+        formControlName="email"
+        placeholder="your@email.com"
+        [disabled]="loading()"
+      />
+      <mat-icon matSuffix>email</mat-icon>
+      @if (emailControl?.invalid && emailControl?.touched) {
+        <mat-error>
+          @if (emailControl?.hasError('required')) {
+            Email is required
+          } @else if (emailControl?.hasError('email')) {
+            Invalid email format
+          }
+        </mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Password Field -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        [type]="showPassword() ? 'text' : 'password'"
+        formControlName="password"
+        placeholder="Enter password"
+        [disabled]="loading()"
+      />
+      <button 
+        mat-icon-button 
+        matSuffix 
+        type="button"
+        (click)="togglePasswordVisibility()"
+        [attr.aria-label]="'Toggle password visibility'"
+        [attr.aria-pressed]="showPassword()"
+      >
+        <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      @if (passwordControl?.invalid && passwordControl?.touched) {
+        <mat-error>
+          @if (passwordControl?.hasError('required')) {
+            Password is required
+          } @else if (passwordControl?.hasError('minlength')) {
+            Minimum 6 characters
+          }
+        </mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Messages -->
+    @if (authMessage()) {
+      <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <div class="flex items-center text-blue-700">
+          <mat-icon class="mr-2 text-sm">info</mat-icon>
+          <span class="text-sm">{{ authMessage() }}</span>
+        </div>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div class="flex items-center text-red-700">
+          <mat-icon class="mr-2 text-sm">error</mat-icon>
+          <span class="text-sm">{{ error() }}</span>
+        </div>
+      </div>
+    }
+
+    @if (successMessage()) {
+      <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+        <div class="flex items-center text-green-700">
+          <mat-icon class="mr-2 text-sm">check_circle</mat-icon>
+          <span class="text-sm">{{ successMessage() }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- Submit Button -->
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      class="w-full py-3 text-base font-medium mb-4"
+      [disabled]="loading() || !loginForm.valid"
+    >
+      @if (!(loading())) {
+        Sign In
+      } @else {
+        <span class="flex items-center justify-center gap-2">
+          <mat-spinner diameter="16"></mat-spinner>
+          Signing In...
+        </span>
+      }
+    </button>
+
+    <!-- Additional Actions -->
+    <div class="space-y-3 text-center">
+      <a 
+        mat-button 
+        color="primary"
+        [routerLink]="['/auth/forgot-password']"
+        class="text-sm"
+      >
+        Forgot your password?
+      </a>
+
+      <!-- Navigation to Sign Up -->
+      <div class="mt-4 pt-4 border-t border-gray-200">
+        <p class="text-sm text-gray-600">
+          Don't have an account? 
+          <a 
+            mat-button 
+            color="primary"
+            [routerLink]="['/auth/signup']"
+            class="text-sm font-medium ml-1"
+          >
+            Sign up
+          </a>
+        </p>
+      </div>
+    </div>
+  </form>
+</div>

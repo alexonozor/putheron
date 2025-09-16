@@ -85,13 +85,6 @@
         <!-- Additional Options Row -->
         <div class="flex flex-wrap items-center gap-4 justify-between">
           <div class="flex items-center gap-4">
-            <!-- Featured Toggle -->
-            <mat-checkbox formControlName="featuredOnly" 
-                          (change)="onSearch()"
-                          color="primary">
-              Pro services only
-            </mat-checkbox>
-
             <!-- Clear Filters -->
             @if (hasActiveFilters()) {
               <button mat-stroked-button 

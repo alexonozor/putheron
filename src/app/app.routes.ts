@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
-import { AuthComponent } from './auth/auth.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CreateProjectStepsComponent } from './create-project-steps/create-project-steps.component';
 import { AuthGuard } from './shared/guards/auth.guard';
@@ -15,9 +14,13 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'search', component: SearchComponent },
   { path: 'own-business', component: OwnBusinessComponent },
-  { path: 'auth', component: AuthComponent, canActivate: [GuestGuard] },
-  { path: 'login', redirectTo: 'auth' },
-  { path: 'signup', redirectTo: 'auth' },
+  { 
+    path: 'auth', 
+    loadChildren: () => import('./auth/auth.route').then(m => m.AUTH_ROUTES),
+    canActivate: [GuestGuard]
+  },
+  { path: 'login', redirectTo: 'auth/login' },
+  { path: 'signup', redirectTo: 'auth/signup' },
   { 
     path: 'dashboard', 
     component: DashboardComponent,

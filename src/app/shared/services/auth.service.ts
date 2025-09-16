@@ -284,4 +284,114 @@ export class AuthService {
     }
   }
 
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      this.loading.set(true);
+      
+      const response = await this.http.post<{ 
+        success: boolean; 
+        data: { success: boolean; message: string }; 
+        message: string;
+      }>(
+        `${this.API_URL}/auth/forgot-password`,
+        { email }
+      ).toPromise();
+
+      if (response?.success) {
+        this.config.logIfEnabled('Password reset email sent successfully');
+        return {
+          success: true,
+          message: response.data?.message || response.message || 'Password reset email sent successfully'
+        };
+      }
+
+      return {
+        success: false,
+        message: response?.message || 'Failed to send password reset email'
+      };
+    } catch (error: any) {
+      this.config.errorIfEnabled('Forgot password error:', error);
+      return {
+        success: false,
+        message: error.error?.message || error.message || 'Failed to send password reset email'
+      };
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async verifyResetToken(token: string): Promise<{ 
+    success: boolean; 
+    message: string; 
+    data?: { email: string }; 
+  }> {
+    try {
+      const response = await this.http.get<{
+        success: boolean;
+        data: { success: boolean; message: string; email: string };
+        message: string;
+      }>(
+        `${this.API_URL}/auth/verify-reset-token?token=${token}`
+      ).toPromise();
+
+      if (response?.success) {
+        return {
+          success: true,
+          message: response.data?.message || 'Token is valid',
+          data: { email: response.data?.email || '' }
+        };
+      }
+
+      return {
+        success: false,
+        message: response?.message || 'Invalid or expired token'
+      };
+    } catch (error: any) {
+      this.config.errorIfEnabled('Verify reset token error:', error);
+      return {
+        success: false,
+        message: error.error?.message || error.message || 'Invalid or expired token'
+      };
+    }
+  }
+
+  async resetPassword(token: string, newPassword: string, confirmPassword: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    try {
+      this.loading.set(true);
+      
+      const response = await this.http.post<{
+        success: boolean;
+        data: { success: boolean; message: string };
+        message: string;
+      }>(
+        `${this.API_URL}/auth/reset-password`,
+        { token, newPassword, confirmPassword }
+      ).toPromise();
+
+      if (response?.success) {
+        this.config.logIfEnabled('Password reset successfully');
+        return {
+          success: true,
+          message: response.data?.message || response.message || 'Password reset successfully'
+        };
+      }
+
+      return {
+        success: false,
+        message: response?.message || 'Failed to reset password'
+      };
+    } catch (error: any) {
+      this.config.errorIfEnabled('Reset password error:', error);
+      return {
+        success: false,
+        message: error.error?.message || error.message || 'Failed to reset password'
+      };
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
 }

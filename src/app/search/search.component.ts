@@ -113,7 +113,6 @@ export class SearchComponent implements OnInit {
     return !!(form?.selectedCountries?.length > 0 || 
              form?.businessType || 
              form?.location || 
-             form?.featuredOnly ||
              form?.selectedCategories?.length > 0 ||
              form?.selectedBusinessTypes?.length > 0 ||
              form?.selectedRating > 0);
@@ -154,8 +153,7 @@ export class SearchComponent implements OnInit {
       selectedBusinessTypes: [this.selectedBusinessTypes()],
       selectedRating: [this.selectedRating()],
       businessType: [''],
-      location: [''],
-      featuredOnly: [false]
+      location: ['']
     });
   }
 
@@ -277,8 +275,7 @@ export class SearchComponent implements OnInit {
       selectedBusinessTypes: [],
       selectedRating: 0,
       businessType: '',
-      location: '',
-      featuredOnly: false
+      location: ''
     });
     this.onSearch();
   }
