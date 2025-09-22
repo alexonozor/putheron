@@ -269,14 +269,36 @@ export class CategoriesService {
         this.getSubcategoriesAsync()
       ]);
 
-      return categories.map(category => ({
-        ...category,
-        subcategories: subcategories.filter(sub => 
-          typeof sub.category_id === 'string' 
-            ? sub.category_id === category._id 
-            : sub.category_id._id === category._id
-        )
-      }));
+      // Handle null/undefined arrays
+      const safeCategories = categories || [];
+      const safeSubcategories = subcategories || [];
+
+      return safeCategories
+        .filter(category => category && category._id) // Filter out null/invalid categories
+        .map(category => ({
+          ...category,
+          subcategories: safeSubcategories.filter(sub => {
+            // Handle null/undefined subcategory
+            if (!sub || !sub.category_id) {
+              if (!sub) {
+                console.warn('Found null subcategory in data');
+              } else if (!sub.category_id) {
+                console.warn('Found subcategory with null category_id:', sub);
+              }
+              return false;
+            }
+            
+            // Handle both string and object types for category_id
+            if (typeof sub.category_id === 'string') {
+              return sub.category_id === category._id;
+            } else if (sub.category_id && typeof sub.category_id === 'object' && sub.category_id._id) {
+              return sub.category_id._id === category._id;
+            }
+            
+            console.warn('Unexpected category_id format:', sub.category_id);
+            return false;
+          })
+        }));
     } catch (error) {
       console.error('Error fetching categories with subcategories:', error);
       throw error;

@@ -1,0 +1,85 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+    
+    <!-- Verifying State -->
+    @if (verifying()) {
+      <div class="text-center space-y-4">
+        <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
+        <h2 class="text-xl font-semibold text-gray-900">Verifying your email...</h2>
+        <p class="text-gray-600">Please wait while we verify your email address.</p>
+      </div>
+    }
+
+    <!-- Success State -->
+    @if (!verifying() && success()) {
+      <div class="text-center space-y-6">
+        <div class="mb-6">
+          <mat-icon class="text-6xl text-green-500 mb-4">check_circle</mat-icon>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Email Verified!</h2>
+          <p class="text-gray-600">Your email address has been successfully verified.</p>
+          @if (userEmail()) {
+            <p class="text-sm text-gray-500 mt-2">
+              Verified: <strong>{{ userEmail() }}</strong>
+            </p>
+          }
+        </div>
+        
+        <div class="space-y-3">
+          <p class="text-sm text-gray-600">You will be redirected to login in a few seconds...</p>
+          
+          <button 
+            mat-raised-button 
+            color="primary"
+            (click)="goToLogin()"
+            class="w-full py-3 text-base font-medium"
+          >
+            Go to Login Now
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (!verifying() && !success() && error()) {
+      <div class="text-center space-y-6">
+        <div class="mb-6">
+          <mat-icon class="text-6xl text-red-500 mb-4">error_outline</mat-icon>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Verification Failed</h2>
+          <p class="text-red-600 mb-4">{{ error() }}</p>
+        </div>
+        
+        <div class="space-y-3">
+          @if (userEmail()) {
+            <button 
+              mat-raised-button 
+              color="accent"
+              (click)="resendVerification()"
+              class="w-full py-3 text-base font-medium mb-3"
+            >
+              Resend Verification Email
+            </button>
+          }
+          
+          <button 
+            mat-stroked-button 
+            color="primary"
+            (click)="goToSignup()"
+            class="w-full py-3 text-base font-medium mb-2"
+          >
+            Back to Sign Up
+          </button>
+
+          <button 
+            mat-button 
+            color="primary"
+            (click)="goToLogin()"
+            class="w-full py-3 text-base font-medium"
+          >
+            Already have a verified account? Login
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

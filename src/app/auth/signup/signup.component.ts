@@ -53,6 +53,8 @@ export class SignupComponent implements OnInit {
   readonly availableCities = signal<USCity[]>([]);
   readonly loading = signal(false);
   readonly showPassword = signal(false);
+  readonly showVerificationStep = signal(false);
+  readonly verificationEmail = signal('');
 
   // Reactive form
   readonly signupForm: FormGroup;
@@ -122,15 +124,43 @@ export class SignupComponent implements OnInit {
       const response = await this.authService.signUp(registerRequest);
       
       if (response.data) {
-        this.successMessage.set('Account created successfully! Redirecting to dashboard...');
-        setTimeout(() => {
-          this.router.navigate(['/dashboard']);
-        }, 2000);
+        this.successMessage.set('Account created successfully! Please check your email to verify your account.');
+        // Show verification message and disable form
+        this.showVerificationMessage(formData.email);
       } else {
         this.error.set(response.error?.message || 'Registration failed. Please try again.');
       }
     } catch (error: any) {
       this.error.set(error?.message || 'An unexpected error occurred. Please try again.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  private showVerificationMessage(email: string) {
+    // Store email for potential resend functionality
+    this.verificationEmail.set(email);
+    this.showVerificationStep.set(true);
+    
+    // Disable the form
+    this.signupForm.disable();
+  }
+
+  async resendVerification() {
+    if (!this.verificationEmail()) return;
+
+    this.loading.set(true);
+    try {
+      const response = await this.authService.resendEmailVerification(this.verificationEmail());
+      
+      if (response.success) {
+        this.successMessage.set('Verification email sent! Please check your inbox.');
+        this.error.set('');
+      } else {
+        this.error.set(response.message || 'Failed to resend verification email.');
+      }
+    } catch (error: any) {
+      this.error.set(error?.message || 'Failed to resend verification email.');
     } finally {
       this.loading.set(false);
     }

@@ -394,4 +394,81 @@ export class AuthService {
     }
   }
 
+  async verifyEmail(token: string): Promise<{
+    success: boolean;
+    message: string;
+    data?: any;
+  }> {
+    try {
+      this.loading.set(true);
+      
+      const response = await this.http.get<{
+        success: boolean;
+        data: any;
+        message: string;
+      }>(`${this.API_URL}/auth/verify-email?token=${token}`).toPromise();
+
+      if (response?.success) {
+        this.config.logIfEnabled('Email verified successfully');
+        return {
+          success: true,
+          message: response.message || 'Email verified successfully',
+          data: response.data
+        };
+      }
+
+      return {
+        success: false,
+        message: response?.message || 'Failed to verify email'
+      };
+    } catch (error: any) {
+      this.config.errorIfEnabled('Email verification error:', error);
+      return {
+        success: false,
+        message: error.error?.message || error.message || 'Email verification failed'
+      };
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async resendEmailVerification(email: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    try {
+      this.loading.set(true);
+      
+      const response = await this.http.post<{
+        success: boolean;
+        data: { success: boolean; message: string };
+        message: string;
+      }>(
+        `${this.API_URL}/auth/resend-verification`,
+        { email }
+      ).toPromise();
+
+      if (response?.success) {
+        this.config.logIfEnabled('Verification email sent successfully');
+        return {
+          success: true,
+          message: response.data?.message || response.message || 'Verification email sent'
+        };
+      }
+
+      return {
+        success: false,
+        message: response?.message || 'Failed to send verification email'
+      };
+    } catch (error: any) {
+      this.config.errorIfEnabled('Resend verification error:', error);
+      return {
+        success: false,
+        message: error.error?.message || error.message || 'Failed to send verification email'
+      };
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
 }

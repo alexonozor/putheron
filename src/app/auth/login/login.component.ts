@@ -37,6 +37,8 @@ export class LoginComponent implements OnInit {
   readonly authMessage = signal('');
   readonly loading = signal(false);
   readonly showPassword = signal(false);
+  readonly showResendOption = signal(false);
+  readonly unverifiedEmail = signal('');
 
   // Reactive form
   readonly loginForm: FormGroup;
@@ -83,10 +85,46 @@ export class LoginComponent implements OnInit {
           this.router.navigate(['/dashboard']);
         }, 1000);
       } else {
-        this.error.set(response.error?.message || 'Login failed. Please try again.');
+        this.handleLoginError(response.error?.message || 'Login failed. Please try again.');
       }
     } catch (error: any) {
-      this.error.set(error?.message || 'An unexpected error occurred. Please try again.');
+      this.handleLoginError(error?.message || 'An unexpected error occurred. Please try again.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  private handleLoginError(message: string) {
+    // Check if the error is about email verification
+    if (message.includes('verify your email') || message.includes('email address before logging')) {
+      this.error.set(message);
+      // Extract email from form if available for resend functionality
+      const email = this.loginForm.get('email')?.value;
+      if (email) {
+        this.unverifiedEmail.set(email);
+        this.showResendOption.set(true);
+      }
+    } else {
+      this.error.set(message);
+    }
+  }
+
+  async resendVerification() {
+    if (!this.unverifiedEmail()) return;
+
+    this.loading.set(true);
+    try {
+      const response = await this.authService.resendEmailVerification(this.unverifiedEmail());
+      
+      if (response.success) {
+        this.successMessage.set('Verification email sent! Please check your inbox.');
+        this.error.set('');
+        this.showResendOption.set(false);
+      } else {
+        this.error.set(response.message || 'Failed to resend verification email.');
+      }
+    } catch (error: any) {
+      this.error.set(error?.message || 'Failed to resend verification email.');
     } finally {
       this.loading.set(false);
     }

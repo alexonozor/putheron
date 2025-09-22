@@ -74,6 +74,19 @@
           <mat-icon class="mr-2 text-sm">error</mat-icon>
           <span class="text-sm">{{ error() }}</span>
         </div>
+        @if (showResendOption()) {
+          <div class="mt-3 pt-3 border-t border-red-200">
+            <button 
+              mat-stroked-button 
+              color="primary"
+              (click)="resendVerification()"
+              [disabled]="loading()"
+              class="text-sm"
+            >
+              Resend Verification Email
+            </button>
+          </div>
+        }
       </div>
     }
 
