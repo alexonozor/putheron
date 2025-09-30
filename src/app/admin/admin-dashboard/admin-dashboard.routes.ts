@@ -69,6 +69,13 @@ export const adminDashboardRoutes: Routes = [
             (c) => c.adminTransactionsRoutes
           ),
       },
+      {
+        path: 'reports',
+        loadChildren: () =>
+          import('./admin-reports/admin-reports.routes').then(
+            (c) => c.adminReportsRoutes
+          ),
+      },
     ],
   },
 ];

@@ -1,0 +1,36 @@
+<div class="p-6 text-center max-w-md">
+  <div class="mb-6">
+    <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+      <mat-icon class="text-green-600 text-3xl">check_circle</mat-icon>
+    </div>
+    <h2 class="text-xl font-semibold text-gray-900 mb-2">Report Submitted</h2>
+    <p class="text-gray-600">
+      Thank you for helping keep this space safe - we will investigate this issue.
+    </p>
+  </div>
+
+  <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
+    <div class="flex items-start">
+      <mat-icon class="text-blue-600 mr-2 mt-0.5" style="font-size: 20px;">info</mat-icon>
+      <div class="text-left">
+        <p class="font-medium text-blue-800 mb-1">What happens next?</p>
+        <ul class="text-blue-700 text-sm space-y-1">
+          <li>• Our team will review your report within 24-48 hours</li>
+          <li>• You won't see content from this {{ data.entityType.toLowerCase() }} while we investigate</li>
+          <li>• We'll take appropriate action based on our community guidelines</li>
+          <li>• You may receive updates on serious violations</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <mat-dialog-actions class="justify-center p-0">
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="onClose()"
+      class="px-8">
+      Got it
+    </button>
+  </mat-dialog-actions>
+</div>

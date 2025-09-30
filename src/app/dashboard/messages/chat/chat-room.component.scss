@@ -281,6 +281,24 @@
     }
   }
 
+  &.report {
+    background: #6b7280;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &:hover {
+      background: #4b5563;
+    }
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
   @media (max-width: 767px) {
     font-size: 12px;
     padding: 8px 14px;

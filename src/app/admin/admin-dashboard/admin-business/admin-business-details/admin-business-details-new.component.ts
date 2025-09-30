@@ -2,7 +2,9 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { BusinessService, Business } from '../../../../shared/services/business.service';
+import { BusinessRejectionDialogComponent, BusinessRejectionDialogData } from '../../../../shared/components/business-rejection-dialog/business-rejection-dialog.component';
 
 @Component({
   selector: 'app-admin-business-details',
@@ -18,6 +20,7 @@ export class AdminBusinessDetailsComponent implements OnInit {
   private readonly businessService = inject(BusinessService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   readonly loading = signal(false);
   readonly business = signal<Business | null>(null);
@@ -105,12 +108,15 @@ export class AdminBusinessDetailsComponent implements OnInit {
 
     this.loading.set(true);
     try {
-      // For now, we'll implement a direct API call or use a workaround
-      // Since there's no admin toggle method, we'll alert the user
-      alert('Business status toggle feature needs to be implemented in the backend API');
+      const newStatus = !business.is_active;
+      const updatedBusiness = await this.businessService.adminToggleBusinessStatusAsync(business._id, newStatus);
+      this.business.set(updatedBusiness);
+      
+      // Show success message
+      alert(`Business ${newStatus ? 'activated' : 'deactivated'} successfully! The business owner has been notified in real-time.`);
     } catch (error: any) {
       console.error('Error toggling business status:', error);
-      alert('Failed to update business status');
+      alert('Failed to update business status: ' + (error.message || 'Unknown error'));
     } finally {
       this.loading.set(false);
     }
@@ -141,10 +147,12 @@ export class AdminBusinessDetailsComponent implements OnInit {
     try {
       const updatedBusiness = await this.businessService.adminVerifyBusinessAsync(business._id);
       this.business.set(updatedBusiness);
-      alert('Business verified successfully');
+      
+      // Show success message
+      alert('Business verified successfully! The business owner has been notified via email about the approval.');
     } catch (error: any) {
       console.error('Error verifying business:', error);
-      alert('Failed to verify business');
+      alert('Failed to verify business: ' + (error.message || 'Unknown error'));
     } finally {
       this.loading.set(false);
     }
@@ -154,17 +162,88 @@ export class AdminBusinessDetailsComponent implements OnInit {
     const business = this.business();
     if (!business) return;
 
-    const reason = prompt('Please provide a reason for rejection:');
-    if (!reason) return;
+    const dialogData: BusinessRejectionDialogData = {
+      businessName: business.name
+    };
+
+    const dialogRef = this.dialog.open(BusinessRejectionDialogComponent, {
+      data: dialogData,
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: true,
+      panelClass: 'custom-dialog-container'
+    });
+
+    const result = await dialogRef.afterClosed().toPromise();
+    if (!result) return;
 
     this.loading.set(true);
     try {
-      const updatedBusiness = await this.businessService.adminRejectBusinessAsync(business._id, reason);
+      const updatedBusiness = await this.businessService.adminRejectBusinessAsync(business._id, result.reason);
       this.business.set(updatedBusiness);
-      alert('Business verification rejected');
+      
+      // Show success message
+      alert('Business submission rejected successfully. The business owner has been notified via email with the rejection reason.');
     } catch (error: any) {
       console.error('Error rejecting business:', error);
-      alert('Failed to reject business verification');
+      alert('Failed to reject business submission: ' + (error.message || 'Unknown error'));
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async suspendBusiness() {
+    const business = this.business();
+    if (!business) return;
+
+    if (business.status === 'suspended') {
+      alert('Business is already suspended');
+      return;
+    }
+
+    const reason = prompt('Please provide a reason for suspending this business:');
+    if (!reason || reason.trim().length === 0) {
+      return;
+    }
+
+    this.loading.set(true);
+    try {
+      const updatedBusiness = await this.businessService.adminSuspendBusinessAsync(business._id, reason.trim());
+      this.business.set(updatedBusiness);
+      
+      // Show success message
+      alert('Business suspended successfully! The business owner has been notified in real-time.');
+    } catch (error: any) {
+      console.error('Error suspending business:', error);
+      alert('Failed to suspend business: ' + (error.message || 'Unknown error'));
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async reactivateBusiness() {
+    const business = this.business();
+    if (!business) return;
+
+    if (business.status !== 'suspended') {
+      alert('Business is not suspended');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to reactivate this business?')) {
+      return;
+    }
+
+    this.loading.set(true);
+    try {
+      const updatedBusiness = await this.businessService.adminReactivateBusinessAsync(business._id);
+      this.business.set(updatedBusiness);
+      
+      // Show success message
+      alert('Business reactivated successfully! The business owner has been notified in real-time.');
+    } catch (error: any) {
+      console.error('Error reactivating business:', error);
+      alert('Failed to reactivate business: ' + (error.message || 'Unknown error'));
     } finally {
       this.loading.set(false);
     }
@@ -174,7 +253,7 @@ export class AdminBusinessDetailsComponent implements OnInit {
     const business = this.business();
     if (!business) return;
 
-    if (!confirm(`Are you sure you want to delete "${business.name}"? This action cannot be undone.`)) {
+    if (!confirm('Are you sure you want to delete this business? This action cannot be undone.')) {
       return;
     }
 
@@ -182,10 +261,11 @@ export class AdminBusinessDetailsComponent implements OnInit {
     try {
       await this.businessService.adminDeleteBusinessAsync(business._id);
       alert('Business deleted successfully');
-      this.goBack();
+      this.router.navigate(['/admin/businesses']);
     } catch (error: any) {
       console.error('Error deleting business:', error);
-      alert('Failed to delete business');
+      alert('Failed to delete business: ' + (error.message || 'Unknown error'));
+    } finally {
       this.loading.set(false);
     }
   }

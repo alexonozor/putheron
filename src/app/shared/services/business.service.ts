@@ -122,6 +122,13 @@ export interface Business {
   is_active: boolean;
   is_featured: boolean;
   status: 'pending' | 'approved' | 'rejected' | 'suspended';
+  rejection_reason?: string;
+  rejected_at?: Date;
+  rejected_by?: string;
+  denial_notification_sent?: boolean;
+  denial_notification_sent_at?: Date;
+  approved_at?: Date;
+  approved_by?: string;
   rating: number;
   review_count: number;
   view_count: number;
@@ -923,6 +930,54 @@ export class BusinessService {
     if (!response.success) {
       throw new Error(response.error || 'Failed to delete business');
     }
+  }
+
+  // Admin suspend business
+  adminSuspendBusiness(businessId: string, reason?: string): Observable<ApiResponse<Business>> {
+    return this.http.patch<ApiResponse<Business>>(
+      `${this.config.apiBaseUrl}/admin/businesses/${businessId}/suspend`,
+      { reason }
+    );
+  }
+
+  async adminSuspendBusinessAsync(businessId: string, reason?: string): Promise<Business> {
+    const response = await firstValueFrom(this.adminSuspendBusiness(businessId, reason));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to suspend business');
+    }
+    return response.data;
+  }
+
+  // Admin reactivate business
+  adminReactivateBusiness(businessId: string): Observable<ApiResponse<Business>> {
+    return this.http.patch<ApiResponse<Business>>(
+      `${this.config.apiBaseUrl}/admin/businesses/${businessId}/reactivate`,
+      {}
+    );
+  }
+
+  async adminReactivateBusinessAsync(businessId: string): Promise<Business> {
+    const response = await firstValueFrom(this.adminReactivateBusiness(businessId));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to reactivate business');
+    }
+    return response.data;
+  }
+
+  // Admin toggle business status
+  adminToggleBusinessStatus(businessId: string, isActive: boolean): Observable<ApiResponse<Business>> {
+    return this.http.patch<ApiResponse<Business>>(
+      `${this.config.apiBaseUrl}/admin/businesses/${businessId}/toggle-status`,
+      { isActive }
+    );
+  }
+
+  async adminToggleBusinessStatusAsync(businessId: string, isActive: boolean): Promise<Business> {
+    const response = await firstValueFrom(this.adminToggleBusinessStatus(businessId, isActive));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to toggle business status');
+    }
+    return response.data;
   }
 
   // Bulk admin operations

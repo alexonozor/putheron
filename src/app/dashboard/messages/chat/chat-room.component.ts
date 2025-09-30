@@ -21,6 +21,9 @@ import { PaymentRequestModalComponent, PaymentRequestData } from './modals/payme
 import { CompletionRequestModalComponent, CompletionRequestData } from './modals/completion-request-modal.component';
 import { PaymentModalComponent, PaymentData, PaymentModalData } from './modals/payment-modal.component';
 import { ReviewFormComponent } from '../../../shared/components/review-form/review-form.component';
+import { ReportsService, ReportType as ServiceReportType } from '../../../shared/services/reports.service';
+import { ReportDialogComponent, ReportType } from '../../../shared/components/report-dialog/report-dialog.component';
+import { ReportConfirmationDialogComponent } from '../../../shared/components/report-confirmation-dialog/report-confirmation-dialog.component';
 
 @Component({
   selector: 'app-chat-room',
@@ -53,6 +56,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   private readonly formBuilder = inject(FormBuilder);
   private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly dialog = inject(MatDialog);
+  private readonly reportsService = inject(ReportsService);
 
   // Signals
   readonly loading = signal(false);
@@ -1196,6 +1200,57 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     ].join('\n');
 
     alert(reviewDetails);
+  }
+
+  async openReportDialog() {
+    const chat = this.chat();
+    if (!chat) return;
+
+    // Get the other participant to report
+    const otherParticipant = this.otherParticipant();
+    if (!otherParticipant) return;
+
+    const otherParticipantName = this.getOtherParticipantName();
+
+    const dialogRef = this.dialog.open(ReportDialogComponent, {
+      width: '500px',
+      data: {
+        reportType: ReportType.USER,
+        targetId: otherParticipant._id,
+        targetName: otherParticipantName,
+        contextInfo: `Chat conversation in project: ${chat.project_id?.title || 'Unknown Project'}`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        try {
+          // Transform dialog result to proper DTO format
+          const reportData = {
+            reported_user_id: otherParticipant._id,
+            report_type: ServiceReportType.USER,
+            reason: result.reason,
+            custom_reason: result.customReason,
+            description: result.description,
+            is_anonymous: result.isAnonymous
+          };
+          
+          await this.reportsService.submitReportAsync(reportData);
+          
+          // Show success confirmation
+          this.dialog.open(ReportConfirmationDialogComponent, {
+            width: '400px',
+            data: {
+              entityType: 'user',
+              entityName: otherParticipantName
+            }
+          });
+        } catch (error) {
+          console.error('Failed to submit report:', error);
+          // Could show error dialog here
+        }
+      }
+    });
   }
 
   onKeyPress(event: KeyboardEvent) {

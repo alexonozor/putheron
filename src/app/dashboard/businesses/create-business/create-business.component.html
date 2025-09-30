@@ -583,6 +583,135 @@
                   </div>
                 </div>
 
+                <!-- Uploaded Images & Documents Section -->
+                <div class="border-b border-gray-200 pb-4">
+                  <h4 class="font-medium text-gray-900 mb-3">Uploaded Images & Documents</h4>
+                  
+                  <!-- Business Logo -->
+                  <div class="mb-4">
+                    <span class="text-sm font-medium text-gray-600 block mb-2">Business Logo:</span>
+                    @if (logoPreview()) {
+                      <div class="flex items-center">
+                        <img [src]="logoPreview()!" alt="Business Logo" class="w-16 h-16 object-cover rounded-lg border border-gray-200">
+                        <div class="ml-3">
+                          <p class="text-sm text-gray-900 font-medium">Logo uploaded</p>
+                          <p class="text-xs text-gray-500">Ready for display</p>
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="flex items-center text-gray-500">
+                        <div class="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                          <mat-icon class="text-gray-400">image</mat-icon>
+                        </div>
+                        <div class="ml-3">
+                          <p class="text-sm">No logo uploaded</p>
+                          <p class="text-xs">Optional - can be added later</p>
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Banner Image -->
+                  <div class="mb-4">
+                    <span class="text-sm font-medium text-gray-600 block mb-2">Banner Image:</span>
+                    @if (bannerPreview()) {
+                      <div class="space-y-2">
+                        <img [src]="bannerPreview()!" alt="Banner Image" class="w-full max-w-md h-24 object-cover rounded-lg border border-gray-200">
+                        <div class="flex items-center">
+                          <mat-icon class="text-green-600 text-base mr-2">check_circle</mat-icon>
+                          <p class="text-sm text-gray-900 font-medium">Banner image uploaded</p>
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="flex items-center text-gray-500">
+                        <div class="w-full max-w-md h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                          <mat-icon class="text-gray-400 text-2xl">image</mat-icon>
+                        </div>
+                        <div class="ml-3">
+                          <p class="text-sm">No banner image uploaded</p>
+                          <p class="text-xs">Optional - can be added later</p>
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- SOS Certification Documentation -->
+                  <div class="mb-4">
+                    <span class="text-sm font-medium text-gray-600 block mb-2">SOS Certification Documentation:</span>
+                    @if (sosCertificationPreviews().length > 0) {
+                      <div class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          @for (preview of sosCertificationPreviews(); track preview.preview) {
+                            <div class="border border-gray-200 rounded-lg p-3">
+                              @if (preview.file && preview.file.type && preview.file.type.startsWith('image/')) {
+                                <!-- Image preview -->
+                                <img [src]="preview.preview" [alt]="preview.file.name" class="w-full h-20 object-cover rounded border mb-2">
+                                <div class="flex items-center">
+                                  <mat-icon class="text-blue-600 text-sm mr-1">image</mat-icon>
+                                  <p class="text-xs text-gray-900 font-medium truncate">{{ preview.file.name }}</p>
+                                </div>
+                              } @else if (!preview.file && (preview.preview.includes('.jpg') || preview.preview.includes('.jpeg') || preview.preview.includes('.png') || preview.preview.includes('/image/'))) {
+                                <!-- URL-based image preview -->
+                                <img [src]="preview.preview" alt="SOS Certification" class="w-full h-20 object-cover rounded border mb-2">
+                                <div class="flex items-center">
+                                  <mat-icon class="text-blue-600 text-sm mr-1">image</mat-icon>
+                                  <p class="text-xs text-gray-900 font-medium">Certification Image</p>
+                                </div>
+                              } @else {
+                                <!-- Document preview -->
+                                <div class="flex items-center p-2 bg-blue-50 rounded border">
+                                  <mat-icon class="text-blue-600 text-2xl mr-2">description</mat-icon>
+                                  <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-medium text-gray-900 truncate">{{ preview.file?.name || 'SOS Certification Document' }}</p>
+                                    <p class="text-xs text-gray-500">{{ preview.file?.type || 'Document' }}</p>
+                                  </div>
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                        <div class="flex items-center">
+                          <mat-icon class="text-green-600 text-base mr-2">check_circle</mat-icon>
+                          <p class="text-sm text-gray-900 font-medium">
+                            {{ sosCertificationPreviews().length }} certification {{ sosCertificationPreviews().length === 1 ? 'document' : 'documents' }} uploaded
+                          </p>
+                        </div>
+                      </div>
+                    } @else if (sosCertificationPreview()) {
+                      <!-- Legacy single file display -->
+                      <div class="space-y-2">
+                        @if (sosCertificationFile && sosCertificationFile.type.startsWith('image/')) {
+                          <img [src]="sosCertificationPreview()!" alt="SOS Certification" class="w-full max-w-md h-24 object-cover rounded-lg border border-gray-200">
+                        } @else {
+                          <div class="border border-gray-200 rounded-lg p-3 bg-blue-50 max-w-md">
+                            <div class="flex items-center">
+                              <mat-icon class="text-blue-600 text-2xl mr-3">description</mat-icon>
+                              <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-900">{{ sosCertificationPreview() }}</p>
+                                <p class="text-xs text-gray-500">{{ sosCertificationFile?.type || 'Document' }}</p>
+                              </div>
+                            </div>
+                          </div>
+                        }
+                        <div class="flex items-center">
+                          <mat-icon class="text-green-600 text-base mr-2">check_circle</mat-icon>
+                          <p class="text-sm text-gray-900 font-medium">SOS certification document uploaded</p>
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="flex items-center text-gray-500">
+                        <div class="w-20 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                          <mat-icon class="text-gray-400">description</mat-icon>
+                        </div>
+                        <div class="ml-3">
+                          <p class="text-sm">No certification documents uploaded</p>
+                          <p class="text-xs">Optional - can be added later</p>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+
                 <div>
                   <h4 class="font-medium text-gray-900 mb-2">Next Steps</h4>
                   <div class="text-sm text-gray-600 space-y-1">

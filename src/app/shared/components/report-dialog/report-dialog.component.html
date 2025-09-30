@@ -1,0 +1,105 @@
+<div class="p-6 max-w-2xl">
+  <div class="flex items-center mb-6">
+    <mat-icon class="text-red-600 mr-3 text-3xl">report</mat-icon>
+    <div>
+      <h2 mat-dialog-title class="text-xl font-semibold text-gray-900 m-0 mb-1">
+        Report {{ entityType }}
+      </h2>
+      <p class="text-sm text-gray-600 m-0">
+        {{ data.targetName }}
+      </p>
+    </div>
+  </div>
+
+  <mat-dialog-content class="p-0">
+    <!-- Report Reason Selection -->
+    <div class="mb-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Why are you reporting this {{ entityTypeLowercase }}?</h3>
+      
+      <div class="space-y-3">
+        <div *ngFor="let reason of reasonOptions" class="flex items-start">
+          <input 
+            type="radio" 
+            [id]="reason.value" 
+            [value]="reason.value" 
+            [(ngModel)]="selectedReason"
+            class="mt-1 mr-3 text-red-600 focus:ring-red-500">
+          <label [for]="reason.value" class="cursor-pointer">
+            <div class="font-medium text-gray-900">{{ reason.label }}</div>
+            <div class="text-sm text-gray-600">{{ reason.description }}</div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Reason Input (shown when OTHER is selected) -->
+    <div *ngIf="selectedReason === ReportReason.OTHER" class="mb-6">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Please specify the reason</mat-label>
+        <input
+          matInput
+          [(ngModel)]="customReason"
+          placeholder="Describe why you are reporting this {{ entityTypeLowercase }}"
+          maxlength="200"
+          required>
+        <mat-hint align="end">{{ (customReason.length || 0) }}/200</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <!-- Additional Details -->
+    <div class="mb-6">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Additional details (optional)</mat-label>
+        <textarea
+          matInput
+          [(ngModel)]="description"
+          placeholder="Provide any additional context that might help our review team..."
+          rows="4"
+          maxlength="500"
+          class="min-h-[100px]">
+        </textarea>
+        <mat-hint align="end">{{ (description.length || 0) }}/500</mat-hint>
+      </mat-form-field>
+    </div>
+
+    <!-- Anonymous Reporting Option -->
+    <div class="mb-6">
+      <mat-checkbox [(ngModel)]="isAnonymous" class="text-sm">
+        Submit this report anonymously
+      </mat-checkbox>
+      <p class="text-xs text-gray-500 mt-1 ml-6">
+        Your identity will not be shared with the reported {{ entityTypeLowercase }}
+      </p>
+    </div>
+
+    <!-- Warning Message -->
+    <div class="bg-amber-50 border border-amber-200 p-4 rounded-lg mb-6">
+      <div class="flex items-start">
+        <mat-icon class="text-amber-600 mr-2 mt-0.5" style="font-size: 20px;">warning</mat-icon>
+        <div>
+          <p class="font-medium text-amber-800 mb-1">Important:</p>
+          <ul class="text-amber-700 text-sm space-y-1">
+            <li>• False reports may result in action against your account</li>
+            <li>• Reports are reviewed by our moderation team</li>
+            <li>• You will not see content from this {{ entityTypeLowercase }} while we investigate</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="p-0 mt-6">
+    <button mat-button (click)="onCancel()" class="mr-2">
+      Cancel
+    </button>
+    <button 
+      mat-raised-button 
+      color="warn"
+      (click)="onSubmit()"
+      [disabled]="!canSubmit()"
+      class="bg-red-600 hover:bg-red-700 text-white">
+      <mat-icon class="mr-1">send</mat-icon>
+      Submit Report
+    </button>
+  </mat-dialog-actions>
+</div>

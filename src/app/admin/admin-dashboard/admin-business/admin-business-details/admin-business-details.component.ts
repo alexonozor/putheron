@@ -105,12 +105,15 @@ export class AdminBusinessDetailsComponent implements OnInit {
 
     this.loading.set(true);
     try {
-      // For now, we'll implement a direct API call or use a workaround
-      // Since there's no admin toggle method, we'll alert the user
-      alert('Business status toggle feature needs to be implemented in the backend API');
+      const newStatus = !business.is_active;
+      const updatedBusiness = await this.businessService.adminToggleBusinessStatusAsync(business._id, newStatus);
+      this.business.set(updatedBusiness);
+      
+      // Show success message
+      alert(`Business ${newStatus ? 'activated' : 'deactivated'} successfully! The business owner has been notified in real-time.`);
     } catch (error: any) {
       console.error('Error toggling business status:', error);
-      alert('Failed to update business status');
+      alert('Failed to update business status: ' + (error.message || 'Unknown error'));
     } finally {
       this.loading.set(false);
     }
@@ -170,11 +173,68 @@ export class AdminBusinessDetailsComponent implements OnInit {
     }
   }
 
+  async suspendBusiness() {
+    const business = this.business();
+    if (!business) return;
+
+    if (business.status === 'suspended') {
+      alert('Business is already suspended');
+      return;
+    }
+
+    const reason = prompt('Please provide a reason for suspending this business:');
+    if (!reason || reason.trim().length === 0) {
+      return;
+    }
+
+    this.loading.set(true);
+    try {
+      const updatedBusiness = await this.businessService.adminSuspendBusinessAsync(business._id, reason.trim());
+      this.business.set(updatedBusiness);
+      
+      // Show success message
+      alert('Business suspended successfully! The business owner has been notified in real-time.');
+    } catch (error: any) {
+      console.error('Error suspending business:', error);
+      alert('Failed to suspend business: ' + (error.message || 'Unknown error'));
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  async reactivateBusiness() {
+    const business = this.business();
+    if (!business) return;
+
+    if (business.status !== 'suspended') {
+      alert('Business is not suspended');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to reactivate this business?')) {
+      return;
+    }
+
+    this.loading.set(true);
+    try {
+      const updatedBusiness = await this.businessService.adminReactivateBusinessAsync(business._id);
+      this.business.set(updatedBusiness);
+      
+      // Show success message
+      alert('Business reactivated successfully! The business owner has been notified in real-time.');
+    } catch (error: any) {
+      console.error('Error reactivating business:', error);
+      alert('Failed to reactivate business: ' + (error.message || 'Unknown error'));
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
   async deleteBusiness() {
     const business = this.business();
     if (!business) return;
 
-    if (!confirm(`Are you sure you want to delete "${business.name}"? This action cannot be undone.`)) {
+    if (!confirm('Are you sure you want to delete this business? This action cannot be undone.')) {
       return;
     }
 
@@ -182,10 +242,11 @@ export class AdminBusinessDetailsComponent implements OnInit {
     try {
       await this.businessService.adminDeleteBusinessAsync(business._id);
       alert('Business deleted successfully');
-      this.goBack();
+      this.router.navigate(['/admin/businesses']);
     } catch (error: any) {
       console.error('Error deleting business:', error);
-      alert('Failed to delete business');
+      alert('Failed to delete business: ' + (error.message || 'Unknown error'));
+    } finally {
       this.loading.set(false);
     }
   }

@@ -110,13 +110,24 @@
                     </button>
                   } @else {
                     <!-- Favorite Button for Non-Owners -->
-                    <div class="flex items-center">
+                    <div class="flex items-center space-x-3">
                       <app-favorite-button
                         [businessId]="business()!._id"
                         [businessName]="business()!.name"
                         size="large"
                         buttonClass="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-xl shadow-lg p-3 transition-all banner-button">
                       </app-favorite-button>
+                      
+                      <!-- Report Button -->
+                      <button (click)="openReportDialog()"
+                        class="inline-flex items-center justify-center p-3 bg-gray-600 bg-opacity-90 hover:bg-opacity-100 hover:bg-gray-700 text-white rounded-xl transition-all shadow-lg font-medium"
+                        title="Report Business">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6v1a2 2 0 01-2 2H5a2 2 0 01-2-2z">
+                          </path>
+                        </svg>
+                      </button>
                     </div>
                     
                     @if (!isOwner() && business()?.contact_email) {

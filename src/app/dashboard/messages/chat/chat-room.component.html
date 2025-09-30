@@ -79,6 +79,16 @@
                 {{ reviewButtonText() }}
               </button>
             }
+            
+            <!-- Report Button (Mobile) -->
+            @if (otherParticipant()) {
+              <button 
+                (click)="openReportDialog()"
+                class="action-btn report"
+                title="Report User">
+                <mat-icon>flag</mat-icon>
+              </button>
+            }
           </div>
           
           <!-- Desktop: Full action buttons -->
@@ -130,6 +140,17 @@
                 (click)="handleReviewAction()"
                 class="action-btn review">
                 {{ reviewButtonText() }}
+              </button>
+            }
+            
+            <!-- Report Button (Desktop) -->
+            @if (otherParticipant()) {
+              <button 
+                (click)="openReportDialog()"
+                class="action-btn report"
+                title="Report User">
+                <mat-icon>flag</mat-icon>
+                Report User
               </button>
             }
           </div>

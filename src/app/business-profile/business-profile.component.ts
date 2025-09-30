@@ -8,6 +8,10 @@ import { ReviewService } from '../shared/services/review.service';
 import { User } from '../models/user.model';
 import { HeaderComponent } from '../shared/components/header/header.component';
 import { FavoriteButtonComponent } from '../shared/components/favorite-button/favorite-button.component';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ReportsService, ReportType as ServiceReportType } from '../shared/services/reports.service';
+import { ReportDialogComponent, ReportType } from '../shared/components/report-dialog/report-dialog.component';
+import { ReportConfirmationDialogComponent } from '../shared/components/report-confirmation-dialog/report-confirmation-dialog.component';
 
 @Component({
   selector: 'app-business-profile',
@@ -16,6 +20,7 @@ import { FavoriteButtonComponent } from '../shared/components/favorite-button/fa
     CommonModule,
     HeaderComponent,
     FavoriteButtonComponent,
+    MatDialogModule,
   ],
   templateUrl: './business-profile.component.html',
   styleUrl: './business-profile.component.scss'
@@ -27,6 +32,8 @@ export class BusinessProfileComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly projectService = inject(ProjectService);
   private readonly reviewService = inject(ReviewService);
+  private readonly dialog = inject(MatDialog);
+  private readonly reportsService = inject(ReportsService);
 
   // Loading states
   public readonly loading = signal(false);
@@ -447,5 +454,66 @@ export class BusinessProfileComponent implements OnInit {
 
   viewProject(project: Project): void {
     this.router.navigate(['/dashboard/projects', project._id]);
+  }
+
+  async openReportDialog() {
+    const business = this.business();
+    console.log('Opening report dialog for business:', business);
+    if (!business) return;
+
+    const currentUser = this.authService.user();
+    if (!currentUser) {
+      this.router.navigate(['/auth']);
+      return;
+    }
+
+    // Don't allow reporting your own business
+    const ownerId = typeof business.owner_id === 'string' 
+      ? business.owner_id 
+      : business.owner_id?._id;
+      
+    if (currentUser._id === ownerId) {
+      return;
+    }
+
+    const dialogRef = this.dialog.open(ReportDialogComponent, {
+      width: '500px',
+      data: {
+        reportType: ReportType.BUSINESS,
+        targetId: business._id,
+        targetName: business.name,
+        contextInfo: `Business profile: ${business.business_type || 'Unknown Type'} - ${business.short_description || 'No description'}`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        try {
+          // Transform dialog result to proper DTO format
+          const reportData = {
+            reported_business_id: business._id,
+            report_type: ServiceReportType.BUSINESS,
+            reason: result.reason,
+            custom_reason: result.customReason,
+            description: result.description,
+            is_anonymous: result.isAnonymous
+          };
+          
+          await this.reportsService.submitReportAsync(reportData);
+          
+          // Show success confirmation
+          this.dialog.open(ReportConfirmationDialogComponent, {
+            width: '400px',
+            data: {
+              entityType: 'business',
+              entityName: business.name
+            }
+          });
+        } catch (error) {
+          console.error('Failed to submit report:', error);
+          // Could show error dialog here
+        }
+      }
+    });
   }
 }
