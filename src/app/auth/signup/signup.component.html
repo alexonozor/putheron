@@ -83,7 +83,7 @@
           [disabled]="loading() || availableCities().length === 0"
         >
           @if (availableCities().length === 0) {
-            <mat-option value="">Select state first</mat-option>
+            <mat-option value="">Select state</mat-option>
           } @else {
             <mat-option value="">Select city</mat-option>
             @for (city of availableCities(); track city.name) {
