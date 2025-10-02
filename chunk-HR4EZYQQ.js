@@ -1,0 +1,1 @@
+import{Ba as o,Wa as s,gc as t,qc as i}from"./chunk-YOTEMOQK.js";import"./chunk-QEZ3K4DX.js";var m=class n{static \u0275fac=function(e){return new(e||n)};static \u0275cmp=o({type:n,selectors:[["app-admin-business"]],decls:1,vars:0,template:function(e,p){e&1&&s(0,"router-outlet")},dependencies:[t,i],encapsulation:2})};export{m as AdminBusinessComponent};
