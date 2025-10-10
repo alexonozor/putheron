@@ -1,0 +1,67 @@
+// Custom styles for the permission management modal
+.permission-item {
+  transition: all 0.3s ease;
+}
+
+.permission-item:hover {
+  transform: translateY(-2px);
+}
+
+// Loading animation
+.animate-spin {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Custom scrollbar
+:host ::ng-deep {
+  .max-h-60::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .max-h-60::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  
+  .max-h-60::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  
+  .max-h-60::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+// Success and error snackbar styles
+:host ::ng-deep {
+  .success-snackbar {
+    background-color: #10b981 !important;
+    color: white !important;
+  }
+  
+  .error-snackbar {
+    background-color: #ef4444 !important;
+    color: white !important;
+  }
+  
+  // Dialog panel styles
+  .permission-management-dialog .mat-mdc-dialog-container {
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+  }
+  
+  .permission-management-dialog .mat-mdc-dialog-surface {
+    border-radius: 16px !important;
+  }
+}

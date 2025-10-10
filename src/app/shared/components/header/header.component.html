@@ -66,6 +66,14 @@
                                     <mat-icon>person</mat-icon>
                                     <span>Profile</span>
                                 </button>
+
+                                <!-- Admin Access (only for authorized users) -->
+                                @if (hasAdminAccess()) {
+                                    <button mat-menu-item (click)="navigateToAdmin()">
+                                        <mat-icon>admin_panel_settings</mat-icon>
+                                        <span>Admin Panel</span>
+                                    </button>
+                                }
                                 
                                 <!-- Mode Switching -->
                                 @if (!isBusinessOwner()) {

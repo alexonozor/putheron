@@ -24,6 +24,8 @@ export interface User {
   is_banned?: boolean;
   email_verified?: boolean;
   ban_reason?: string;
+  is_admin?: boolean; // Legacy admin field
+  is_super_admin?: boolean; // Super admin with all permissions
   
   // Stripe fields
   stripe_account_id?: string;

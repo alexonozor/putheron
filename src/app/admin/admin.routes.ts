@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AdminGuard } from '../shared/guards/permission.guard';
 
 export const adminRoutes: Routes = [
   {
@@ -8,6 +9,12 @@ export const adminRoutes: Routes = [
   },
   {
     path: 'dashboard',
-    loadChildren: () => import('./admin-dashboard/admin-dashboard.routes').then(c => c.adminDashboardRoutes)
+    loadChildren: () => import('./admin-dashboard/admin-dashboard.routes').then(c => c.adminDashboardRoutes),
+    canActivate: [AdminGuard]
+  },
+  {
+    path: 'super-admin-assignment',
+    loadComponent: () => import('./super-admin-assignment/super-admin-assignment.component').then(c => c.SuperAdminAssignmentComponent),
+    canActivate: [AdminGuard]
   }
 ];

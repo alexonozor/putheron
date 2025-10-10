@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
+import { AuthorizationService } from './authorization.service';
 import { 
   User, 
   AuthResponse, 
@@ -20,6 +21,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly config = inject(ConfigService);
+  private readonly authorizationService = inject(AuthorizationService);
   
   private readonly API_URL = this.config.apiBaseUrl;
   private readonly TOKEN_KEY = this.config.tokenKey;
@@ -53,6 +55,39 @@ export class AuthService {
     return of(this.loading());
   }
 
+  constructor() {
+    // Initialize permissions on service creation (page reload)
+    this.initializePermissions();
+  }
+
+  /**
+   * Initialize permissions if user is already authenticated
+   */
+  private async initializePermissions(): Promise<void> {
+    const user = this.getUserFromStorage();
+    console.log('AuthService: Initializing permissions for user:', user?.email || 'No user', 'Mode:', user?.user_mode);
+    
+    if (user) {
+      try {
+        // Check if permissions are already loaded (from localStorage)
+        const currentPermissions = this.authorizationService.userPermissions();
+        console.log('AuthService: Current permissions loaded:', !!currentPermissions);
+        
+        if (!currentPermissions) {
+          console.log('AuthService: Loading permissions from server for user:', user._id, 'Mode:', user.user_mode);
+          await this.authorizationService.loadUserPermissions(user._id);
+          console.log('AuthService: Permissions initialization completed');
+        } else {
+          console.log('AuthService: Permissions already loaded from storage');
+        }
+      } catch (error) {
+        // More specific error handling
+        console.warn('AuthService: Permission initialization had issues, but continuing...', error);
+        // Don't treat this as a fatal error - the authorization service should handle this gracefully
+      }
+    }
+  }
+
   private getTokenFromStorage(): string | null {
     if (typeof window !== 'undefined') {
       return localStorage.getItem(this.TOKEN_KEY);
@@ -68,7 +103,7 @@ export class AuthService {
     return null;
   }
 
-  private setAuthData(token: string, user: User): void {
+  private async setAuthData(token: string, user: User): Promise<void> {
     if (typeof window !== 'undefined') {
       localStorage.setItem(this.TOKEN_KEY, token);
       localStorage.setItem(this.USER_KEY, JSON.stringify(user));
@@ -78,6 +113,14 @@ export class AuthService {
     this.userSubject.next(user);
     this._user.set(user);
     this._isAuthenticated.set(true);
+    
+    // Load user permissions after authentication
+    try {
+      await this.authorizationService.loadUserPermissions(user._id);
+      this.config.logIfEnabled('User permissions loaded successfully');
+    } catch (error) {
+      this.config.errorIfEnabled('Failed to load user permissions:', error);
+    }
   }
 
   private clearAuthData(): void {
@@ -90,6 +133,9 @@ export class AuthService {
     this.userSubject.next(null);
     this._user.set(null);
     this._isAuthenticated.set(false);
+    
+    // Clear user permissions
+    this.authorizationService.clearPermissions();
   }
 
   getAuthToken(): string | null {
@@ -114,7 +160,7 @@ export class AuthService {
       ).toPromise();
 
       if (response?.success && response.data) {
-        this.setAuthData(response.data.access_token, response.data.user);
+        await this.setAuthData(response.data.access_token, response.data.user);
         this.config.logIfEnabled('User registered successfully:', response.data.user.email);
         return { data: response.data, error: null };
       }
@@ -139,7 +185,7 @@ export class AuthService {
       ).toPromise();
 
       if (response?.success && response.data) {
-        this.setAuthData(response.data.access_token, response.data.user);
+        await this.setAuthData(response.data.access_token, response.data.user);
         this.config.logIfEnabled('User signed in successfully:', response.data.user.email);
         return { data: response.data, error: null };
       }
@@ -232,6 +278,9 @@ export class AuthService {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.USER_KEY);
     }
+    
+    // Clear user permissions
+    this.authorizationService.clearPermissions();
     
     this.config.logIfEnabled('User logged out successfully');
   }

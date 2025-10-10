@@ -9,7 +9,10 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
 import { MatMenuModule } from '@angular/material/menu';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AuthService } from '../../shared/services/auth.service';
+import { AuthService } from '../../shared/services';
+import { ConfigService } from '../../shared/services/config.service';
+import { AuthorizationService } from '../../shared/services/authorization.service';
+import { HasPermissionDirective } from '../../shared/directives';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -25,18 +28,22 @@ import { AuthService } from '../../shared/services/auth.service';
     MatButtonModule,
     MatToolbarModule,
     MatCardModule,
-    MatMenuModule
+    MatMenuModule,
+    HasPermissionDirective
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
 export class AdminDashboardComponent {
   private readonly authService = inject(AuthService);
+  readonly authorizationService = inject(AuthorizationService);
   private readonly breakpointObserver = inject(BreakpointObserver);
   private readonly router = inject(Router);
+  private readonly config = inject(ConfigService);
 
   readonly user = this.authService.user;
   readonly isMobile = signal(false);
+  readonly isBootstrapping = signal(false);
 
   readonly isHandset = computed(() => {
     return this.breakpointObserver.isMatched(Breakpoints.Handset);
@@ -49,6 +56,16 @@ export class AdminDashboardComponent {
       .subscribe(result => {
         this.isMobile.set(result.matches);
       });
+
+    // Load user permissions if not already loaded
+    if (!this.hasPermissionsLoaded()) {
+      const user = this.authService.user();
+      if (user?._id) {
+        this.authorizationService.refreshPermissions(user._id).catch((err: any) => {
+          console.warn('Failed to load user permissions:', err);
+        });
+      }
+    }
   }
 
   logout() {
@@ -75,5 +92,81 @@ export class AdminDashboardComponent {
     }
     
     return user.email.charAt(0).toUpperCase();
+  }
+
+  // TEMPORARY: Bootstrap method to setup admin roles and permissions
+  async bootstrapAdminRoles() {
+    try {
+      this.isBootstrapping.set(true);
+      
+      // Get the auth token
+      const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+      
+      if (!token) {
+        alert('No authentication token found. Please log in again.');
+        this.router.navigate(['/auth']);
+        return;
+      }
+
+      console.log('🚀 Starting admin roles bootstrap...');
+
+      const response = await fetch(this.config.getApiUrl('/admin/roles/bootstrap'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Bootstrap failed: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Bootstrap completed:', result);
+      
+      // Show success message
+      alert(`🎉 Success! You are now a Super Admin!\n\n${result.message}\n\nYou can now access all role management features. This button will be removed in production.`);
+      
+      // Refresh the page to update permissions
+      window.location.reload();
+      
+    } catch (error: any) {
+      console.error('❌ Bootstrap failed:', error);
+      
+      let errorMessage = 'Bootstrap failed. ';
+      
+      if (error.message.includes('403')) {
+        errorMessage += 'You may not have permission to bootstrap roles. Contact your system administrator.';
+      } else if (error.message.includes('401')) {
+        errorMessage += 'Authentication failed. Please log in again.';
+        this.router.navigate(['/auth']);
+        return;
+      } else {
+        errorMessage += error.message || 'Unknown error occurred.';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      this.isBootstrapping.set(false);
+    }
+  }
+
+  // Check if user is super admin (still needed for specific logic)
+  isSuperAdmin(): boolean {
+    return this.authorizationService.hasRole(AuthorizationService.ROLES.SUPER_ADMIN);
+  }
+
+  // Check if permissions are loaded
+  hasPermissionsLoaded(): boolean {
+    const userPerms = this.authorizationService.userPermissions();
+    return userPerms != null && userPerms.allPermissions.length > 0;
+  }
+
+  // Check if should show bootstrap button
+  shouldShowBootstrap(): boolean {
+    return this.isSuperAdmin() || !this.hasPermissionsLoaded();
   }
 }

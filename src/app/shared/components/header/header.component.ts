@@ -7,6 +7,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../services/auth.service';
+import { AuthorizationService } from '../../services/authorization.service';
 import { NotificationNavComponent } from '../notification-nav/notification-nav.component';
 
 @Component({
@@ -27,6 +28,7 @@ import { NotificationNavComponent } from '../notification-nav/notification-nav.c
 })
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
+  private readonly authorizationService = inject(AuthorizationService);
   private readonly router = inject(Router);
 
   readonly user = this.authService.user;
@@ -45,6 +47,11 @@ export class HeaderComponent {
   // Check if user is a business owner as computed signal
   readonly isBusinessOwner = computed(() => {
     return this.userMode() === 'business_owner';
+  });
+
+  // Check if user has admin access - use authorization service computed signal
+  readonly hasAdminAccess = computed(() => {
+    return this.authorizationService.hasAdminAccess();
   });
 
   constructor() {
@@ -120,6 +127,10 @@ export class HeaderComponent {
 
   navigateToMessages() {
     this.router.navigate(['/dashboard/messages']);
+  }
+
+  navigateToAdmin() {
+    this.router.navigate(['/admin']);
   }
 
   navigateToCreateBusiness() {

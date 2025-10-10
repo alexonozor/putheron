@@ -1,0 +1,230 @@
+<!-- Role Form Modal -->
+<div class="role-form-modal">
+  <!-- Modal Header -->
+  <div mat-dialog-title class="flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-gray-900">
+      {{ isEditing ? 'Edit Role' : 'Create New Role' }}
+    </h2>
+    <button 
+      mat-icon-button 
+      (click)="onCancel()"
+      class="text-gray-400 hover:text-gray-600">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Modal Content -->
+  <div mat-dialog-content class="max-h-[70vh] overflow-y-auto">
+    <form [formGroup]="roleForm" class="space-y-6">
+      
+      <!-- Basic Information Section -->
+      <mat-card class="shadow-none border">
+        <mat-card-header>
+          <mat-card-title class="text-lg">Basic Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="space-y-4 pt-4">
+          
+          <!-- Role Name -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Role Name *</mat-label>
+            <input 
+              matInput 
+              formControlName="name"
+              placeholder="e.g., content_manager">
+            <mat-icon matSuffix>badge</mat-icon>
+            <mat-error *ngIf="roleForm.get('name')?.hasError('required')">
+              Role name is required
+            </mat-error>
+            <mat-error *ngIf="roleForm.get('name')?.hasError('minlength')">
+              Role name must be at least 2 characters
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Display Name -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Display Name</mat-label>
+            <input 
+              matInput 
+              formControlName="display_name"
+              placeholder="e.g., Content Manager">
+            <mat-icon matSuffix>label</mat-icon>
+            <mat-hint>Friendly name for display purposes</mat-hint>
+          </mat-form-field>
+
+          <!-- Description -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Description *</mat-label>
+            <textarea 
+              matInput 
+              formControlName="description"
+              rows="3"
+              placeholder="Describe the role and its responsibilities..."></textarea>
+            <mat-icon matSuffix>description</mat-icon>
+            <mat-error *ngIf="roleForm.get('description')?.hasError('required')">
+              Description is required
+            </mat-error>
+            <mat-error *ngIf="roleForm.get('description')?.hasError('minlength')">
+              Description must be at least 5 characters
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Color and Priority Row -->
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Color -->
+            <mat-form-field appearance="outline">
+              <mat-label>Color</mat-label>
+              <input 
+                matInput 
+                type="color"
+                formControlName="color"
+                class="h-10">
+              <mat-icon matSuffix>palette</mat-icon>
+            </mat-form-field>
+
+            <!-- Priority -->
+            <mat-form-field appearance="outline">
+              <mat-label>Priority</mat-label>
+              <input 
+                matInput 
+                type="number"
+                formControlName="priority"
+                min="1"
+                max="100">
+              <mat-icon matSuffix>priority_high</mat-icon>
+              <mat-error *ngIf="roleForm.get('priority')?.hasError('min')">
+                Priority must be at least 1
+              </mat-error>
+              <mat-error *ngIf="roleForm.get('priority')?.hasError('max')">
+                Priority cannot exceed 100
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Permissions Section -->
+      <mat-card class="shadow-none border">
+        <mat-card-header>
+          <mat-card-title class="text-lg flex items-center justify-between w-full">
+            <span>Permissions</span>
+            <span class="text-sm font-normal text-gray-500">
+              {{ selectedPermissions.length }} of {{ allPermissions().length }} selected
+            </span>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-4">
+          
+          <!-- Permissions by Module -->
+          <div class="space-y-4 max-h-96 overflow-y-auto">
+            <div *ngFor="let module of getModuleNames()" class="border rounded-lg">
+              
+              <!-- Module Header -->
+              <div class="bg-gray-50 px-4 py-3 border-b">
+                <h4 class="font-medium text-gray-900 capitalize">{{ module }}</h4>
+                <p class="text-sm text-gray-500">
+                  {{ getPermissionsByModule()[module].length }} permissions
+                </p>
+              </div>
+
+              <!-- Module Permissions -->
+              <div class="p-4 space-y-2">
+                <div 
+                  *ngFor="let permission of getPermissionsByModule()[module]; trackBy: trackByPermissionId" 
+                  class="flex items-center justify-between p-2 rounded hover:bg-gray-50">
+                  
+                  <div class="flex-1">
+                    <label class="flex items-center cursor-pointer">
+                      <mat-checkbox 
+                        [checked]="isPermissionSelected(permission._id)"
+                        (change)="togglePermission(permission._id)"
+                        class="mr-3">
+                      </mat-checkbox>
+                      
+                      <div>
+                        <div class="font-medium text-sm text-gray-900">
+                          {{ permission.name }}
+                        </div>
+                        <div class="text-xs text-gray-500">
+                          {{ permission.module }}.{{ permission.action }}
+                          <span *ngIf="permission.description" class="ml-2">
+                            - {{ permission.description }}
+                          </span>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  
+                  <!-- Permission Badge -->
+                  <div class="ml-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                      {{ permission.action }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- No Permissions Message -->
+          <div *ngIf="allPermissions().length === 0" 
+               class="text-center py-8 text-gray-500">
+            <mat-icon class="text-4xl mb-2 opacity-50">security</mat-icon>
+            <p>No permissions available</p>
+          </div>
+
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" 
+           class="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <div class="flex items-center">
+          <mat-icon class="text-red-600 mr-2">error</mat-icon>
+          <span class="text-red-700 text-sm">{{ errorMessage }}</span>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Modal Actions -->
+  <div mat-dialog-actions class="flex justify-end space-x-3 pt-4 border-t">
+    <button 
+      mat-button 
+      (click)="onCancel()"
+      class="text-gray-600">
+      Cancel
+    </button>
+    
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="saveRole()"
+      [disabled]="roleForm.invalid || isSaving">
+      
+      <span *ngIf="!isSaving">
+        {{ isEditing ? 'Update Role' : 'Create Role' }}
+      </span>
+      
+      <span *ngIf="isSaving" class="flex items-center">
+        <mat-spinner diameter="16" class="mr-2"></mat-spinner>
+        {{ isEditing ? 'Updating...' : 'Creating...' }}
+      </span>
+    </button>
+  </div>
+</div>
+
+<style>
+.role-form-modal {
+  min-width: 600px;
+  max-width: 800px;
+}
+
+@media (max-width: 768px) {
+  .role-form-modal {
+    min-width: 90vw;
+    max-width: 95vw;
+  }
+}
+</style>

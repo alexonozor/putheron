@@ -3,16 +3,14 @@ import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  private authService = inject(AuthService);
   private router = inject(Router);
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Get the auth token from the auth service
-    const authToken = this.authService.getAuthToken();
+    // Get the auth token directly from localStorage to avoid circular dependency
+    const authToken = this.getTokenFromStorage();
 
     // Clone the request and add the authorization header if we have a token
     let authRequest = request;
@@ -30,7 +28,7 @@ export class AuthInterceptor implements HttpInterceptor {
         if (error.status === 401) {
           // Token might be expired or invalid, redirect to login
           console.warn('Authentication failed, redirecting to login');
-          this.authService.signOut();
+          this.clearAuthData();
           this.router.navigate(['/auth'], { 
             queryParams: { message: 'Your session has expired. Please log in again.' }
           });
@@ -38,5 +36,27 @@ export class AuthInterceptor implements HttpInterceptor {
         return throwError(() => error);
       })
     );
+  }
+
+  /**
+   * Get token directly from localStorage to avoid circular dependency
+   */
+  private getTokenFromStorage(): string | null {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('access_token');
+    }
+    return null;
+  }
+
+  /**
+   * Clear auth data from localStorage
+   */
+  private clearAuthData(): void {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('current_user');
+      localStorage.removeItem('userPermissions');
+      localStorage.removeItem('permissionsTimestamp');
+    }
   }
 }

@@ -1,15 +1,17 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
 import { BusinessService, Business } from '../../shared/services/business.service';
 import { ProjectService } from '../../shared/services/project.service';
 import { FavoritesService } from '../../shared/services/favorites.service';
+import { RoleService } from '../../shared/services/role.service';
 
 @Component({
   selector: 'app-overviews',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './overviews.component.html',
   styleUrl: './overviews.component.scss',
 })
@@ -20,6 +22,7 @@ export class OverviewsComponent implements OnInit {
   private readonly businessService = inject(BusinessService);
   private readonly projectService = inject(ProjectService);
   private readonly favoritesService = inject(FavoritesService);
+  private readonly roleService = inject(RoleService);
 
   // Signals for overview state
   readonly userBusinesses = signal<Business[]>([]);
@@ -29,6 +32,11 @@ export class OverviewsComponent implements OnInit {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly activeTab = signal<string>('overview');
+  
+  // Super admin assignment
+  userIdForAdmin = '';
+  readonly isAssigningAdmin = signal(false);
+  readonly rachelUserId = '687e220f5c54f009db530a0d';
 
   // Computed signals
   readonly user = this.authService.user;
@@ -199,5 +207,36 @@ export class OverviewsComponent implements OnInit {
       return business.subcategory_id.name;
     }
     return null;
+  }
+
+  // Super Admin Assignment Methods
+  async assignSuperAdmin() {
+    if (!this.userIdForAdmin.trim()) {
+      alert('Please enter a User ID');
+      return;
+    }
+
+    this.isAssigningAdmin.set(true);
+    
+    try {
+      await this.roleService.makeSuperAdminAsync(this.userIdForAdmin.trim());
+      
+      alert(`✅ User ${this.userIdForAdmin} has been successfully assigned as Super Admin!`);
+      this.userIdForAdmin = '';
+    } catch (error: any) {
+      console.error('Error assigning super admin:', error);
+      alert(`❌ Failed to assign super admin: ${error.message || 'Unknown error'}`);
+    } finally {
+      this.isAssigningAdmin.set(false);
+    }
+  }
+
+  copyRachelId() {
+    navigator.clipboard.writeText(this.rachelUserId).then(() => {
+      alert('Rachel\'s User ID copied to clipboard!');
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      alert('Failed to copy User ID');
+    });
   }
 }

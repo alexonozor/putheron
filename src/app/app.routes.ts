@@ -51,7 +51,7 @@ export const routes: Routes = [
     path: 'stripe/refresh', 
     component: StripeCallbackComponent
   },
-  { path: '**', redirectTo: '' }
+ 
 
   
 ];

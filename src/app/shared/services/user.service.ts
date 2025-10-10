@@ -1,145 +1,85 @@
-// import { Injectable, inject, signal, computed } from '@angular/core';
-// import { SupabaseService } from './supabase.service';
-// import { Profile, UserProfile, ProfileUpdate, User } from '../../models';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, firstValueFrom } from 'rxjs';
+import { ConfigService } from './config.service';
 
-// @Injectable({
-//   providedIn: 'root'
-// })
-// export class UserService {
-//   private supabaseService = inject(SupabaseService);
-  
-//   // Signals for reactive state management
-//   public currentProfile = signal<Profile | null>(null);
-//   public loading = signal(false);
-//   public error = signal<string | null>(null);
+export interface User {
+  _id: string;
+  username?: string;
+  email: string;
+  firstName?: string; // Legacy support
+  lastName?: string;  // Legacy support
+  first_name?: string; // New API format
+  last_name?: string;  // New API format
+  isActive?: boolean;
+  profilePicture?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-//   // Computed signals
-//   public isProfileComplete = computed(() => {
-//     const profile = this.currentProfile();
-//     return profile && profile.full_name;
-//   });
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+  error?: string;
+  total?: number;
+}
 
-//   public isBuyer = computed(() => {
-//     const profile = this.currentProfile();
-//     return profile?.is_buyer || false;
-//   });
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+  private readonly http = inject(HttpClient);
+  private readonly config = inject(ConfigService);
 
-//   public isSeller = computed(() => {
-//     const profile = this.currentProfile();
-//     return profile?.is_seller || false;
-//   });
+  private getApiUrl(endpoint: string): string {
+    return this.config.getApiUrl(`/users${endpoint}`);
+  }
 
-//   async loadUserProfile(userId: string) {
-//     this.loading.set(true);
-//     this.error.set(null);
-    
-//     try {
-//       const { data, error } = await this.supabaseService.getProfile(userId);
-      
-//       if (error) {
-//         this.error.set(error.message);
-//         return { data: null, error };
-//       }
-      
-//       if (data) {
-//         this.currentProfile.set(data);
-//       }
-      
-//       return { data, error: null };
-//     } catch (err: any) {
-//       this.error.set(err.message);
-//       return { data: null, error: err };
-//     } finally {
-//       this.loading.set(false);
-//     }
-//   }
+  // Get all users
+  getAllUsers(filters?: {
+    isActive?: boolean;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }): Observable<ApiResponse<User[]>> {
+    const params: any = {};
+    if (filters?.isActive !== undefined) params.isActive = filters.isActive.toString();
+    if (filters?.search) params.search = filters.search;
+    if (filters?.limit) params.limit = filters.limit.toString();
+    if (filters?.offset) params.offset = filters.offset.toString();
 
-//   async updateProfile(updates: ProfileUpdate) {
-//     this.loading.set(true);
-//     this.error.set(null);
-    
-//     try {
-//       const currentUser = this.supabaseService.user;
-//       if (!currentUser) {
-//         throw new Error('No authenticated user');
-//       }
-      
-//       const { data, error } = await this.supabaseService.updateProfile(
-//         currentUser.id, 
-//         updates
-//       );
-      
-//       if (error) {
-//         this.error.set(error.message);
-//         return { data: null, error };
-//       }
-      
-//       if (data) {
-//         this.currentProfile.set(data);
-//       }
-      
-//       return { data, error: null };
-//     } catch (err: any) {
-//       this.error.set(err.message);
-//       return { data: null, error: err };
-//     } finally {
-//       this.loading.set(false);
-//     }
-//   }
+    return this.http.get<ApiResponse<User[]>>(
+      this.getApiUrl(''),
+      { params }
+    );
+  }
 
+  async getAllUsersAsync(filters?: {
+    isActive?: boolean;
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<User[]> {
+    const response = await firstValueFrom(this.getAllUsers(filters));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to fetch users');
+    }
+    return response.data;
+  }
 
-//   async uploadAvatar(file: File, userId: string) {
-//     this.loading.set(true);
-//     this.error.set(null);
-    
-//     try {
-//       const fileExt = file.name.split('.').pop();
-//       const fileName = `${userId}.${fileExt}`;
-//       const filePath = `avatars/${fileName}`;
+  // Get user by ID
+  getUserById(id: string): Observable<ApiResponse<User>> {
+    return this.http.get<ApiResponse<User>>(
+      this.getApiUrl(`/${id}`)
+    );
+  }
 
-//       // Upload file to Supabase storage
-//       const { error: uploadError } = await this.supabaseService.uploadFile(
-//         'avatars', 
-//         filePath, 
-//         file
-//       );
-
-//       if (uploadError) {
-//         this.error.set(uploadError.message);
-//         return { data: null, error: uploadError };
-//       }
-
-//       // Get public URL
-//       const publicUrl = this.supabaseService.getPublicUrl('avatars', filePath);
-
-//       // Update profile with new avatar URL
-//       const { data, error } = await this.updateProfile({
-//         avatar_url: publicUrl
-//       });
-
-//       return { data: publicUrl, error };
-//     } catch (err: any) {
-//       this.error.set(err.message);
-//       return { data: null, error: err };
-//     } finally {
-//       this.loading.set(false);
-//     }
-//   }
-
-//   async updatePersonalInfo(data: {
-//     full_name?: string;
-//     avatar_url?: string;
-//     country_of_origin?: string;
-//     is_buyer?: boolean;
-//     is_seller?: boolean;
-//     last_name?: string;
-//   }) {
-//     return await this.updateProfile(data);
-//   }
-
-//   // Clear user data on logout
-//   clearUserData() {
-//     this.currentProfile.set(null);
-//     this.error.set(null);
-//   }
-// }
+  async getUserByIdAsync(id: string): Promise<User> {
+    const response = await firstValueFrom(this.getUserById(id));
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to fetch user');
+    }
+    return response.data;
+  }
+}

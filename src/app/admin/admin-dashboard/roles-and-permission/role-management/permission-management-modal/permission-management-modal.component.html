@@ -1,0 +1,158 @@
+<!-- Permission Management Modal -->
+<div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold">Manage Permissions</h2>
+        <p class="text-indigo-100 mt-1">Role: {{ data.role.display_name || data.role.name }}</p>
+      </div>
+      <button 
+        (click)="closeModal()"
+        class="p-2 text-indigo-100 hover:text-white hover:bg-white/20 rounded-lg transition-colors">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="p-8 max-h-[70vh] overflow-y-auto">
+    <!-- Current Permissions -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <mat-icon class="text-green-600">check_circle</mat-icon>
+          Current Permissions ({{ currentPermissions.length }})
+        </h3>
+        <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+          {{ currentPermissions.length }} assigned
+        </span>
+      </div>
+
+      <!-- Current Permissions List -->
+      <div *ngIf="currentPermissions.length > 0; else noCurrentPermissions" 
+           class="grid gap-3 max-h-60 overflow-y-auto pr-2">
+        <div *ngFor="let permission of currentPermissions" 
+             class="group bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 hover:shadow-md transition-all duration-200">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-3 h-3 rounded-full bg-gradient-to-r from-green-400 to-emerald-500"></div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-900 group-hover:text-green-700 transition-colors">
+                  {{ permission.name }}
+                </h4>
+                <p class="text-sm text-gray-600 mt-1">{{ permission.description || 'No description' }}</p>
+                <span class="inline-block text-xs font-mono text-green-600 bg-green-100 px-2 py-1 rounded mt-2">
+                  {{ permission.module }}.{{ permission.action }}
+                </span>
+              </div>
+            </div>
+            
+            <button 
+              (click)="removePermission(permission._id)"
+              [disabled]="isLoading"
+              class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+              [title]="'Remove ' + permission.name">
+              <mat-icon class="text-lg">remove_circle</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noCurrentPermissions>
+        <div class="text-center py-8 bg-gray-50 rounded-xl">
+          <mat-icon class="text-4xl text-gray-400 mb-2">security</mat-icon>
+          <p class="text-gray-600 font-medium">No permissions assigned</p>
+          <p class="text-sm text-gray-500">Add permissions from the available list below</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Available Permissions -->
+    <div>
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <mat-icon class="text-blue-600">add_circle</mat-icon>
+          Available Permissions ({{ filteredAvailablePermissions.length }})
+        </h3>
+        
+        <!-- Search -->
+        <div class="relative max-w-xs">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="filterAvailablePermissions()"
+            placeholder="Search permissions..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+          <mat-icon class="absolute left-3 top-2.5 text-gray-400 text-base">search</mat-icon>
+        </div>
+      </div>
+
+      <!-- Available Permissions List -->
+      <div *ngIf="filteredAvailablePermissions.length > 0; else noAvailablePermissions"
+           class="grid gap-3 max-h-60 overflow-y-auto pr-2">
+        <div *ngFor="let permission of filteredAvailablePermissions" 
+             class="group bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 hover:shadow-md transition-all duration-200">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4 flex-1">
+              <div class="w-3 h-3 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500"></div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+                  {{ permission.name }}
+                </h4>
+                <p class="text-sm text-gray-600 mt-1">{{ permission.description || 'No description' }}</p>
+                <span class="inline-block text-xs font-mono text-blue-600 bg-blue-100 px-2 py-1 rounded mt-2">
+                  {{ permission.module }}.{{ permission.action }}
+                </span>
+              </div>
+            </div>
+            
+            <button 
+              (click)="addPermission(permission._id)"
+              [disabled]="isLoading"
+              class="p-2 text-green-500 hover:bg-green-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+              [title]="'Add ' + permission.name">
+              <mat-icon class="text-lg">add_circle</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noAvailablePermissions>
+        <div class="text-center py-8 bg-gray-50 rounded-xl">
+          <mat-icon class="text-4xl text-gray-400 mb-2">done_all</mat-icon>
+          <p class="text-gray-600 font-medium">
+            {{ searchTerm ? 'No matching permissions found' : 'All permissions are already assigned' }}
+          </p>
+          <p class="text-sm text-gray-500">
+            {{ searchTerm ? 'Try adjusting your search terms' : 'This role has all available permissions' }}
+          </p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="border-t border-gray-200 px-8 py-4 bg-gray-50">
+    <div class="flex items-center justify-between">
+      <div class="text-sm text-gray-600">
+        <span class="font-medium">{{ currentPermissions.length }}</span> permissions assigned to this role
+      </div>
+      <button 
+        (click)="closeModal()"
+        class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+        Done
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div *ngIf="isLoading" class="absolute inset-0 bg-black/20 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 shadow-xl">
+      <div class="flex items-center gap-3">
+        <mat-icon class="animate-spin text-2xl text-indigo-600">refresh</mat-icon>
+        <span class="text-gray-700 font-medium">Updating permissions...</span>
+      </div>
+    </div>
+  </div>
+</div>
