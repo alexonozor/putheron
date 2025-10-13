@@ -52,6 +52,11 @@ export const adminDashboardRoutes: Routes = [
           import('./admin-services/admin-services.routes').then(
             (c) => c.adminServicesRoutes
           ),
+        canActivate: [PermissionGuard],
+        data: {
+          permissions: [AuthorizationService.PERMISSIONS.SERVICES_VIEW],
+          redirectTo: '/admin/dashboard'
+        }
       },
       {
         path: 'categories',
@@ -59,6 +64,11 @@ export const adminDashboardRoutes: Routes = [
           import('./admin-categories/admin-categories.routes').then(
             (c) => c.adminCategoriesRoutes
           ),
+        canActivate: [PermissionGuard],
+        data: {
+          permissions: [AuthorizationService.PERMISSIONS.CATEGORIES_VIEW],
+          redirectTo: '/admin/dashboard'
+        }
       },
       {
         path: 'projects',
@@ -66,6 +76,11 @@ export const adminDashboardRoutes: Routes = [
           import('./admin-projects/admin-projects.routes').then(
             (c) => c.adminProjectsRoutes
           ),
+        canActivate: [PermissionGuard],
+        data: {
+          permissions: [AuthorizationService.PERMISSIONS.PROJECTS_VIEW],
+          redirectTo: '/admin/dashboard'
+        }
       },
       {
         path: 'reviews',
@@ -73,6 +88,11 @@ export const adminDashboardRoutes: Routes = [
           import('./admin-reviews/admin-reviews.routes').then(
             (c) => c.ADMIN_REVIEWS_ROUTES
           ),
+        canActivate: [PermissionGuard],
+        data: {
+          permissions: [AuthorizationService.PERMISSIONS.REVIEWS_VIEW],
+          redirectTo: '/admin/dashboard'
+        }
       },
       {
         path: 'transactions',
@@ -80,6 +100,11 @@ export const adminDashboardRoutes: Routes = [
           import('./admin-transactions/admin-transactions.routes').then(
             (c) => c.adminTransactionsRoutes
           ),
+        canActivate: [PermissionGuard],
+        data: {
+          permissions: [AuthorizationService.PERMISSIONS.TRANSACTIONS_VIEW],
+          redirectTo: '/admin/dashboard'
+        }
       },
       {
         path: 'reports',
@@ -87,6 +112,11 @@ export const adminDashboardRoutes: Routes = [
           import('./admin-reports/admin-reports.routes').then(
             (c) => c.adminReportsRoutes
           ),
+        canActivate: [PermissionGuard],
+        data: {
+          permissions: [AuthorizationService.PERMISSIONS.REPORTS_VIEW],
+          redirectTo: '/admin/dashboard'
+        }
       },
       {
         path: 'roles-and-permissions',

@@ -396,17 +396,17 @@ export class AuthorizationService {
     // Check for admin permissions
     const adminPermissions = [
       'dashboard.read',
-      'users.read',
-      'users.create',
-      'users.update', 
-      'users.delete',
-      'roles.read',
-      'roles.create',
-      'roles.update',
-      'roles.delete',
-      'businesses.approve',
-      'businesses.suspend',
-      'analytics.read'
+      'users.read', 'users.create', 'users.update', 'users.delete',
+      'businesses.read', 'businesses.approve', 'businesses.suspend',
+      'services.read', 'services.approve', 'services.reject',
+      'categories.read', 'categories.create', 'categories.update',
+      'projects.read', 'projects.approve', 'projects.reject',
+      'reviews.read', 'reviews.moderate', 'reviews.flag',
+      'transactions.read', 'transactions.refund', 'transactions.cancel',
+      'reports.read', 'analytics.read',
+      'roles.read', 'roles.create', 'roles.update', 'roles.delete',
+      'permissions.read', 'permissions.create', 'permissions.update',
+      'settings.read', 'audit.read'
     ];
     
     const hasAdminPermission = adminPermissions.some(permission => 
@@ -434,13 +434,7 @@ export class AuthorizationService {
     USERS_EDIT: 'users.update',
     USERS_DELETE: 'users.delete',
     USERS_SUSPEND: 'users.suspend',
-    
-    // Role Management
-    ROLES_VIEW: 'roles.read',
-    ROLES_CREATE: 'roles.create',
-    ROLES_EDIT: 'roles.update',
-    ROLES_DELETE: 'roles.delete',
-    ROLES_ASSIGN: 'roles.assign',
+    USERS_EXPORT: 'users.export',
     
     // Business Management
     BUSINESS_VIEW: 'businesses.read',
@@ -450,18 +444,83 @@ export class AuthorizationService {
     BUSINESS_APPROVE: 'businesses.approve',
     BUSINESS_REJECT: 'businesses.reject',
     BUSINESS_SUSPEND: 'businesses.suspend',
+    BUSINESS_EXPORT: 'businesses.export',
     
-    // Admin Dashboard
+    // Services Management
+    SERVICES_VIEW: 'services.read',
+    SERVICES_CREATE: 'services.create',
+    SERVICES_EDIT: 'services.update',
+    SERVICES_DELETE: 'services.delete',
+    SERVICES_APPROVE: 'services.approve',
+    SERVICES_REJECT: 'services.reject',
+    SERVICES_EXPORT: 'services.export',
+    
+    // Categories Management
+    CATEGORIES_VIEW: 'categories.read',
+    CATEGORIES_CREATE: 'categories.create',
+    CATEGORIES_EDIT: 'categories.update',
+    CATEGORIES_DELETE: 'categories.delete',
+    CATEGORIES_REORDER: 'categories.reorder',
+    CATEGORIES_EXPORT: 'categories.export',
+    
+    // Projects Management
+    PROJECTS_VIEW: 'projects.read',
+    PROJECTS_CREATE: 'projects.create',
+    PROJECTS_EDIT: 'projects.update',
+    PROJECTS_DELETE: 'projects.delete',
+    PROJECTS_APPROVE: 'projects.approve',
+    PROJECTS_REJECT: 'projects.reject',
+    PROJECTS_EXPORT: 'projects.export',
+    
+    // Reviews Management
+    REVIEWS_VIEW: 'reviews.read',
+    REVIEWS_CREATE: 'reviews.create',
+    REVIEWS_EDIT: 'reviews.update',
+    REVIEWS_DELETE: 'reviews.delete',
+    REVIEWS_MODERATE: 'reviews.moderate',
+    REVIEWS_FLAG: 'reviews.flag',
+    REVIEWS_EXPORT: 'reviews.export',
+    
+    // Transactions Management
+    TRANSACTIONS_VIEW: 'transactions.read',
+    TRANSACTIONS_CREATE: 'transactions.create',
+    TRANSACTIONS_EDIT: 'transactions.update',
+    TRANSACTIONS_DELETE: 'transactions.delete',
+    TRANSACTIONS_REFUND: 'transactions.refund',
+    TRANSACTIONS_CANCEL: 'transactions.cancel',
+    TRANSACTIONS_EXPORT: 'transactions.export',
+    
+    // Reports and Analytics
+    REPORTS_VIEW: 'reports.read',
+    REPORTS_CREATE: 'reports.create',
+    REPORTS_EDIT: 'reports.update',
+    REPORTS_DELETE: 'reports.delete',
+    REPORTS_EXPORT: 'reports.export',
+    ANALYTICS_VIEW: 'analytics.read',
+    ANALYTICS_ADVANCED: 'analytics.advanced',
+    
+    // Role and Permission Management
+    ROLES_VIEW: 'roles.read',
+    ROLES_CREATE: 'roles.create',
+    ROLES_EDIT: 'roles.update',
+    ROLES_DELETE: 'roles.delete',
+    ROLES_ASSIGN: 'roles.assign',
+    PERMISSIONS_VIEW: 'permissions.read',
+    PERMISSIONS_CREATE: 'permissions.create',
+    PERMISSIONS_EDIT: 'permissions.update',
+    PERMISSIONS_DELETE: 'permissions.delete',
+    
+    // System and Dashboard
     ADMIN_ACCESS: 'dashboard.read',
     ADMIN_DASHBOARD: 'dashboard.read',
-    ANALYTICS_VIEW: 'analytics.read',
+    SETTINGS_VIEW: 'settings.read',
+    SETTINGS_EDIT: 'settings.update',
+    AUDIT_VIEW: 'audit.read',
+    AUDIT_EXPORT: 'audit.export',
     
     // Legacy constants for backward compatibility
-    BUSINESS_MANAGE: 'businesses.update', // Business management requires update permission
-    PERMISSIONS_VIEW: 'roles.read', // Permission management through roles
-    PERMISSIONS_CREATE: 'roles.create',
-    PERMISSIONS_EDIT: 'roles.update',
-    PERMISSIONS_DELETE: 'roles.delete'
+    BUSINESS_MANAGE: 'businesses.update',
+    USERS_MANAGE: 'users.update'
   } as const;
 
   // Common role constants

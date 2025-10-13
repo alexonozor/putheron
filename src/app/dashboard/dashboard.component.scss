@@ -64,12 +64,37 @@
   display: flex !important;
 }
 
-/* Ensure main content area is properly styled */
-main {
-  width: 100% !important;
+/* Fix sidenav height to prevent growing with content */
+::ng-deep .mat-drawer {
+  max-height: 100vh !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Sidebar content container with fixed height and scrolling */
+.sidebar-content {
+  height: 100% !important;
+  max-height: 100vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* Navigation area should be scrollable if content overflows */
+.sidebar-content nav {
   flex: 1 !important;
   overflow-y: auto !important;
-  padding: 1.5rem !important;
+  overflow-x: hidden !important;
+}
+
+/* Ensure main content area is properly styled with fixed height */
+main {
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
 }
 
 /* Base layout styles - since we're using Tailwind classes in the template, 
@@ -151,6 +176,15 @@ main {
 /* Empty state illustration enhancement */
 .empty-state svg {
   opacity: 0.6;
+}
+
+/* Fix mat-sidenav-content height to prevent page growth */
+::ng-deep .mat-drawer-content {
+  height: 100% !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* Responsive adjustments */

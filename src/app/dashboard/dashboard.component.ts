@@ -14,6 +14,7 @@ import { SocketService } from '../shared/services/socket.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Subscription } from 'rxjs';
 import { FavoritesService } from '../shared/services/favorites.service';
+import { HeaderComponent } from "../shared/components/header/header.component";
 
 @Component({
   selector: 'app-dashboard',
@@ -28,8 +29,8 @@ import { FavoritesService } from '../shared/services/favorites.service';
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    NotificationNavComponent
-  ],
+    HeaderComponent
+],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -150,6 +151,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   toggleSidenav() {
     this.sidenavOpened.set(!this.sidenavOpened());
+  }
+
+  onMenuToggle() {
+    this.toggleSidenav();
   }
 
   onNavigationClick() {

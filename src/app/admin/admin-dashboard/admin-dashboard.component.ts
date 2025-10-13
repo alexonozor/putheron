@@ -13,6 +13,7 @@ import { AuthService } from '../../shared/services';
 import { ConfigService } from '../../shared/services/config.service';
 import { AuthorizationService } from '../../shared/services/authorization.service';
 import { HasPermissionDirective } from '../../shared/directives';
+import { HeaderComponent } from "../../shared/components/header/header.component";
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -29,8 +30,9 @@ import { HasPermissionDirective } from '../../shared/directives';
     MatToolbarModule,
     MatCardModule,
     MatMenuModule,
-    HasPermissionDirective
-  ],
+    HasPermissionDirective,
+    HeaderComponent
+],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
@@ -43,6 +45,7 @@ export class AdminDashboardComponent {
 
   readonly user = this.authService.user;
   readonly isMobile = signal(false);
+  readonly sidenavOpened = signal(true); // Default to true for admin (desktop-first)
   readonly isBootstrapping = signal(false);
 
   readonly isHandset = computed(() => {
@@ -54,7 +57,15 @@ export class AdminDashboardComponent {
     this.breakpointObserver
       .observe([Breakpoints.Handset, Breakpoints.Tablet])
       .subscribe(result => {
-        this.isMobile.set(result.matches);
+        const isMobileNow = result.matches;
+        this.isMobile.set(isMobileNow);
+        
+        // Auto-close sidenav on mobile, open on desktop
+        if (isMobileNow) {
+          this.sidenavOpened.set(false);
+        } else {
+          this.sidenavOpened.set(true);
+        }
       });
 
     // Load user permissions if not already loaded
@@ -78,7 +89,18 @@ export class AdminDashboardComponent {
   }
 
   toggleSidenav() {
-    // Toggle sidenav logic for admin dashboard
+    this.sidenavOpened.set(!this.sidenavOpened());
+  }
+
+  onMenuToggle() {
+    this.toggleSidenav();
+  }
+
+  onNavigationClick() {
+    // Close sidebar on mobile when a navigation link is clicked
+    if (this.isMobile()) {
+      this.sidenavOpened.set(false);
+    }
   }
 
   getUserInitials(): string {

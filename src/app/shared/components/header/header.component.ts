@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, effect } from '@angular/core';
+import { Component, inject, signal, computed, effect, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,6 +30,14 @@ export class HeaderComponent {
   private readonly authService = inject(AuthService);
   private readonly authorizationService = inject(AuthorizationService);
   private readonly router = inject(Router);
+
+  // Input properties
+  @Input() showMobileMenuButton = false;
+  @Input() isAdminMode = false;
+  @Input() isDashboardMode = false;
+
+  // Output events
+  @Output() menuToggle = new EventEmitter<void>();
 
   readonly user = this.authService.user;
   readonly isAuthenticated = this.authService.isAuthenticated;
@@ -183,6 +191,10 @@ export class HeaderComponent {
 
   toggleMobileMenu() {
     this.showMobileMenu.update(current => !current);
+  }
+
+  onMenuToggle() {
+    this.menuToggle.emit();
   }
 
   async signOut() {

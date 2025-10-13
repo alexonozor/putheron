@@ -1,233 +1,283 @@
-  <!-- Error Display -->
-        @if (error()) {
-          <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
-            <div class="flex">
-              <svg class="w-5 h-5 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-              </svg>
-              <div>
-                <h3 class="text-sm font-medium text-red-800">Error</h3>
-                <p class="mt-1 text-sm text-red-700">{{ error() }}</p>
-              </div>
-            </div>
-          </div>
-        }
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  <div class="p-4 sm:p-6 lg:p-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div class="mb-4 sm:mb-0">
+          <h1 class="text-3xl font-bold text-gray-900 gradient-text">
+            Dashboard Overview
+          </h1>
+          <p class="text-gray-600 mt-2 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Welcome back, {{ (user()?.first_name + ' ' + (user()?.last_name || '')).trim() || user()?.email }}
+          </p>
+          <p class="text-sm text-gray-500 mt-1">Last updated: {{ getCurrentDateTime() }}</p>
+        </div>
+        <div class="flex space-x-3">
+          <button 
+            (click)="loadDashboardData()"
+            [disabled]="loading()"
+            class="action-button inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Refresh
+          </button>
+          <button 
+            (click)="navigateToCreateBusiness()"
+            class="action-button inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            New Business
+          </button>
+        </div>
+      </div>
+    </div>
 
-        <!-- Loading State -->
-        @if (loading()) {
-          <div class="flex items-center justify-center py-12">
-            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-            <span class="ml-3 text-gray-600">Loading...</span>
+    <!-- Error Display -->
+    @if (error()) {
+      <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+        <div class="flex items-center">
+          <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <div class="flex-1">
+            <h3 class="text-sm font-medium text-red-800">Error Loading Dashboard</h3>
+            <p class="text-sm text-red-700 mt-1">{{ error() }}</p>
           </div>
-        } @else {
-          <!-- Tab Content -->
+          <button 
+            (click)="loadDashboardData()"
+            class="ml-4 px-3 py-1 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors">
+            Try Again
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="flex items-center justify-center h-64">
+        <div class="text-center">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p class="mt-4 text-sm text-gray-600">Loading dashboard data...</p>
+        </div>
+      </div>
+    } @else {
+      <!-- Tab Content -->
           @switch (activeTab()) {
             @case ('overview') {
               <!-- Overview Dashboard Content -->
               <div class="space-y-8">
-                <!-- Stats Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Main Stats Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 stagger-animation">
                   <!-- Total Businesses Card -->
-                  <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-200">
-                    <div class="flex items-center justify-between">
-                      <div>
-                        <p class="text-sm font-medium text-gray-500 mb-1">Total Businesses</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ userBusinesses().length }}</p>
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                          </svg>
+                        </div>
                       </div>
-                      <div class="p-3 bg-blue-50 rounded-lg">
-                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                        </svg>
+                      <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500">Total Businesses</p>
+                        <div class="flex items-baseline">
+                          <p class="text-2xl font-bold text-gray-900">{{ userBusinesses().length | number }}</p>
+                          <p class="ml-2 text-sm font-medium text-blue-600">Active</p>
+                        </div>
+                        <p class="text-xs text-gray-500">Business listings</p>
                       </div>
                     </div>
                   </div>
 
                   <!-- Active Services Card -->
-                  <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-200">
-                    <div class="flex items-center justify-between">
-                      <div>
-                        <p class="text-sm font-medium text-gray-500 mb-1">Active Services</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ getTotalServices() }}</p>
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          </svg>
+                        </div>
                       </div>
-                      <div class="p-3 bg-green-50 rounded-lg">
-                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
+                      <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500">Active Services</p>
+                        <div class="flex items-baseline">
+                          <p class="text-2xl font-bold text-gray-900">{{ getTotalServices() | number }}</p>
+                          <p class="ml-2 text-sm font-medium text-green-600">Available</p>
+                        </div>
+                        <p class="text-xs text-gray-500">Service offerings</p>
                       </div>
                     </div>
                   </div>
 
                   <!-- Projects Card -->
-                  <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-200">
-                    <div class="flex items-center justify-between">
-                      <div>
-                        <p class="text-sm font-medium text-gray-500 mb-1">Projects</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ getTotalProjects() }}</p>
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
+                          </svg>
+                        </div>
                       </div>
-                      <div class="p-3 bg-purple-50 rounded-lg">
-                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
-                        </svg>
+                      <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500">Projects</p>
+                        <div class="flex items-baseline">
+                          <p class="text-2xl font-bold text-gray-900">{{ getTotalProjects() | number }}</p>
+                          <p class="ml-2 text-sm font-medium text-purple-600">Total</p>
+                        </div>
+                        <p class="text-xs text-gray-500">Portfolio items</p>
                       </div>
                     </div>
                   </div>
 
                   <!-- Total Favorites Card -->
-                  <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-200">
-                    <div class="flex items-center justify-between">
-                      <div>
-                        <p class="text-sm font-medium text-gray-500 mb-1">Total Favorites</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ getTotalFavorites() }}</p>
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                          </svg>
+                        </div>
                       </div>
-                      <div class="p-3 bg-red-50 rounded-lg">
-                        <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                        </svg>
+                      <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500">Total Favorites</p>
+                        <div class="flex items-baseline">
+                          <p class="text-2xl font-bold text-gray-900">{{ getTotalFavorites() | number }}</p>
+                          <p class="ml-2 text-sm font-medium text-red-600">Received</p>
+                        </div>
+                        <p class="text-xs text-gray-500">Customer likes</p>
                       </div>
                     </div>
                   </div>
+                </div>
 
+                <!-- Secondary Stats Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                   <!-- Messages Card -->
-                  <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-200">
-                    <div class="flex items-center justify-between">
-                      <div>
-                        <p class="text-sm font-medium text-gray-500 mb-1">Messages</p>
-                        <p class="text-3xl font-bold text-gray-900">0</p>
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                          </svg>
+                        </div>
                       </div>
-                      <div class="p-3 bg-orange-50 rounded-lg">
-                        <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                        </svg>
+                      <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-500">Messages</p>
+                        <div class="flex items-baseline">
+                          <p class="text-2xl font-bold text-gray-900">0</p>
+                          <p class="ml-2 text-sm font-medium text-indigo-600">Coming soon</p>
+                        </div>
+                        <p class="text-xs text-gray-500">Customer inquiries</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <!-- Super Admin Assignment -->
-                <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-200 overflow-hidden">
-                  <div class="px-6 py-4 border-b border-red-200 bg-white/50">
-                    <div class="flex items-center space-x-2">
-                      <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                      </svg>
-                      <h3 class="text-lg font-semibold text-red-900">Super Admin Assignment</h3>
-                    </div>
-                    <p class="text-sm text-red-700 mt-1">Assign super admin privileges to gain system access</p>
-                  </div>
-                  <div class="p-6">
-                    <form (ngSubmit)="assignSuperAdmin()" #assignForm="ngForm" class="space-y-4">
-                      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-end">
-                        <div class="lg:col-span-2">
-                          <label for="userId" class="block text-sm font-medium text-red-900 mb-2">User ID</label>
-                          <input 
-                            id="userId"
-                            type="text"
-                            [(ngModel)]="userIdForAdmin" 
-                            name="userId"
-                            placeholder="Enter user ID (e.g., 687e220f5c54f009db530a0d)"
-                            required
-                            class="block w-full px-3 py-2 border border-red-300 rounded-lg shadow-sm placeholder-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                        </div>
-                        <button 
-                          type="submit"
-                          [disabled]="isAssigningAdmin() || assignForm.invalid"
-                          class="w-full lg:w-auto inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-colors font-medium">
-                          @if (isAssigningAdmin()) {
-                            <svg class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Assigning...
-                          } @else {
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                            </svg>
-                            Assign Super Admin
-                          }
-                        </button>
-                      </div>
-                      
-                      <!-- Quick Reference -->
-                      <div class="bg-white/60 rounded-lg p-4 border border-red-200">
-                        <div class="flex items-center justify-between">
-                          <div>
-                            <h4 class="text-sm font-medium text-red-900">Rachel's User ID:</h4>
-                            <code class="text-xs text-red-800 bg-red-100 px-2 py-1 rounded mt-1 inline-block font-mono">687e220f5c54f009db530a0d</code>
-                          </div>
-                          <button 
-                            type="button"
-                            (click)="copyRachelId()"
-                            class="text-red-600 hover:text-red-800 p-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
+             
 
                 <!-- Recent Activity -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <!-- Recent Businesses -->
-                  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200">
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-slate-50">
                       <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-gray-900">Recent Businesses</h3>
+                        <div>
+                          <h3 class="text-lg font-semibold text-gray-900">Recent Businesses</h3>
+                          <p class="text-sm text-gray-600 mt-1">Your latest business listings</p>
+                        </div>
                         <button 
                           (click)="setActiveTab('businesses')"
-                          class="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
-                          View All →
+                          class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200">
+                          View All
+                          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                          </svg>
                         </button>
                       </div>
                     </div>
                     <div class="p-6">
                       @if (userBusinesses().length === 0) {
                         <div class="text-center py-12">
-                          <div class="p-4 bg-gray-50 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div class="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl w-20 h-20 mx-auto mb-6 flex items-center justify-center border border-blue-100">
+                            <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                             </svg>
                           </div>
-                          <h4 class="text-lg font-medium text-gray-900 mb-2">No businesses yet</h4>
-                          <p class="text-gray-500 mb-6">Get started by creating your first business</p>
+                          <h4 class="text-xl font-semibold text-gray-900 mb-2">No businesses yet</h4>
+                          <p class="text-gray-600 mb-6 max-w-sm mx-auto">Get started by creating your first business profile and start connecting with customers</p>
                           <button 
                             (click)="navigateToCreateBusiness()"
-                            class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl font-medium">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
-                            Create Business
+                            Create Your First Business
                           </button>
                         </div>
                       } @else {
-                        <div class="space-y-4">
+                        <div class="space-y-3">
                           @for (business of userBusinesses().slice(0, 3); track business._id) {
-                            <div class="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-all duration-200 border border-transparent hover:border-gray-200"
+                            <div class="flex items-center space-x-4 p-4 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 cursor-pointer transition-all duration-300 transform hover:-translate-y-1 border border-transparent hover:border-blue-200 hover:shadow-md group"
                                  (click)="viewBusiness(business._id)">
                               @if (business.logo_url) {
-                                <img class="h-12 w-12 rounded-lg object-cover" [src]="business.logo_url" [alt]="business.name">
+                                <img class="h-14 w-14 rounded-xl object-cover border-2 border-gray-100 group-hover:border-blue-200 transition-colors" [src]="business.logo_url" [alt]="business.name">
                               } @else {
-                                <div class="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center">
-                                  <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="h-14 w-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center border-2 border-gray-100 group-hover:border-blue-200 group-hover:from-blue-50 group-hover:to-indigo-50 transition-all">
+                                  <svg class="w-7 h-7 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                                   </svg>
                                 </div>
                               }
                               <div class="flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-900 truncate">{{ business.name }}</p>
-                                <div class="flex items-center space-x-2 mt-1">
-                                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" 
-                                        [class]="getStatusColor(business.status)">
+                                <div class="flex items-center space-x-2 mb-2">
+                                  <h4 class="text-base font-semibold text-gray-900 truncate group-hover:text-blue-700 transition-colors">{{ business.name }}</h4>
+                                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border" 
+                                        [class]="getStatusBadgeClass(business.status)">
                                     {{ business.status | titlecase }}
                                   </span>
                                 </div>
+                                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                  <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                    </svg>
+                                    {{ getCategoryName(business) }}
+                                  </span>
+                                  <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    {{ business.view_count || 0 }} views
+                                  </span>
+                                </div>
                               </div>
-                              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                               </svg>
+                            </div>
+                          }
+                          
+                          @if (userBusinesses().length > 3) {
+                            <div class="pt-4 border-t border-gray-100">
+                              <button 
+                                (click)="setActiveTab('businesses')"
+                                class="w-full flex items-center justify-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 border border-gray-200 hover:border-blue-200">
+                                View {{ userBusinesses().length - 3 }} more businesses
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                              </button>
                             </div>
                           }
                         </div>
@@ -236,41 +286,72 @@
                   </div>
 
                   <!-- Quick Actions -->
-                  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                      <h3 class="text-lg font-semibold text-gray-900">Quick Actions</h3>
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+                      <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Quick Actions</h3>
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                      </div>
+                      <p class="text-sm text-gray-600 mt-1">Get started with common tasks</p>
                     </div>
                     <div class="p-6">
-                      <div class="space-y-4">
+                      <div class="grid grid-cols-1 gap-4">
                         <button 
                           (click)="navigateToCreateBusiness()"
-                          class="w-full flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 group">
-                          <div class="flex items-center space-x-4">
-                            <div class="p-3 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
-                              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          class="flex items-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl hover:from-blue-100 hover:to-indigo-100 hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md group">
+                          <div class="flex items-center space-x-4 w-full">
+                            <div class="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
+                              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                               </svg>
                             </div>
-                            <div class="text-left">
-                              <p class="text-sm font-medium text-gray-900">Create New Business</p>
-                              <p class="text-xs text-gray-500">Set up a new business profile</p>
+                            <div class="flex-1 text-left">
+                              <p class="text-base font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">Create New Business</p>
+                              <p class="text-sm text-gray-600">Set up a new business profile and start listing your services</p>
                             </div>
+                            <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
                           </div>
                         </button>
 
                         <button 
                           (click)="createService()"
-                          class="w-full flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 group">
-                          <div class="flex items-center space-x-4">
-                            <div class="p-3 bg-green-50 rounded-lg group-hover:bg-green-100 transition-colors">
-                              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          class="flex items-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl hover:from-green-100 hover:to-emerald-100 hover:border-green-300 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md group">
+                          <div class="flex items-center space-x-4 w-full">
+                            <div class="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
+                              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                               </svg>
                             </div>
-                            <div class="text-left">
-                              <p class="text-sm font-medium text-gray-900">Add New Service</p>
-                              <p class="text-xs text-gray-500">Create a service for your business</p>
+                            <div class="flex-1 text-left">
+                              <p class="text-base font-semibold text-gray-900 group-hover:text-green-700 transition-colors">Add New Service</p>
+                              <p class="text-sm text-gray-600">Create a service offering for one of your businesses</p>
                             </div>
+                            <svg class="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                          </div>
+                        </button>
+
+                        <button 
+                          (click)="setActiveTab('businesses')"
+                          class="flex items-center p-4 bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-xl hover:from-purple-100 hover:to-violet-100 hover:border-purple-300 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md group">
+                          <div class="flex items-center space-x-4 w-full">
+                            <div class="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300">
+                              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v11a2 2 0 002 2h2m0-13h10a2 2 0 012 2v9a2 2 0 01-2 2H9m8-2v2m-6-6h6m-6-2h6m-6-2h6m-6-2h6"></path>
+                              </svg>
+                            </div>
+                            <div class="flex-1 text-left">
+                              <p class="text-base font-semibold text-gray-900 group-hover:text-purple-700 transition-colors">Manage Businesses</p>
+                              <p class="text-sm text-gray-600">View and manage all your business listings</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
                           </div>
                         </button>
                       </div>
@@ -471,4 +552,6 @@
               </div>
             }
           }
-        }
+    }
+  </div>
+</div>

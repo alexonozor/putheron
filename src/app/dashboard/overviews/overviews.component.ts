@@ -185,6 +185,16 @@ export class OverviewsComponent implements OnInit {
     }
   }
 
+  getStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'approved': return 'bg-green-50 text-green-700 border-green-200';
+      case 'pending': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      case 'rejected': return 'bg-red-50 text-red-700 border-red-200';
+      case 'suspended': return 'bg-gray-50 text-gray-700 border-gray-200';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  }
+
   getStatusIcon(status: string): string {
     switch (status) {
       case 'approved': return 'bg-green-400';
@@ -209,27 +219,6 @@ export class OverviewsComponent implements OnInit {
     return null;
   }
 
-  // Super Admin Assignment Methods
-  async assignSuperAdmin() {
-    if (!this.userIdForAdmin.trim()) {
-      alert('Please enter a User ID');
-      return;
-    }
-
-    this.isAssigningAdmin.set(true);
-    
-    try {
-      await this.roleService.makeSuperAdminAsync(this.userIdForAdmin.trim());
-      
-      alert(`✅ User ${this.userIdForAdmin} has been successfully assigned as Super Admin!`);
-      this.userIdForAdmin = '';
-    } catch (error: any) {
-      console.error('Error assigning super admin:', error);
-      alert(`❌ Failed to assign super admin: ${error.message || 'Unknown error'}`);
-    } finally {
-      this.isAssigningAdmin.set(false);
-    }
-  }
 
   copyRachelId() {
     navigator.clipboard.writeText(this.rachelUserId).then(() => {
@@ -237,6 +226,17 @@ export class OverviewsComponent implements OnInit {
     }).catch(err => {
       console.error('Failed to copy:', err);
       alert('Failed to copy User ID');
+    });
+  }
+
+  getCurrentDateTime(): string {
+    return new Date().toLocaleString('en-US', {
+      month: 'long',
+      day: 'numeric', 
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
     });
   }
 }

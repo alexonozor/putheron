@@ -101,6 +101,55 @@ export class PermissionManagementModalComponent implements OnInit {
     );
   }
 
+  // Group permissions by module for better organization
+  getGroupedPermissions(permissions: Permission[]): { [module: string]: Permission[] } {
+    return permissions.reduce((groups, permission) => {
+      const module = this.getModuleDisplayName(permission.module);
+      if (!groups[module]) {
+        groups[module] = [];
+      }
+      groups[module].push(permission);
+      return groups;
+    }, {} as { [module: string]: Permission[] });
+  }
+
+  // Get friendly module names
+  private getModuleDisplayName(module: string): string {
+    const moduleMap: { [key: string]: string } = {
+      'users': 'User Management',
+      'businesses': 'Business Management', 
+      'services': 'Services Management',
+      'categories': 'Categories Management',
+      'projects': 'Projects Management',
+      'reviews': 'Reviews Management',
+      'transactions': 'Transactions Management',
+      'reports': 'Reports & Analytics',
+      'analytics': 'Analytics',
+      'roles': 'Roles Management',
+      'permissions': 'Permissions Management',
+      'dashboard': 'Dashboard Access',
+      'settings': 'System Settings',
+      'audit': 'Audit & Logging'
+    };
+    
+    return moduleMap[module] || module.charAt(0).toUpperCase() + module.slice(1);
+  }
+
+  // Get grouped available permissions
+  getGroupedAvailablePermissions(): { [module: string]: Permission[] } {
+    return this.getGroupedPermissions(this.filteredAvailablePermissions);
+  }
+
+  // Get grouped current permissions
+  getGroupedCurrentPermissions(): { [module: string]: Permission[] } {
+    return this.getGroupedPermissions(this.currentPermissions);
+  }
+
+  // Get object keys for template iteration
+  getObjectKeys(obj: any): string[] {
+    return Object.keys(obj);
+  }
+
   async addPermission(permissionId: string) {
     try {
       this.isLoading = true;

@@ -2,6 +2,7 @@
 export * from './auth.service';
 export * from './config.service';
 export * from './business.service';
+export * from './admin-dashboard.service';
 
 // Commented out services - will be re-enabled when ready
 // export * from './user.service';
