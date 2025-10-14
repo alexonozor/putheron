@@ -384,3 +384,43 @@
     }
   }
 }
+
+.mat-mdc-dialog-title::before {
+    display: inline-block;
+    width: 0;
+    height: 40px;
+    content: none !important ;
+    vertical-align: 0;
+}
+
+// Date picker enhancements
+.date-picker-field {
+  .mat-mdc-form-field-input-control input {
+    cursor: pointer;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+  }
+
+  .mat-datepicker-toggle {
+    cursor: pointer;
+    
+    &:hover {
+      .mat-datepicker-toggle-default-icon {
+        color: var(--mat-primary);
+        transform: scale(1.1);
+        transition: all 0.2s ease;
+      }
+    }
+  }
+}
+
+// Enhance date picker calendar appearance
+::ng-deep .mat-datepicker-content {
+  .mat-calendar-body-disabled {
+    color: rgba(0, 0, 0, 0.3) !important;
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    cursor: not-allowed !important;
+  }
+}

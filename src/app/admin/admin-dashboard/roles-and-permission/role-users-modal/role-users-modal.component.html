@@ -1,5 +1,5 @@
 <!-- Material Dialog Title -->
-<div mat-dialog-title class="flex items-center justify-between p-6 border-b border-gray-200">
+<div mat-dialog-title class="flex! items-center! justify-between! p-6! border-b! border-gray-200!">
   <div class="flex items-center space-x-4">
     <div class="relative">
       <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg"
@@ -67,10 +67,16 @@
                     <span>Loading users...</span>
                   </div>
                 </mat-option>
-                <mat-option *ngIf="!isLoadingUsers && filteredUsers().length === 0" disabled>
+                <mat-option *ngIf="!isLoadingUsers && filteredUsers().length === 0 && userSearchControl.value && userSearchControl.value.length >= 2" disabled>
                   <div class="flex items-center space-x-2 py-2 text-gray-500">
                     <mat-icon class="w-4 h-4">search_off</mat-icon>
-                    <span>No users found</span>
+                    <span>No users found for "{{ userSearchControl.value }}"</span>
+                  </div>
+                </mat-option>
+                <mat-option *ngIf="!isLoadingUsers && filteredUsers().length === 0 && (!userSearchControl.value || userSearchControl.value.length < 2)" disabled>
+                  <div class="flex items-center space-x-2 py-2 text-gray-500">
+                    <mat-icon class="w-4 h-4">search</mat-icon>
+                    <span>Type at least 2 characters to search</span>
                   </div>
                 </mat-option>
                 <mat-option *ngFor="let user of filteredUsers()" [value]="user">
@@ -94,18 +100,29 @@
               </mat-error>
               <mat-hint *ngIf="isLoadingUsers">Searching users...</mat-hint>
               <mat-hint *ngIf="!isLoadingUsers && filteredUsers().length > 0">{{ filteredUsers().length }} available user{{ filteredUsers().length === 1 ? '' : 's' }}</mat-hint>
-              <mat-hint *ngIf="!isLoadingUsers && filteredUsers().length === 0 && userSearchControl.value">No users found for "{{ userSearchControl.value }}"</mat-hint>
-              <mat-hint *ngIf="!isLoadingUsers && filteredUsers().length === 0 && !userSearchControl.value">Type to search for users</mat-hint>
+              <mat-hint *ngIf="!isLoadingUsers && filteredUsers().length === 0 && userSearchControl.value && userSearchControl.value.length >= 2">No users found for "{{ userSearchControl.value }}"</mat-hint>
+              <mat-hint *ngIf="!isLoadingUsers && filteredUsers().length === 0 && (!userSearchControl.value || userSearchControl.value.length < 2)">Type at least 2 characters to search for users</mat-hint>
             </mat-form-field>
 
             <!-- Expiry Date -->
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field appearance="outline" class="w-full date-picker-field">
               <mat-label>Expiry Date (Optional)</mat-label>
-              <input matInput [matDatepicker]="picker" formControlName="expires_at" 
-                     placeholder="Select expiry date">
-              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-              <mat-datepicker #picker></mat-datepicker>
-              <mat-hint>Leave empty for permanent assignment</mat-hint>
+              <input matInput 
+                     [matDatepicker]="picker" 
+                     formControlName="expires_at" 
+                     [min]="minDate"
+                     placeholder="Click to select date"
+                     (click)="openDatePicker(picker)"
+                     (focus)="openDatePicker(picker)"
+                     readonly>
+              <mat-datepicker-toggle matIconSuffix 
+                                   [for]="picker"
+                                   (click)="openDatePicker(picker)"></mat-datepicker-toggle>
+              <mat-datepicker #picker startView="month"></mat-datepicker>
+              <mat-error *ngIf="assignForm.get('expires_at')?.hasError('pastDate')">
+                {{ assignForm.get('expires_at')?.errors?.['pastDate']?.message }}
+              </mat-error>
+              <mat-hint>Leave empty for permanent assignment (cannot select past dates)</mat-hint>
             </mat-form-field>
           </div>
 

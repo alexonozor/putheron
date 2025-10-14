@@ -115,13 +115,13 @@ export class AuthorizationService {
             success: boolean;
             data: any[];
             message?: string;
-          }>(this.getApiUrl(`/users/${userId}/roles`)).toPromise(),
+          }>(`${this.config.getApiUrl('/roles/my-roles')}`).toPromise(),
           
           this.http.get<{
             success: boolean;
             data: Permission[];
             message?: string;
-          }>(this.getApiUrl(`/users/${userId}/permissions`)).toPromise()
+          }>(`${this.config.getApiUrl('/roles/my-permissions')}`).toPromise()
         ]);
 
         if (rolesResponse?.success && permissionsResponse?.success) {
@@ -379,6 +379,61 @@ export class AuthorizationService {
   }
 
   /**
+   * Force refresh user permissions and clear cache
+   */
+  async forceRefreshPermissions(userId: string): Promise<void> {
+    this.clearStoredPermissions();
+    await this.loadUserPermissions(userId);
+  }
+
+  /**
+   * Debug method to inspect current authorization state
+   * Call this from browser console: window.authService.debugAuthState()
+   */
+  debugAuthState(): void {
+    const permissions = this.permissionNames();
+    const roles = this.activeRoles();
+    const userPerms = this.userPermissions();
+
+    console.group('🔍 Authorization Debug Information');
+    console.log('📊 Current User Permissions:', userPerms);
+    console.log('🎭 Active Roles:', roles);
+    console.log('🔐 All Permissions:', permissions);
+    console.log('👑 Has Admin Access:', this.hasAdminAccess());
+    console.log('🆔 User ID:', userPerms?.userId);
+    
+    console.group('🔍 Role Details');
+    roles.forEach(role => {
+      console.log(`Role: ${role.name} (${role.display_name})`);
+      console.log('  Permissions:', role.permissions?.map(p => typeof p === 'string' ? p : p?.name));
+    });
+    console.groupEnd();
+    
+    console.group('🔍 Admin Permission Check');
+    const adminPermissions = [
+      'dashboard.read', 'users.read', 'users.create', 'users.update', 'users.delete',
+      'businesses.read', 'businesses.approve', 'businesses.suspend',
+      'services.read', 'services.approve', 'services.reject',
+      'categories.read', 'categories.create', 'categories.update',
+      'projects.read', 'projects.approve', 'projects.reject',
+      'reviews.read', 'reviews.moderate', 'reviews.flag',
+      'transactions.read', 'transactions.refund', 'transactions.cancel',
+      'reports.read', 'analytics.read',
+      'roles.read', 'roles.create', 'roles.update', 'roles.delete',
+      'permissions.read', 'permissions.create', 'permissions.update',
+      'settings.read', 'audit.read'
+    ];
+    
+    adminPermissions.forEach(perm => {
+      const hasIt = permissions.includes(perm);
+      console.log(`${hasIt ? '✅' : '❌'} ${perm}`);
+    });
+    console.groupEnd();
+    
+    console.groupEnd();
+  }
+
+  /**
    * Check if user has any admin-level permissions
    * This is a computed signal that checks for common admin permissions
    */
@@ -386,14 +441,14 @@ export class AuthorizationService {
     const permissions = this.permissionNames();
     const roles = this.activeRoles();
     
-    // Check for admin roles
-    const adminRoles = ['super_admin', 'admin', 'system_admin', 'moderator'];
-    const hasAdminRole = roles.some(role => 
-      adminRoles.includes(role.name.toLowerCase()) || 
-      adminRoles.includes(role.display_name?.toLowerCase() || '')
+    // Check for system admin roles (backward compatibility)
+    const systemAdminRoles = ['super_admin', 'admin', 'system_admin', 'moderator'];
+    const hasSystemAdminRole = roles.some(role => 
+      systemAdminRoles.includes(role.name.toLowerCase()) || 
+      systemAdminRoles.includes(role.display_name?.toLowerCase() || '')
     );
     
-    // Check for admin permissions
+    // Check for admin permissions - any role with these permissions should grant admin access
     const adminPermissions = [
       'dashboard.read',
       'users.read', 'users.create', 'users.update', 'users.delete',
@@ -413,14 +468,43 @@ export class AuthorizationService {
       permissions.includes(permission)
     );
     
-    const hasAccess = hasAdminRole || hasAdminPermission;
+    // Check if any of the user's custom roles have admin-level permissions
+    // This handles cases like custom roles (e.g., "volunteer") that have admin permissions
+    const hasCustomRoleWithAdminPerms = roles.some(role => {
+      if (!role.permissions || !Array.isArray(role.permissions)) {
+        return false;
+      }
+      
+      // Check if this role has any admin permissions
+      return role.permissions.some(permission => {
+        if (typeof permission === 'string') {
+          return adminPermissions.includes(permission);
+        } else if (permission && typeof permission === 'object' && 'name' in permission) {
+          return adminPermissions.includes((permission as any).name);
+        }
+        return false;
+      });
+    });
+    
+    const hasAccess = hasSystemAdminRole || hasAdminPermission || hasCustomRoleWithAdminPerms;
     
     console.log('Admin access check:', {
       permissions: permissions.length,
-      roles: roles.map(r => r.name),
-      hasAdminRole,
+      roles: roles.map(r => ({
+        name: r.name,
+        display_name: r.display_name,
+        permissions: r.permissions?.length || 0,
+        permissionDetails: r.permissions?.map(p => typeof p === 'string' ? p : p?.name)
+      })),
+      hasSystemAdminRole,
       hasAdminPermission,
-      hasAccess
+      hasCustomRoleWithAdminPerms,
+      hasAccess,
+      allPermissions: permissions,
+      adminPermissionsCheck: adminPermissions.map(perm => ({
+        permission: perm,
+        hasIt: permissions.includes(perm)
+      }))
     });
     
     return hasAccess;

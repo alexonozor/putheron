@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -22,7 +22,6 @@ import { RoleService, Role, UserRole, AssignRoleDto } from '../../../../shared/s
 import { UserService, User } from '../../../../shared/services/user.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { AuthorizationService } from '../../../../shared/services/authorization.service';
-
 export interface RoleUsersModalData {
   role: Role;
 }
@@ -49,8 +48,10 @@ export interface RoleUsersModalData {
     MatCardModule,
     MatTooltipModule
   ],
+  providers: [
+    provideNativeDateAdapter()
+  ],
   templateUrl: './role-users-modal.component.html',
-
   styleUrl: './role-users-modal.component.scss'
 })
 export class RoleUsersModalComponent implements OnInit, OnDestroy {
@@ -76,6 +77,9 @@ export class RoleUsersModalComponent implements OnInit, OnDestroy {
   isAssigning = false;
   userSearchControl = this.fb.control('');
 
+  // Date picker configuration
+  minDate = new Date(); // Prevent selecting past dates
+
   // Computed available users (excluding already assigned users)
   availableUsers = computed(() => {
     const assignedUserIds = this.roleUsers().map(ur => {
@@ -95,7 +99,7 @@ export class RoleUsersModalComponent implements OnInit, OnDestroy {
   ) {
     this.assignForm = this.fb.group({
       user_id: ['', Validators.required],
-      expires_at: [''],
+      expires_at: ['', [this.futureDateValidator]],
       notes: ['']
     });
 
@@ -105,8 +109,7 @@ export class RoleUsersModalComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     await this.loadRoleUsers();
-    // Load initial users without search term
-    await this.searchUsers('');
+    // Don't load users initially - let them search when they type
   }
 
   ngOnDestroy() {
@@ -117,11 +120,17 @@ export class RoleUsersModalComponent implements OnInit, OnDestroy {
 
   private setupUserSearch() {
     this.searchSubscription = this.userSearchControl.valueChanges.pipe(
-      startWith(''),
       debounceTime(300), // Wait 300ms after user stops typing
       distinctUntilChanged(), // Only search if the term changed
       switchMap((searchTerm: string | null) => {
-        const term = searchTerm || '';
+        const term = (searchTerm || '').trim();
+        
+        // Only search if user has typed something (minimum 2 characters for efficiency)
+        if (!term || term.length < 2) {
+          this.isLoadingUsers = false;
+          return of({ success: true, data: [] });
+        }
+
         this.isLoadingUsers = true;
         return this.userService.getAllUsers({
           isActive: true,
@@ -149,10 +158,18 @@ export class RoleUsersModalComponent implements OnInit, OnDestroy {
 
   private async searchUsers(searchTerm: string) {
     try {
+      // Only search if we have a meaningful search term
+      const term = searchTerm.trim();
+      if (!term || term.length < 2) {
+        this.allUsers.set([]);
+        this.filteredUsers.set([]);
+        return;
+      }
+
       this.isLoadingUsers = true;
       const users = await this.userService.getAllUsersAsync({
         isActive: true,
-        search: searchTerm,
+        search: term,
         limit: 50
       });
       
@@ -360,6 +377,28 @@ export class RoleUsersModalComponent implements OnInit, OnDestroy {
   formatDate(date: string | Date | undefined): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
+  }
+
+  // Custom validator to ensure selected date is not in the past
+  futureDateValidator(control: any) {
+    if (!control.value) {
+      return null; // Allow empty values (optional field)
+    }
+    
+    const selectedDate = new Date(control.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to beginning of day
+    
+    if (selectedDate < today) {
+      return { pastDate: { message: 'Expiry date cannot be in the past' } };
+    }
+    
+    return null;
+  }
+
+  // Open date picker when input or icon is clicked
+  openDatePicker(picker: any) {
+    picker.open();
   }
 
   trackByUserRole(index: number, userRole: UserRole): string {

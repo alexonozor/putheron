@@ -73,6 +73,7 @@ export class NotificationNavComponent implements OnInit {
   async markUnseenAsSeen() {
     try {
       await this.notificationService.markAllAsSeen();
+      // Note: markAllAsSeen should NOT update unreadCount - only markAllAsRead should do that
     } catch (error) {
       console.error('Error marking notifications as seen:', error);
     }
