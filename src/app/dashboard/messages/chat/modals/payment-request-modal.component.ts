@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,6 +11,11 @@ export interface PaymentRequestData {
   amount: number; // Changed from string to number
   description: string;
   content: string;
+}
+
+export interface PaymentRequestModalData {
+  defaultAmount?: number;
+  isStartPayment?: boolean;
 }
 
 @Component({
@@ -28,7 +33,7 @@ export interface PaymentRequestData {
   template: `
     <h1 mat-dialog-title class="dialog-title">
       <mat-icon class="title-icon">payment</mat-icon>
-      Request Additional Payment
+      {{ data?.isStartPayment ? 'Request Project Payment' : 'Request Additional Payment' }}
     </h1>
     
     <div mat-dialog-content class="dialog-content">
@@ -55,7 +60,7 @@ export interface PaymentRequestData {
           <input 
             matInput 
             formControlName="description"
-            placeholder="Why is additional payment needed?">
+            [placeholder]="data?.isStartPayment ? 'Payment for project services' : 'Why is additional payment needed?'">
           <mat-error *ngIf="paymentForm.get('description')?.hasError('required')">
             Description is required
           </mat-error>
@@ -67,7 +72,7 @@ export interface PaymentRequestData {
             matInput 
             formControlName="content"
             rows="4"
-            placeholder="Explain the payment request in detail..."></textarea>
+            [placeholder]="data?.isStartPayment ? 'Message about project payment and start...' : 'Explain the payment request in detail...'"></textarea>
           <mat-error *ngIf="paymentForm.get('content')?.hasError('required')">
             Message is required
           </mat-error>
@@ -87,7 +92,7 @@ export interface PaymentRequestData {
         (click)="onSubmit()"
         [disabled]="paymentForm.invalid">
         <mat-icon>send</mat-icon>
-        Send Payment Request
+        {{ data?.isStartPayment ? 'Start Project & Request Payment' : 'Send Payment Request' }}
       </button>
     </div>
   `,
@@ -142,11 +147,22 @@ export class PaymentRequestModalComponent {
 
   paymentForm: FormGroup;
 
-  constructor() {
+  constructor(@Inject(MAT_DIALOG_DATA) public data?: PaymentRequestModalData) {
+    const defaultAmount = this.data?.defaultAmount || '';
+    const isStartPayment = this.data?.isStartPayment || false;
+    
+    const defaultDescription = isStartPayment 
+      ? 'Project payment' 
+      : '';
+    
+    const defaultContent = isStartPayment 
+      ? 'Payment is required to start working on your project. This amount covers the agreed services and deliverables.'
+      : '';
+
     this.paymentForm = this.formBuilder.group({
-      amount: ['', [Validators.required, Validators.min(0.01)]],
-      description: ['', [Validators.required, Validators.minLength(3)]],
-      content: ['', [Validators.required, Validators.minLength(10)]]
+      amount: [defaultAmount, [Validators.required, Validators.min(0.01)]],
+      description: [defaultDescription, [Validators.required, Validators.minLength(3)]],
+      content: [defaultContent, [Validators.required, Validators.minLength(10)]]
     });
   }
 

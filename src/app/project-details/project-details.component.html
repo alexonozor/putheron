@@ -21,80 +21,113 @@
      
         
         <!-- Business Owner Actions -->
-        @if (project() && isBusinessOwner() && project()!.status === 'pending') {
-          <button 
-            (click)="navigateToChat()"
-            class="flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-            <mat-icon class="mr-2 w-5 h-5">chat</mat-icon>
-            Chat with Client
-            @if (chatUnreadCount() > 0) {
-              <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center">
-                {{ chatUnreadCount() }}
-              </span>
-            }
-          </button>
+        @if (project() && isBusinessOwner()) {
+          <!-- Chat Button - Always Available for Business Owner -->
+          @if (['requested', 'under_review', 'accepted', 'started', 'payment_requested', 'payment_completed', 'in_progress'].includes(project()!.status)) {
+            <button 
+              (click)="navigateToChat()"
+              class="flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+              <mat-icon class="mr-2 w-5 h-5">chat</mat-icon>
+              Chat with Client
+              @if (chatUnreadCount() > 0) {
+                <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center">
+                  {{ chatUnreadCount() }}
+                </span>
+              }
+            </button>
+          }
 
-          <button 
-            (click)="acceptProject()"
-            class="flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-            <mat-icon class="mr-2 w-5 h-5">check_circle</mat-icon>
-            Accept Project
-          </button>
-          
-          <button 
-            (click)="rejectProject()"
-            class="flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-            <mat-icon class="mr-2 w-5 h-5">cancel</mat-icon>
-            Reject Project
-          </button>
-        }
-        
-        <!-- Other Status Actions -->
-        @if (project() && isBusinessOwner() && project()!.status === 'accepted') {
-          <button 
-            (click)="navigateToChat()"
-            class="flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-            <mat-icon class="mr-2 w-5 h-5">chat</mat-icon>
-            Chat with Client
-            @if (chatUnreadCount() > 0) {
-              <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center">
-                {{ chatUnreadCount() }}
-              </span>
+          <!-- Status-Specific Actions -->
+          @switch (project()!.status) {
+            @case ('requested') {
+              <button 
+                (click)="acceptProject()"
+                class="flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">check_circle</mat-icon>
+                Accept Project
+              </button>
+              
+              <button 
+                (click)="rejectProject()"
+                class="flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">cancel</mat-icon>
+                Reject Project
+              </button>
             }
-          </button>
-
-          <button 
-            (click)="markInProgress()"
-            class="flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-            <mat-icon class="mr-2 w-5 h-5">play_arrow</mat-icon>
-            Start Project
-          </button>
-        }
-        
-        @if (project() && isBusinessOwner() && project()!.status === 'in_progress') {
-          <button 
-            (click)="navigateToChat()"
-            class="flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-            <mat-icon class="mr-2 w-5 h-5">chat</mat-icon>
-            Chat with Client
-            @if (chatUnreadCount() > 0) {
-              <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] h-5 flex items-center justify-center">
-                {{ chatUnreadCount() }}
-              </span>
+            
+            @case ('under_review') {
+              <button 
+                (click)="acceptProject()"
+                class="flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">check_circle</mat-icon>
+                Accept Project
+              </button>
+              
+              <button 
+                (click)="rejectProject()"
+                class="flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">cancel</mat-icon>
+                Reject Project
+              </button>
             }
-          </button>
+            
+            @case ('accepted') {
+              <button 
+                (click)="startProject()"
+                class="flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">play_arrow</mat-icon>
+                Start Project & Request Payment
+              </button>
+            }
+            
+            @case ('started') {
+              <button 
+                (click)="markInProgress()"
+                class="flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">work</mat-icon>
+                Mark In Progress
+              </button>
+            }
+            
+            @case ('payment_requested') {
+              <button 
+                (click)="markInProgress()"
+                class="flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">work</mat-icon>
+                Mark In Progress
+              </button>
+            }
+            
+            @case ('payment_completed') {
+              <button 
+                (click)="markInProgress()"
+                class="flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">work</mat-icon>
+                Mark In Progress
+              </button>
+            }
+            
+            @case ('in_progress') {
+              <button 
+                (click)="requestAdditionalPayment()"
+                class="flex items-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">payment</mat-icon>
+                Request Additional Payment
+              </button>
 
-          <button 
-            (click)="markCompleted()"
-            class="flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-            <mat-icon class="mr-2 w-5 h-5">check</mat-icon>
-            Mark as Completed
-          </button>
+              <button 
+                (click)="requestCompletion()"
+                class="flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">check_circle</mat-icon>
+                Request Completion
+              </button>
+            }
+          }
         }
       </div>
 
       <!-- Client Actions -->
-      @if (project() && isClient() && ['pending', 'accepted', 'in_progress'].includes(project()!.status)) {
+      @if (project() && isClient() && ['requested', 'under_review', 'accepted', 'started', 'payment_requested', 'payment_completed', 'in_progress'].includes(project()!.status)) {
         <div class="p-6 bg-gray-50 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Client Actions</h3>
           <div class="flex flex-wrap gap-3">
@@ -102,7 +135,7 @@
               (click)="navigateToChat()"
               class="flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
               <mat-icon class="mr-2 w-5 h-5">chat</mat-icon>
-              @if (project()!.status === 'pending') {
+              @if (project()!.status === 'requested' || project()!.status === 'under_review') {
                 Chat with Business
               } @else {
                 Chat with Business Owner
@@ -367,15 +400,15 @@
                   }
                   <div class="flex-1">
                     <button 
-                      (click)="navigateToBusinessProfile(businessInfo.slug)"
+                      (click)="navigateToBusinessProfile(businessInfo.id)"
                       class="text-2xl font-bold text-blue-600 hover:text-blue-800 transition-colors mb-1 text-left cursor-pointer underline-offset-4 hover:underline">
                       {{ businessInfo.name }}
                     </button>
                     <p class="text-gray-600">Click to view business profile</p>
-                    @if (businessInfo.slug) {
+                    @if (businessInfo.id) {
                       <div class="mt-2 flex items-center space-x-2">
                         <mat-icon class="w-4 h-4 text-gray-400">link</mat-icon>
-                        <span class="text-sm text-gray-500">/business/{{ businessInfo.slug }}</span>
+                        <span class="text-sm text-gray-500">/business/{{ businessInfo.id }}</span>
                       </div>
                     }
                   </div>

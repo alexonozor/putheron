@@ -149,7 +149,7 @@ export class OverviewsComponent implements OnInit {
   }
 
   viewBusiness(businessId: string) {
-    this.router.navigate(['/business', businessId]);
+    this.router.navigate(['/business/profile', businessId]);
   }
 
   editBusiness(businessId: string) {

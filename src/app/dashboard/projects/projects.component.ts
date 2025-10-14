@@ -41,10 +41,10 @@ export class ProjectsComponent implements OnInit {
   // Computed signals
   readonly user = this.authService.user;
   readonly pendingMyProjects = computed(() => 
-    this.myProjects().filter(p => p.status === 'pending')
+    this.myProjects().filter(p => ['requested', 'under_review'].includes(p.status))
   );
   readonly activeMyProjects = computed(() => 
-    this.myProjects().filter(p => ['accepted', 'in_progress'].includes(p.status))
+    this.myProjects().filter(p => ['accepted', 'started', 'payment_requested', 'payment_pending', 'payment_completed', 'in_progress'].includes(p.status))
   );
   readonly completedMyProjects = computed(() => 
     this.myProjects().filter(p => ['completed', 'settled'].includes(p.status))
@@ -56,10 +56,10 @@ export class ProjectsComponent implements OnInit {
     this.myProjects().filter(p => p.status === 'cancelled')
   );
   readonly pendingBusinessProjects = computed(() => 
-    this.businessProjects().filter(p => p.status === 'pending')
+    this.businessProjects().filter(p => ['requested', 'under_review'].includes(p.status))
   );
   readonly activeBusinessProjects = computed(() => 
-    this.businessProjects().filter(p => ['accepted', 'in_progress'].includes(p.status))
+    this.businessProjects().filter(p => ['accepted', 'started', 'payment_requested', 'payment_pending', 'payment_completed', 'in_progress'].includes(p.status))
   );
   readonly completedBusinessProjects = computed(() => 
     this.businessProjects().filter(p => ['completed', 'settled'].includes(p.status))
@@ -107,22 +107,34 @@ export class ProjectsComponent implements OnInit {
 
   getStatusColor(status: string): string {
     const colors: { [key: string]: string } = {
-      'pending': 'bg-yellow-100 text-yellow-800',
-      'accepted': 'bg-blue-100 text-blue-800',
+      'requested': 'bg-blue-100 text-blue-800',
+      'under_review': 'bg-yellow-100 text-yellow-800',
+      'accepted': 'bg-green-100 text-green-800',
+      'started': 'bg-indigo-100 text-indigo-800',
+      'payment_requested': 'bg-orange-100 text-orange-800',
+      'payment_pending': 'bg-orange-100 text-orange-800',
+      'payment_completed': 'bg-emerald-100 text-emerald-800',
       'in_progress': 'bg-purple-100 text-purple-800',
+      'awaiting_client_approval': 'bg-amber-100 text-amber-800',
       'completed': 'bg-green-100 text-green-800',
-      'settled': 'bg-green-100 text-green-800',
+      'settled': 'bg-teal-100 text-teal-800',
       'rejected': 'bg-red-100 text-red-800',
-      'cancelled': 'bg-orange-100 text-orange-800'
+      'cancelled': 'bg-gray-100 text-gray-800'
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   }
 
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'pending': 'Pending',
+      'requested': 'Requested',
+      'under_review': 'Under Review',
       'accepted': 'Accepted',
+      'started': 'Started',
+      'payment_requested': 'Payment Requested',
+      'payment_pending': 'Payment Pending',
+      'payment_completed': 'Payment Completed',
       'in_progress': 'In Progress',
+      'awaiting_client_approval': 'Awaiting Approval',
       'completed': 'Completed',
       'settled': 'Settled',
       'rejected': 'Rejected',

@@ -321,7 +321,7 @@ export class SearchComponent implements OnInit {
   }
 
   onBusinessClick(business: Business) {
-    this.router.navigate(['/business', business._id]);
+    this.router.navigate(['/business/profile', business._id]);
   }
 
   // Helper methods for template

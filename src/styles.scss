@@ -68,3 +68,61 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .mdc-notched-outline__notch {
     border-right: none !important;
 }
+
+// Modal styles for create project dialog
+.create-project-modal {
+  .mat-mdc-dialog-container {
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .mat-mdc-dialog-surface {
+    border-radius: 12px;
+    padding: 0;
+  }
+
+
+
+  // Dialog title styling
+  .mat-mdc-dialog-title {
+    background: #fff;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  // Dialog actions styling  
+  .mat-mdc-dialog-actions {
+    background: #f8f9fa;
+  }
+}
+
+// Success snackbar styles
+.success-snackbar {
+  --mdc-snackbar-container-color: #22c55e !important;
+  --mdc-snackbar-supporting-text-color: #ffffff !important;
+
+  .mdc-snackbar__surface {
+    background-color: #22c55e !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.3) !important;
+  }
+
+  .mdc-snackbar__label {
+    color: #ffffff !important;
+    font-weight: 500;
+  }
+
+  .mdc-snackbar__action {
+    color: #ffffff !important;
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 6px !important;
+    padding: 4px 12px !important;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.3) !important;
+    }
+  }
+}

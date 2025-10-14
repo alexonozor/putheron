@@ -1,24 +1,23 @@
-import { Component, OnInit, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
-import { MatStepperModule } from '@angular/material/stepper';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { ProjectService, CreateProjectDto } from '../shared/services/project.service';
-import { BusinessService, Business, Service } from '../shared/services/business.service';
-import { AuthService } from '../shared/services/auth.service';
-import { StripeService } from '../shared/services/stripe.service';
-import { DashboardRefreshService } from '../shared/services/dashboard-refresh.service';
+import { MatDialogModule } from '@angular/material/dialog';
+import { ProjectService, CreateProjectDto } from '../../shared/services/project.service';
+import { BusinessService, Business, Service } from '../../shared/services/business.service';
+import { AuthService } from '../../shared/services/auth.service';
+import { DashboardRefreshService } from '../../shared/services/dashboard-refresh.service';
 
 @Component({
   selector: 'app-create-project-steps',
@@ -31,28 +30,31 @@ import { DashboardRefreshService } from '../shared/services/dashboard-refresh.se
     MatSelectModule,
     MatCheckboxModule,
     MatDatepickerModule,
-    MatNativeDateModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatCardModule,
-    MatStepperModule,
-    MatProgressBarModule,
+    MatDialogModule,
   ],
   templateUrl: './create-project-steps.component.html',
   styleUrl: './create-project-steps.component.scss'
 })
 export class CreateProjectStepsComponent implements OnInit {
-  @ViewChild('paymentElement', { static: false }) paymentElementRef!: ElementRef;
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly projectService = inject(ProjectService);
   private readonly businessService = inject(BusinessService);
   private readonly authService = inject(AuthService);
-  private readonly stripeService = inject(StripeService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly dashboardRefreshService = inject(DashboardRefreshService);
+  private readonly dialogRef = inject(MatDialogRef<CreateProjectStepsComponent>);
+  
+  // Dialog data interface
+  public dialogData = inject(MAT_DIALOG_DATA) as { 
+    businessId: string; 
+    preSelectedServiceId?: string 
+  } | null;
 
   // Signals
   readonly loading = signal(false);
@@ -61,13 +63,7 @@ export class CreateProjectStepsComponent implements OnInit {
   readonly services = signal<Service[]>([]);
   readonly servicesLoading = signal(false);
   readonly submitting = signal(false);
-  readonly paymentProcessing = signal(false);
 
-  // Payment related
-  readonly clientSecret = signal<string | null>(null);
-  readonly paymentIntentId = signal<string | null>(null);
-  readonly createdProject = signal<any | null>(null);
-  
   // Image and file upload
   readonly imagePreview = signal<string | null>(null);
   readonly attachmentPreviews = signal<{ name: string; url: string; type: string; size: number }[]>([]);
@@ -75,20 +71,9 @@ export class CreateProjectStepsComponent implements OnInit {
   // File storage
   public imageFile: File | null = null;
   public attachmentFiles: File[] = [];
-  
-  // Project form data storage
-  private projectFormData: CreateProjectDto | null = null;
-  
-  // Stripe Elements
-  private elements: any = null;
-  private paymentElement: any = null;
-
-  // Stepper reference
-  @ViewChild('stepper') stepper!: any;
 
   // Forms
   projectInfoForm: FormGroup;
-  paymentForm: FormGroup;
 
   // Computed signals
   readonly user = this.authService.user;
@@ -110,7 +95,7 @@ export class CreateProjectStepsComponent implements OnInit {
     }, 0);
   });
 
-  readonly canContinue = computed(() => {
+  readonly canSubmit = computed(() => {
     const formValid = this.projectInfoForm?.valid || false;
     const hasServices = this.selectedServices().length > 0;
     const notSubmitting = !this.submitting();
@@ -127,32 +112,53 @@ export class CreateProjectStepsComponent implements OnInit {
     return null;
   }
 
+  // Custom validator for deadline (no past dates)
+  private futureDateValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) {
+      return null; // Allow empty dates since deadline is optional
+    }
+    
+    const selectedDate = new Date(control.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
+    
+    if (selectedDate < today) {
+      return { pastDate: true };
+    }
+    
+    return null;
+  }
+
   constructor() {
     this.projectInfoForm = this.formBuilder.group({
       title: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', [Validators.maxLength(1000)]],
       selectedServices: [[], [Validators.required, this.atLeastOneService]],
-      deadline: [''],
+      deadline: ['', [this.futureDateValidator]],
       additionalNotes: ['', [Validators.maxLength(500)]]
-    });
-
-    this.paymentForm = this.formBuilder.group({
-      termsAccepted: [false, [Validators.requiredTrue]]
     });
   }
 
   ngOnInit(): void {
     // Check if user is authenticated
     if (!this.user()) {
-      this.router.navigate(['/auth']);
+      if (this.dialogRef) {
+        this.dialogRef.close({ error: 'Authentication required' });
+      } else {
+        this.router.navigate(['/auth']);
+      }
       return;
     }
 
-    // Get business ID from route parameters
-    const businessId = this.route.snapshot.params['businessId'];
+    // Get business ID from dialog data or route parameters (for backward compatibility)
+    const businessId = this.dialogData?.businessId || this.route.snapshot.params['businessId'];
     if (!businessId) {
       this.error.set('Business ID is required');
-      this.router.navigate(['/']);
+      if (this.dialogRef) {
+        this.dialogRef.close({ error: 'Business ID is required' });
+      } else {
+        this.router.navigate(['/']);
+      }
       return;
     }
 
@@ -162,6 +168,16 @@ export class CreateProjectStepsComponent implements OnInit {
     // Listen to form changes to update signal
     this.projectInfoForm.get('selectedServices')?.valueChanges.subscribe((value: string[] | null) => {
       this.selectedServiceIds.set(value || []);
+      
+      // If there's a pre-selected service from dialog data, select it
+      if (this.dialogData?.preSelectedServiceId && !value?.includes(this.dialogData.preSelectedServiceId)) {
+        const currentValue = value || [];
+        if (!currentValue.includes(this.dialogData.preSelectedServiceId)) {
+          const newValue = [...currentValue, this.dialogData.preSelectedServiceId];
+          this.projectInfoForm.get('selectedServices')?.setValue(newValue, { emitEvent: false });
+          this.selectedServiceIds.set(newValue);
+        }
+      }
     });
   }
 
@@ -178,6 +194,17 @@ export class CreateProjectStepsComponent implements OnInit {
       this.servicesLoading.set(true);
       const services = await this.businessService.getBusinessServicesAsync(businessId);
       this.services.set(services.filter(service => service.is_active));
+
+      // Pre-select service if provided in dialog data
+      if (this.dialogData?.preSelectedServiceId) {
+        const preSelectedService = services.find(service => 
+          service._id === this.dialogData?.preSelectedServiceId && service.is_active
+        );
+        if (preSelectedService) {
+          this.projectInfoForm.get('selectedServices')?.setValue([this.dialogData.preSelectedServiceId]);
+          this.selectedServiceIds.set([this.dialogData.preSelectedServiceId]);
+        }
+      }
     } catch (error: any) {
       console.error('Error loading business data:', error);
       this.error.set('Failed to load business information');
@@ -187,7 +214,7 @@ export class CreateProjectStepsComponent implements OnInit {
     }
   }
 
-  async onProjectInfoSubmit() {
+  async onProjectSubmit() {
     if (this.projectInfoForm.invalid) {
       this.markFormGroupTouched(this.projectInfoForm);
       return;
@@ -204,28 +231,8 @@ export class CreateProjectStepsComponent implements OnInit {
         throw new Error('Business information not loaded');
       }
 
-      // Calculate total cost from selected services
-      const selectedServiceIds = formValue.selectedServices;
-      const selectedServices = this.services().filter(service => 
-        selectedServiceIds.includes(service._id)
-      );
-      
-      const totalCost = selectedServices.reduce((total, service) => 
-        total + (service.price || 0), 0
-      );
-
-      console.log('Creating payment intent for services:', selectedServiceIds);
-      console.log('Total cost:', totalCost);
-
-      // Create payment intent for the calculated amount
-      const paymentData = await this.projectService.calculatePaymentIntentAsync(selectedServiceIds);
-      console.log('Payment intent created:', paymentData);
-      
-      this.clientSecret.set(paymentData.clientSecret);
-      this.paymentIntentId.set(paymentData.paymentIntentId);
-
-      // Store form data for later project creation (AFTER payment)
-      this.projectFormData = {
+      // Create project data
+      const projectData: CreateProjectDto = {
         title: formValue.title,
         description: formValue.description,
         business_id: business._id,
@@ -234,102 +241,12 @@ export class CreateProjectStepsComponent implements OnInit {
         additional_notes: formValue.additionalNotes
       };
 
-      console.log('Project form data stored for after payment:', this.projectFormData);
+      console.log('Creating project request:', projectData);
 
-      // Initialize Stripe Elements
-      await this.initializePaymentElement(paymentData.clientSecret);
-
-      // Move to next step (payment)
-      this.stepper.next();
+      // Create project directly (no payment required)
+      const createdProject = await this.projectService.createProjectAsync(projectData);
       
-    } catch (error: any) {
-      console.error('Error preparing payment:', error);
-      this.error.set(error.error?.message || error.message || 'Failed to prepare payment');
-    } finally {
-      this.submitting.set(false);
-    }
-  }
-
-  async initializePaymentElement(clientSecret: string) {
-    try {
-      const { elements, paymentElement } = await this.stripeService.createElement(clientSecret);
-      this.elements = elements;
-      this.paymentElement = paymentElement;
-
-      // Mount the payment element
-      setTimeout(() => {
-        if (this.paymentElementRef?.nativeElement) {
-          this.paymentElement.mount(this.paymentElementRef.nativeElement);
-        }
-      }, 100);
-    } catch (error) {
-      console.error('Error initializing payment element:', error);
-      this.error.set('Failed to initialize payment system');
-    }
-  }
-
-  async onPaymentSubmit() {
-    if (this.paymentForm.invalid) {
-      this.markFormGroupTouched(this.paymentForm);
-      return;
-    }
-
-    if (!this.elements || !this.clientSecret()) {
-      this.error.set('Payment system not properly initialized');
-      return;
-    }
-
-    if (!this.projectFormData || !this.paymentIntentId()) {
-      this.error.set('Project data not found. Please go back and fill the form again.');
-      return;
-    }
-
-    this.paymentProcessing.set(true);
-    this.error.set(null);
-
-    try {
-      console.log('=== Starting Payment Process ===');
-      console.log('Client Secret:', this.clientSecret());
-      console.log('Payment Intent ID:', this.paymentIntentId());
-      console.log('Project Form Data ready for creation:', this.projectFormData);
-
-      // Confirm payment with Stripe (without redirect)
-      console.log('Confirming payment with Stripe...');
-      const result = await this.stripeService.confirmPaymentWithoutRedirect(
-        this.clientSecret()!,
-        this.elements
-      );
-
-      console.log('Stripe payment confirmation result:', result);
-
-      if (result.error) {
-        console.error('Payment confirmation failed:', result.error);
-        throw new Error(result.error.message || 'Payment confirmation failed');
-      }
-
-      // Check if payment succeeded
-      if ('paymentIntent' in result) {
-        const paymentIntent = result.paymentIntent as any;
-        console.log('Payment Intent Status:', paymentIntent?.status);
-        if (paymentIntent?.status !== 'succeeded') {
-          console.error('Payment not succeeded. Status:', paymentIntent?.status);
-          throw new Error('Payment was not completed successfully');
-        }
-      } else {
-        console.log('Payment confirmation successful, no paymentIntent in result');
-      }
-
-      console.log('✅ Payment confirmed successfully!');
-      console.log('Now creating project with payment intent:', this.paymentIntentId());
-
-      // Create project after successful payment
-      const createdProject = await this.projectService.createProjectAfterPaymentAsync(
-        this.projectFormData!,
-        this.paymentIntentId()!
-      );
-      
-      console.log('✅ Project created successfully:', createdProject);
-      this.createdProject.set(createdProject);
+      console.log('✅ Project request created successfully:', createdProject);
       
       // Upload image if selected
       if (this.imageFile) {
@@ -359,19 +276,25 @@ export class CreateProjectStepsComponent implements OnInit {
       // Refresh dashboard
       this.dashboardRefreshService.triggerRefresh();
       
-      // Navigate to success page or project details
-      this.router.navigate(['/dashboard/projects', createdProject._id], {
-        queryParams: { payment: 'success' }
-      });
+      // Close modal with success data or navigate if not in modal
+      if (this.dialogRef) {
+        this.dialogRef.close({ 
+          success: true, 
+          project: createdProject,
+          message: 'Project request submitted successfully!'
+        });
+      } else {
+        // Navigate to project details (fallback for non-modal usage)
+        this.router.navigate(['/dashboard/projects', createdProject._id]);
+      }
 
-      console.log('=== Payment and Project Creation Process Completed Successfully ===');
+      console.log('=== Project Request Submission Process Completed Successfully ===');
       
     } catch (error: any) {
-      console.error('❌ Error in payment/project creation process:', error);
+      console.error('❌ Error in project request submission:', error);
       console.error('Full error object:', error);
       
-      // More detailed error handling
-      let errorMessage = 'Payment failed. Please try again.';
+      let errorMessage = 'Failed to submit project request. Please try again.';
       
       if (error.error && error.error.message) {
         errorMessage = error.error.message;
@@ -379,29 +302,30 @@ export class CreateProjectStepsComponent implements OnInit {
         errorMessage = error.message;
       }
       
-      // Check if it's a specific payment error vs project creation error
-      if (errorMessage.includes('payment') || errorMessage.includes('Payment')) {
-        console.error('This appears to be a payment-related error');
-      } else {
-        console.error('This appears to be a project creation error');
-      }
-      
       this.error.set(errorMessage);
     } finally {
-      this.paymentProcessing.set(false);
+      this.submitting.set(false);
     }
   }
 
   onCancel() {
-    this.router.navigate(['/']);
+    if (this.dialogRef) {
+      this.dialogRef.close({ cancelled: true });
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 
   onBackToBusiness() {
-    const business = this.business();
-    if (business) {
-      this.router.navigate(['/business', business.slug]);
+    if (this.dialogRef) {
+      this.dialogRef.close({ cancelled: true });
     } else {
-      this.router.navigate(['/']);
+      const business = this.business();
+      if (business) {
+        this.router.navigate(['/business/profile', business._id]);
+      } else {
+        this.router.navigate(['/']);
+      }
     }
   }
 
@@ -430,6 +354,8 @@ export class CreateProjectStepsComponent implements OnInit {
       if (field.errors['required']) return `${fieldName} is required`;
       if (field.errors['maxlength']) return `${fieldName} is too long`;
       if (field.errors['requiredTrue']) return 'You must accept the terms';
+      if (field.errors['atLeastOneService']) return 'Please select at least one service';
+      if (field.errors['pastDate']) return 'Deadline cannot be in the past';
     }
     return '';
   }

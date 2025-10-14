@@ -103,7 +103,7 @@ export class FavoritesComponent implements OnInit {
   }
 
   viewBusiness(business: any) {
-    this.router.navigate(['/business', business.slug]);
+    this.router.navigate(['/business/profile', business._id]);
   }
 
   searchBusinesses() {

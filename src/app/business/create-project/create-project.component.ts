@@ -12,10 +12,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ProjectService, CreateProjectDto } from '../shared/services/project.service';
-import { BusinessService, Business, Service } from '../shared/services/business.service';
-import { AuthService } from '../shared/services/auth.service';
-import { DashboardRefreshService } from '../shared/services/dashboard-refresh.service';
+import { ProjectService, CreateProjectDto } from '../../shared/services/project.service';
+import { BusinessService, Business, Service } from '../../shared/services/business.service';
+import { AuthService } from '../../shared/services/auth.service';
+import { DashboardRefreshService } from '../../shared/services/dashboard-refresh.service';
 
 @Component({
   selector: 'app-create-project',
@@ -74,7 +74,7 @@ export class CreateProjectComponent implements OnInit {
       title: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', [Validators.maxLength(1000)]],
       selectedServices: [[], [Validators.required]],
-      offeredPrice: [0, [Validators.required, Validators.min(0)]],
+      offeredPrice: ['', [Validators.maxLength(100)]], // Now optional, accepts text
       deadline: [''],
       additionalNotes: ['', [Validators.maxLength(500)]]
     });
@@ -170,7 +170,7 @@ export class CreateProjectComponent implements OnInit {
     // Navigate back to the business profile or home
     const businessId = this.route.snapshot.params['businessId'];
     if (businessId) {
-      this.router.navigate(['/business', businessId]);
+      this.router.navigate(['/business/profile', businessId]);
     } else {
       this.router.navigate(['/']);
     }

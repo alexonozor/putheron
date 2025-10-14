@@ -12,6 +12,8 @@ import { ChatService, Message } from '../shared/services/chat.service';
 import { ReviewService } from '../shared/services/review.service';
 import { DashboardRefreshService } from '../shared/services/dashboard-refresh.service';
 import { PaymentModalComponent, PaymentModalData, PaymentData } from '../dashboard/messages/chat/modals/payment-modal.component';
+import { PaymentRequestModalComponent, PaymentRequestData, PaymentRequestModalData } from '../dashboard/messages/chat/modals/payment-request-modal.component';
+import { CompletionRequestModalComponent, CompletionRequestData } from '../dashboard/messages/chat/modals/completion-request-modal.component';
 import { ReviewFormComponent } from '../shared/components/review-form/review-form.component';
 
 @Component({
@@ -219,13 +221,66 @@ export class ProjectDetailsComponent implements OnInit {
     if (!project) return;
 
     try {
-      await this.projectService.updateProjectAsync(project._id, { status: 'accepted' });
-      this.loadProject(project._id); // Reload to get updated data and check for chat
-      this.dashboardRefreshService.triggerRefresh(); // Refresh dashboard counters
+      await this.projectService.acceptProjectAsync(project._id);
+      await this.loadProject(project._id);
     } catch (error: any) {
       console.error('Error accepting project:', error);
       this.error.set('Failed to accept project');
     }
+  }
+
+  async startProject() {
+    const project = this.project();
+    if (!project) return;
+
+    // First, create or get the chat for this project
+    let chat = this.existingChat();
+    if (!chat) {
+      try {
+        chat = await this.chatService.createOrGetChatAsync({ project_id: project._id });
+        this.existingChat.set(chat);
+      } catch (error: any) {
+        console.error('Error creating chat:', error);
+        this.error.set('Failed to create project chat');
+        return;
+      }
+    }
+
+    // Open payment request modal with pre-filled amount
+    const modalData: PaymentRequestModalData = {
+      defaultAmount: project.offered_price || 0,
+      isStartPayment: true
+    };
+
+    const dialogRef = this.dialog.open(PaymentRequestModalComponent, {
+      width: '500px',
+      disableClose: true,
+      data: modalData
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: PaymentRequestData) => {
+      if (result) {
+        try {
+          // Send payment request via chat
+          await this.chatService.requestAdditionalPaymentAsync(chat!._id, result);
+          
+          // Update project status to 'started' and 'payment_requested'
+          await this.projectService.startProjectAsync(project._id);
+          
+          // Reload project data
+          await this.loadProject(project._id);
+          
+          // Reload payment requests
+          await this.loadPaymentRequests(chat!._id);
+          
+          alert('Project started successfully! Payment request has been sent to the client.');
+          
+        } catch (error: any) {
+          console.error('Error starting project and requesting payment:', error);
+          this.error.set('Failed to start project and request payment');
+        }
+      }
+    });
   }
 
   async rejectProject() {
@@ -233,15 +288,11 @@ export class ProjectDetailsComponent implements OnInit {
     if (!project) return;
 
     const reason = prompt('Please provide a reason for rejection:');
-    if (!reason) return;
+    if (reason === null) return; // User cancelled
 
     try {
-      await this.projectService.updateProjectAsync(project._id, { 
-        status: 'rejected',
-        rejection_reason: reason 
-      });
-      this.loadProject(project._id); // Reload to get updated data and check for chat
-      this.dashboardRefreshService.triggerRefresh(); // Refresh dashboard counters
+      await this.projectService.rejectProjectAsync(project._id, reason);
+      await this.loadProject(project._id);
     } catch (error: any) {
       console.error('Error rejecting project:', error);
       this.error.set('Failed to reject project');
@@ -262,18 +313,91 @@ export class ProjectDetailsComponent implements OnInit {
     }
   }
 
-  async markCompleted() {
+  async requestCompletion() {
     const project = this.project();
     if (!project) return;
 
-    try {
-      await this.projectService.updateProjectAsync(project._id, { status: 'completed' });
-      this.loadProject(project._id); // Reload to get updated data and check for chat
-      this.dashboardRefreshService.triggerRefresh(); // Refresh dashboard counters
-    } catch (error: any) {
-      console.error('Error marking project as completed:', error);
-      this.error.set('Failed to update project status');
+    // Ensure chat exists
+    let chat = this.existingChat();
+    if (!chat) {
+      try {
+        chat = await this.chatService.createOrGetChatAsync({ project_id: project._id });
+        this.existingChat.set(chat);
+      } catch (error: any) {
+        console.error('Error creating chat:', error);
+        this.error.set('Failed to create project chat');
+        return;
+      }
     }
+
+    // Open completion request modal
+    const dialogRef = this.dialog.open(CompletionRequestModalComponent, {
+      width: '500px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: CompletionRequestData) => {
+      if (result) {
+        try {
+          // Send completion request via chat
+          await this.chatService.requestCompletionAsync(chat!._id, result);
+          
+          // Reload project data
+          await this.loadProject(project._id);
+          
+          // Trigger dashboard refresh
+          this.dashboardRefreshService.triggerRefresh();
+          
+          alert('Completion request sent successfully! The client will be notified to review and approve.');
+          
+        } catch (error: any) {
+          console.error('Error requesting completion:', error);
+          this.error.set('Failed to request completion');
+        }
+      }
+    });
+  }
+
+  async requestAdditionalPayment() {
+    const project = this.project();
+    if (!project) return;
+
+    // Ensure chat exists
+    let chat = this.existingChat();
+    if (!chat) {
+      try {
+        chat = await this.chatService.createOrGetChatAsync({ project_id: project._id });
+        this.existingChat.set(chat);
+      } catch (error: any) {
+        console.error('Error creating chat:', error);
+        this.error.set('Failed to create project chat');
+        return;
+      }
+    }
+
+    // Open payment request modal
+    const dialogRef = this.dialog.open(PaymentRequestModalComponent, {
+      width: '500px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: PaymentRequestData) => {
+      if (result) {
+        try {
+          // Send payment request via chat
+          await this.chatService.requestAdditionalPaymentAsync(chat!._id, result);
+          
+          // Reload payment requests to show the new one
+          await this.loadPaymentRequests(chat!._id);
+          
+          alert('Additional payment request sent successfully!');
+          
+        } catch (error: any) {
+          console.error('Error requesting additional payment:', error);
+          this.error.set('Failed to request additional payment');
+        }
+      }
+    });
   }
 
   async startChat() {
@@ -298,13 +422,19 @@ export class ProjectDetailsComponent implements OnInit {
 
   getStatusColor(status: string): string {
     const colors: { [key: string]: string } = {
-      'pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      'accepted': 'bg-blue-100 text-blue-800 border-blue-200',
+      'requested': 'bg-blue-100 text-blue-800 border-blue-200',
+      'under_review': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'accepted': 'bg-green-100 text-green-800 border-green-200',
+      'started': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+      'payment_requested': 'bg-orange-100 text-orange-800 border-orange-200',
+      'payment_pending': 'bg-orange-100 text-orange-800 border-orange-200',
+      'payment_completed': 'bg-emerald-100 text-emerald-800 border-emerald-200',
       'in_progress': 'bg-purple-100 text-purple-800 border-purple-200',
-      'awaiting_client_approval': 'bg-orange-100 text-orange-800 border-orange-200',
+      'awaiting_client_approval': 'bg-amber-100 text-amber-800 border-amber-200',
       'completed': 'bg-green-100 text-green-800 border-green-200',
       'rejected': 'bg-red-100 text-red-800 border-red-200',
-      'cancelled': 'bg-gray-100 text-gray-800 border-gray-200'
+      'cancelled': 'bg-gray-100 text-gray-800 border-gray-200',
+      'settled': 'bg-teal-100 text-teal-800 border-teal-200'
     };
     return colors[status] || 'bg-gray-100 text-gray-800 border-gray-200';
   }
@@ -633,17 +763,17 @@ export class ProjectDetailsComponent implements OnInit {
   // Navigation method for business profile
   navigateToBusinessProfile(businessSlug: string): void {
     if (businessSlug) {
-      this.router.navigate(['/business', businessSlug]);
+      this.router.navigate(['/business/profile', businessSlug]);
     }
   }
 
   // Helper methods for type-safe access to populated fields
-  getBusinessInfo(project: Project): { name: string; logo_url?: string; slug: string } | null {
+  getBusinessInfo(project: Project): { name: string; logo_url?: string; id: string } | null {
     if (typeof project.business_id === 'object' && project.business_id) {
       return {
         name: project.business_id.name || 'Unknown Business',
         logo_url: project.business_id.logo_url,
-        slug: project.business_id.slug
+        id: project.business_id._id
       };
     }
     return null;

@@ -1,17 +1,19 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BusinessService, Business, Service } from '../shared/services/business.service';
-import { AuthService } from '../shared/services/auth.service';
-import { ProjectService, Project } from '../shared/services/project.service';
-import { ReviewService } from '../shared/services/review.service';
-import { User } from '../models/user.model';
-import { HeaderComponent } from '../shared/components/header/header.component';
-import { FavoriteButtonComponent } from '../shared/components/favorite-button/favorite-button.component';
+import { BusinessService, Business, Service } from '../../shared/services/business.service';
+import { AuthService } from '../../shared/services/auth.service';
+import { ProjectService, Project } from '../../shared/services/project.service';
+import { ReviewService } from '../../shared/services/review.service';
+import { User } from '../../models/user.model';
+import { HeaderComponent } from '../../shared/components/header/header.component';
+import { FavoriteButtonComponent } from '../../shared/components/favorite-button/favorite-button.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ReportsService, ReportType as ServiceReportType } from '../shared/services/reports.service';
-import { ReportDialogComponent, ReportType } from '../shared/components/report-dialog/report-dialog.component';
-import { ReportConfirmationDialogComponent } from '../shared/components/report-confirmation-dialog/report-confirmation-dialog.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ReportsService, ReportType as ServiceReportType } from '../../shared/services/reports.service';
+import { ReportDialogComponent, ReportType } from '../../shared/components/report-dialog/report-dialog.component';
+import { ReportConfirmationDialogComponent } from '../../shared/components/report-confirmation-dialog/report-confirmation-dialog.component';
+import { CreateProjectStepsComponent } from '../create-project-steps/create-project-steps.component';
 
 @Component({
   selector: 'app-business-profile',
@@ -21,6 +23,7 @@ import { ReportConfirmationDialogComponent } from '../shared/components/report-c
     HeaderComponent,
     FavoriteButtonComponent,
     MatDialogModule,
+    MatSnackBarModule,
   ],
   templateUrl: './business-profile.component.html',
   styleUrl: './business-profile.component.scss'
@@ -33,6 +36,7 @@ export class BusinessProfileComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
   private readonly reviewService = inject(ReviewService);
   private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly reportsService = inject(ReportsService);
 
   // Loading states
@@ -298,8 +302,8 @@ export class BusinessProfileComponent implements OnInit {
       return;
     }
 
-    // Navigate to create-project page with business ID
-    this.router.navigate(['/create-project', business._id]);
+    // Open create project modal
+    this.openCreateProjectModal(business._id);
   }
 
   startProjectWithService(serviceId: string) {
@@ -325,10 +329,8 @@ export class BusinessProfileComponent implements OnInit {
       return;
     }
 
-    // Navigate to create-project page with business ID and service ID as query param
-    this.router.navigate(['/create-project', business._id], {
-      queryParams: { serviceId: serviceId }
-    });
+    // Open create project modal with pre-selected service
+    this.openCreateProjectModal(business._id, serviceId);
   }
 
   contactOwner() {
@@ -513,6 +515,56 @@ export class BusinessProfileComponent implements OnInit {
           console.error('Failed to submit report:', error);
           // Could show error dialog here
         }
+      }
+    });
+  }
+
+  openCreateProjectModal(businessId: string, preSelectedServiceId?: string) {
+    const dialogRef = this.dialog.open(CreateProjectStepsComponent, {
+      // width: '90vw',
+      // height: 'auto',
+      // maxHeight: '90vh',
+      data: {
+        businessId: businessId,
+        preSelectedServiceId: preSelectedServiceId
+      },
+      panelClass: 'create-project-modal',
+      disableClose: true, // Prevent accidental closing during form submission
+      autoFocus: false // Don't auto-focus to prevent stepper issues
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.success && result.project) {
+        // Project was created successfully
+        console.log('Project created successfully:', result);
+        
+        // Show success snackbar
+        const snackBarRef = this.snackBar.open(
+          'Project request submitted successfully! The business owner will review your request.',
+          'View Project',
+          {
+            duration: 8000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar']
+          }
+        );
+
+        // Handle navigation
+        let hasNavigated = false;
+        
+        // Navigate to project details when "View Project" is clicked
+        snackBarRef.onAction().subscribe(() => {
+          hasNavigated = true;
+          this.router.navigate(['/dashboard/projects', result.project._id]);
+        });
+
+        // Auto-navigate when snackbar is dismissed (by timeout or user dismissal)
+        snackBarRef.afterDismissed().subscribe(() => {
+          if (!hasNavigated) {
+            this.router.navigate(['/dashboard/projects', result.project._id]);
+          }
+        });
       }
     });
   }

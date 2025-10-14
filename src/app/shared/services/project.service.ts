@@ -36,7 +36,7 @@ export interface Project {
     features?: string[];
   }[];
   offered_price: number;
-  status: 'pending' | 'accepted' | 'rejected' | 'in_progress' | 'awaiting_client_approval' | 'completed' | 'cancelled' | 'settled';
+  status: 'requested' | 'under_review' | 'accepted' | 'started' | 'payment_requested' | 'payment_pending' | 'payment_completed' | 'in_progress' | 'awaiting_client_approval' | 'completed' | 'rejected' | 'cancelled' | 'settled';
   deadline?: Date | string;
   additional_notes?: string;
   image_url?: string;
@@ -48,6 +48,8 @@ export interface Project {
     public_id: string;
   }>;
   accepted_at?: Date | string;
+  started_at?: Date | string;
+  payment_requested_at?: Date | string;
   rejected_at?: Date | string;
   business_completed_at?: Date | string;
   client_approved_at?: Date | string;
@@ -88,7 +90,7 @@ export interface CreateProjectDto {
   description?: string;
   business_id: string;
   selected_services: string[];
-  offered_price?: number;
+  offered_price?: number | string;
   deadline?: string;
   additional_notes?: string;
 }
@@ -327,6 +329,44 @@ export class ProjectService {
     const response = await firstValueFrom(this.uploadProjectAttachments(projectId, files));
     if (!response.success) {
       throw new Error(response.message || 'Failed to upload project attachments');
+    }
+    return response.data;
+  }
+
+  // NEW BUSINESS OWNER ACTIONS FOR UPDATED FLOW
+
+  acceptProject(projectId: string): Observable<{ success: boolean; data: Project; message: string }> {
+    return this.http.post<{ success: boolean; data: Project; message: string }>(`${this.apiUrl}/${projectId}/accept`, {});
+  }
+
+  async acceptProjectAsync(projectId: string): Promise<Project> {
+    const response = await firstValueFrom(this.acceptProject(projectId));
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to accept project');
+    }
+    return response.data;
+  }
+
+  startProject(projectId: string): Observable<{ success: boolean; data: { project: Project; paymentIntent?: any }; message: string }> {
+    return this.http.post<{ success: boolean; data: { project: Project; paymentIntent?: any }; message: string }>(`${this.apiUrl}/${projectId}/start`, {});
+  }
+
+  async startProjectAsync(projectId: string): Promise<{ project: Project; paymentIntent?: any }> {
+    const response = await firstValueFrom(this.startProject(projectId));
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to start project');
+    }
+    return response.data;
+  }
+
+  rejectProject(projectId: string, reason?: string): Observable<{ success: boolean; data: Project; message: string }> {
+    return this.http.post<{ success: boolean; data: Project; message: string }>(`${this.apiUrl}/${projectId}/reject`, { reason });
+  }
+
+  async rejectProjectAsync(projectId: string, reason?: string): Promise<Project> {
+    const response = await firstValueFrom(this.rejectProject(projectId, reason));
+    if (!response.success) {
+      throw new Error(response.message || 'Failed to reject project');
     }
     return response.data;
   }
