@@ -73,48 +73,34 @@
             
             @case ('accepted') {
               <button 
-                (click)="startProject()"
-                class="flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-                <mat-icon class="mr-2 w-5 h-5">play_arrow</mat-icon>
-                Start Project & Request Payment
-              </button>
-            }
-            
-            @case ('started') {
-              <button 
-                (click)="markInProgress()"
-                class="flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-                <mat-icon class="mr-2 w-5 h-5">work</mat-icon>
-                Mark In Progress
+                (click)="requestPayment()"
+                class="flex items-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">payment</mat-icon>
+                Request Payment
               </button>
             }
             
             @case ('payment_requested') {
               <button 
-                (click)="markInProgress()"
-                class="flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-                <mat-icon class="mr-2 w-5 h-5">work</mat-icon>
-                Mark In Progress
+                (click)="startProject()"
+                [disabled]="!canStartProject()"
+                [class]="'flex items-center px-6 py-3 text-white text-base font-semibold rounded-lg transition-colors shadow-sm ' + 
+                         (canStartProject() ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-400 cursor-not-allowed')">
+                <mat-icon class="mr-2 w-5 h-5">play_arrow</mat-icon>
+                {{ canStartProject() ? 'Start Project' : 'Start Project (Awaiting Payment)' }}
               </button>
             }
             
             @case ('payment_completed') {
               <button 
-                (click)="markInProgress()"
-                class="flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-                <mat-icon class="mr-2 w-5 h-5">work</mat-icon>
-                Mark In Progress
+                (click)="startProject()"
+                class="flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+                <mat-icon class="mr-2 w-5 h-5">play_arrow</mat-icon>
+                Start Project
               </button>
             }
             
             @case ('in_progress') {
-              <button 
-                (click)="requestAdditionalPayment()"
-                class="flex items-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
-                <mat-icon class="mr-2 w-5 h-5">payment</mat-icon>
-                Request Additional Payment
-              </button>
-
               <button 
                 (click)="requestCompletion()"
                 class="flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
@@ -122,6 +108,16 @@
                 Request Completion
               </button>
             }
+          }
+
+          <!-- Additional Payment Button - Available after initial payment -->
+          @if (['payment_completed', 'started', 'in_progress', 'awaiting_client_approval'].includes(project()!.status)) {
+            <button 
+              (click)="requestAdditionalPayment()"
+              class="flex items-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white text-base font-semibold rounded-lg transition-colors shadow-sm">
+              <mat-icon class="mr-2 w-5 h-5">add_card</mat-icon>
+              Request Additional Payment
+            </button>
           }
         }
       </div>
@@ -488,84 +484,100 @@
             </div>
           </div>
 
-          <!-- Payment Requests Card -->
-          @if (isClient() && hasPendingPaymentRequests()) {
+          <!-- Payment Request Card -->
+          @if (shouldShowPaymentButtons()) {
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div class="px-6 py-5 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                   <mat-icon class="mr-2 text-orange-600">payment</mat-icon>
-                  Payment Requests
+                  Payment Required
                 </h3>
               </div>
               
-              <div class="px-6 py-6 space-y-4">
-                @if (loadingPaymentRequests()) {
-                  <div class="flex items-center justify-center py-4">
-                    <mat-spinner diameter="24"></mat-spinner>
-                    <span class="ml-2 text-sm text-gray-600">Loading payment requests...</span>
-                  </div>
-                } @else {
-                  @for (request of pendingPaymentRequests(); track request._id) {
-                    <div class="border border-orange-200 rounded-lg p-4 bg-orange-50">
-                      <div class="flex items-start justify-between mb-3">
-                        <div class="flex-1">
-                          <div class="flex items-center space-x-2 mb-2">
-                            <span [class]="'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ' + getPaymentStatusColor(request.payment_status || 'pending')">
-                              {{ request.payment_status || 'pending' | titlecase }}
-                            </span>
-                            <span class="text-xs text-gray-500">{{ formatPaymentTime(request.createdAt) }}</span>
-                          </div>
-                          <h4 class="font-semibold text-lg text-orange-900">
-                            {{ request.payment_amount | currency:'USD':'symbol':'1.0-0' }}
-                          </h4>
-                          @if (request.payment_description) {
-                            <p class="text-sm text-orange-700 mb-2">{{ request.payment_description }}</p>
-                          }
-                          @if (request.content) {
-                            <p class="text-sm text-gray-600">{{ request.content }}</p>
-                          }
-                        </div>
+              <div class="px-6 py-6">
+                <div class="border border-orange-200 rounded-lg p-6 bg-orange-50">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                      <div class="flex items-center space-x-2 mb-3">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800 border border-orange-200">
+                          Payment Requested
+                        </span>
                       </div>
-                      
-                      @if (request.payment_status === 'pending') {
-                        <div class="flex gap-2 mt-4">
-                          <button 
-                            (click)="approvePaymentRequest(request)"
-                            class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">
-                            <mat-icon class="w-4 h-4 mr-1">check</mat-icon>
-                            Approve & Pay
-                          </button>
-                          <button 
-                            (click)="rejectPaymentRequest(request)"
-                            class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
-                            <mat-icon class="w-4 h-4 mr-1">close</mat-icon>
-                            Reject
-                          </button>
-                        </div>
-                      }
+                      <h4 class="font-semibold text-xl text-orange-900 mb-2">
+                        {{ project()?.offered_price | currency:'USD':'symbol':'1.0-0' }}
+                      </h4>
+                      <p class="text-sm text-orange-700 mb-4">
+                        Payment for project: {{ project()?.title }}
+                      </p>
+                      <p class="text-sm text-gray-600 mb-4">
+                        The business owner has requested payment to start working on your project.
+                      </p>
                     </div>
-                  }
-                }
-                
-                @if (!loadingPaymentRequests() && pendingPaymentRequests().length === 0) {
-                  <div class="text-center py-4">
-                    <mat-icon class="text-gray-400 mb-2">payment</mat-icon>
-                    <p class="text-sm text-gray-600">No pending payment requests</p>
                   </div>
-                }
+                  
+                  <div class="flex gap-3 mt-4">
+                    <button 
+                      (click)="approveProjectPayment()"
+                      class="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center">
+                      <mat-icon class="w-4 h-4 mr-2">payment</mat-icon>
+                      Make Payment
+                    </button>
+                    <button 
+                      (click)="declineProjectPayment()"
+                      class="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center justify-center">
+                      <mat-icon class="w-4 h-4 mr-2">close</mat-icon>
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Payment Completed Success Card -->
+          @if (project()?.status === 'payment_completed' && isClient()) {
+            <div class="bg-white rounded-xl shadow-sm border border-green-200 overflow-hidden">
+              <div class="px-6 py-5 border-b border-green-200 bg-green-50">
+                <h3 class="text-lg font-semibold text-green-900 flex items-center">
+                  <mat-icon class="mr-2 text-green-600">check_circle</mat-icon>
+                  Payment Completed Successfully
+                </h3>
+              </div>
+              
+              <div class="px-6 py-6">
+                <div class="flex items-center p-4 bg-green-50 rounded-lg border border-green-200">
+                  <mat-icon class="text-green-600 mr-3">paid</mat-icon>
+                  <div>
+                    <p class="text-green-800 font-medium mb-1">
+                      Your payment of {{ project()?.offered_price | currency:'USD':'symbol':'1.0-0' }} has been processed successfully.
+                    </p>
+                    <p class="text-green-700 text-sm">
+                      The business owner will now start working on your project. You'll receive notifications about the progress.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           }
 
           <!-- Payment History Card -->
-          @if (paymentRequests().length > 0) {
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div class="px-6 py-5 border-b border-gray-200">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-200">
+              <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                   <mat-icon class="mr-2 text-blue-600">history</mat-icon>
-                  Payment Request History
+                  Payment Request History ({{ paymentRequests().length }} requests)
                 </h3>
+                @if (project() && project()!.chat_room_id) {
+                  <button 
+                    (click)="refreshPaymentRequests()"
+                    class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
+                    <mat-icon class="w-4 h-4 mr-1">refresh</mat-icon>
+                    Refresh
+                  </button>
+                }
               </div>
+            </div>
               
               <div class="px-6 py-6">
                 @if (loadingPaymentRequests()) {
@@ -622,6 +634,13 @@
                             </button>
                           </div>
                         }
+                        
+                        @if (request.payment_status === 'paid' || request.payment_status === 'approved') {
+                          <div class="flex items-center justify-center mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                            <mat-icon class="text-green-600 mr-2">check_circle</mat-icon>
+                            <span class="text-green-800 font-medium">Payment Completed</span>
+                          </div>
+                        }
                       </div>
                     }
                   </div>
@@ -635,7 +654,6 @@
                 }
               </div>
             </div>
-          }
 
           <!-- Actions Card -->
           <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

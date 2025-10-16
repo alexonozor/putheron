@@ -11,6 +11,7 @@ import { AuthService } from '../shared/services/auth.service';
 import { ChatService, Message } from '../shared/services/chat.service';
 import { ReviewService } from '../shared/services/review.service';
 import { DashboardRefreshService } from '../shared/services/dashboard-refresh.service';
+import { SocketService } from '../shared/services/socket.service';
 import { PaymentModalComponent, PaymentModalData, PaymentData } from '../dashboard/messages/chat/modals/payment-modal.component';
 import { PaymentRequestModalComponent, PaymentRequestData, PaymentRequestModalData } from '../dashboard/messages/chat/modals/payment-request-modal.component';
 import { CompletionRequestModalComponent, CompletionRequestData } from '../dashboard/messages/chat/modals/completion-request-modal.component';
@@ -37,6 +38,7 @@ export class ProjectDetailsComponent implements OnInit {
   private readonly chatService = inject(ChatService);
   private readonly reviewService = inject(ReviewService);
   private readonly dashboardRefreshService = inject(DashboardRefreshService);
+  private readonly socketService = inject(SocketService);
   private readonly dialog = inject(MatDialog);
 
   // Signals
@@ -98,12 +100,40 @@ export class ProjectDetailsComponent implements OnInit {
     );
   });
 
+  // New computed signal to check if client should see payment buttons based on project status
+  readonly shouldShowPaymentButtons = computed(() => {
+    const project = this.project();
+    const isClient = this.isClient();
+    
+    if (!project || !isClient) return false;
+    
+    // Show payment buttons only if project status is 'payment_requested'
+    // Hide them once payment is completed or any other status
+    return project.status === 'payment_requested';
+  });
+
   readonly hasPendingPaymentRequests = computed(() => {
-    return this.pendingPaymentRequests().length > 0;
+    // Use the new project status-based approach instead of chat messages
+    return this.shouldShowPaymentButtons();
   });
 
   readonly hasPaymentHistory = computed(() => {
     return this.paymentRequests().length > 0;
+  });
+
+  readonly hasCompletedPayments = computed(() => {
+    return this.paymentRequests().some(request => 
+      request.message_type === 'payment_request' && 
+      (request.payment_status === 'approved' || request.payment_status === 'paid')
+    );
+  });
+
+  readonly canStartProject = computed(() => {
+    const project = this.project();
+    if (!project || !this.isBusinessOwner()) return false;
+    
+    return project.status === 'payment_completed' || 
+           (project.status === 'payment_requested' && this.hasCompletedPayments());
   });
 
   // Review computed properties
@@ -142,6 +172,56 @@ export class ProjectDetailsComponent implements OnInit {
     }
 
     this.loadProject(projectId);
+    this.setupRealtimeUpdates();
+  }
+
+  private setupRealtimeUpdates() {
+    // Listen for project status updates
+    this.socketService.onEvent('project-status-updated').subscribe((data: any) => {
+      console.log('🔥 Project status update received:', data);
+      const currentProject = this.project();
+      if (currentProject && data.projectId === currentProject._id) {
+        console.log('🔥 Reloading project due to status update');
+        this.loadProject(currentProject._id);
+      }
+    });
+
+        // Listen for completion request created
+    this.socketService.onEvent('completion-request-created').subscribe((data: any) => {
+      console.log('🔥 Completion request created received:', data);
+      const currentProject = this.project();
+      if (currentProject && data.projectId === currentProject._id) {
+        console.log('🔥 Reloading project due to completion request created');
+        this.loadProject(currentProject._id);
+      }
+    });
+
+    // Listen for payment completed
+    this.socketService.onEvent('payment-completed').subscribe(async (data: any) => {
+      console.log('🔥 Payment completed received:', data);
+      const currentProject = this.project();
+      if (currentProject && data.chatId === currentProject.chat_room_id) {
+        console.log('🔥 Reloading project due to payment completion');
+        // Add a small delay to ensure backend has processed the update
+        setTimeout(async () => {
+          await this.loadProject(currentProject._id);
+          // Also reload payment requests to show updated status
+          if (currentProject.chat_room_id) {
+            await this.loadPaymentRequests(currentProject.chat_room_id);
+          }
+        }, 500);
+      }
+    });
+
+    // Listen for notifications that might affect this project
+    this.socketService.onNewNotification().subscribe((notification: any) => {
+      console.log('🔥 New notification received:', notification);
+      const currentProject = this.project();
+      if (currentProject && notification.project_id === currentProject._id) {
+        console.log('🔥 Reloading project due to project notification');
+        this.loadProject(currentProject._id);
+      }
+    });
   }
 
   async loadProject(projectId: string) {
@@ -153,7 +233,7 @@ export class ProjectDetailsComponent implements OnInit {
       this.project.set(project);
       
       // Check for existing chat if project status allows it
-      if (project.status === 'accepted' || project.status === 'in_progress' || project.status === 'awaiting_client_approval' || project.status === 'completed') {
+      if (['accepted', 'started', 'payment_requested', 'payment_completed', 'in_progress', 'awaiting_client_approval', 'completed'].includes(project.status)) {
         await this.checkForExistingChat(projectId);
         
         // Load payment requests if chat exists
@@ -165,9 +245,6 @@ export class ProjectDetailsComponent implements OnInit {
       
       // Check review eligibility for completed projects
       await this.checkReviewEligibility();
-      
-      // Test the review service
-      console.log('Review service available:', !!this.reviewService);
     } catch (error: any) {
       console.error('Error loading project:', error);
       this.error.set('Failed to load project details');
@@ -198,17 +275,58 @@ export class ProjectDetailsComponent implements OnInit {
   async loadPaymentRequests(chatId: string) {
     this.loadingPaymentRequests.set(true);
     try {
+      console.log('🔄 Loading payment requests for chat:', chatId);
       const messages = await this.chatService.getChatMessagesAsync(chatId);
+      
       // Filter for payment request messages
       const paymentMessages = messages.filter(message => 
         message.message_type === 'payment_request'
       );
+      
+      console.log('💳 Found payment request messages:', paymentMessages.map(msg => ({
+        id: msg._id,
+        amount: msg.payment_amount,
+        status: msg.payment_status || 'undefined',
+        description: msg.payment_description,
+        type: msg.message_type,
+        createdAt: msg.createdAt
+      })));
+
+      if (paymentMessages.length === 0) {
+        console.log('⚠️ No payment request messages found in chat messages');
+        console.log('All messages:', messages.map(msg => ({ id: msg._id, type: msg.message_type })));
+      }
+      
       this.paymentRequests.set(paymentMessages);
+      
+      // Check if any payment was completed and update project status if needed
+      const hasCompletedPayment = paymentMessages.some(msg => 
+        msg.payment_status === 'approved' || msg.payment_status === 'paid'
+      );
+      
+      const project = this.project();
+      if (hasCompletedPayment && project && project.status === 'payment_requested') {
+        // Update project status to payment_completed
+        try {
+          await this.projectService.updateProjectAsync(project._id, { status: 'payment_completed' });
+          await this.loadProject(project._id); // Reload project to get updated status
+        } catch (error) {
+          console.error('Error updating project status after payment:', error);
+        }
+      }
     } catch (error: any) {
       console.error('Error loading payment requests:', error);
       // Don't show error for this, just keep empty array
     } finally {
       this.loadingPaymentRequests.set(false);
+    }
+  }
+
+  async refreshPaymentRequests() {
+    const project = this.project();
+    if (project && project.chat_room_id) {
+      console.log('🔄 Manual refresh of payment requests');
+      await this.loadPaymentRequests(project.chat_room_id);
     }
   }
 
@@ -229,7 +347,7 @@ export class ProjectDetailsComponent implements OnInit {
     }
   }
 
-  async startProject() {
+  async requestPayment() {
     const project = this.project();
     if (!project) return;
 
@@ -264,8 +382,8 @@ export class ProjectDetailsComponent implements OnInit {
           // Send payment request via chat
           await this.chatService.requestAdditionalPaymentAsync(chat!._id, result);
           
-          // Update project status to 'started' and 'payment_requested'
-          await this.projectService.startProjectAsync(project._id);
+          // Update project status to 'payment_requested'
+          await this.projectService.updateProjectAsync(project._id, { status: 'payment_requested' });
           
           // Reload project data
           await this.loadProject(project._id);
@@ -273,14 +391,36 @@ export class ProjectDetailsComponent implements OnInit {
           // Reload payment requests
           await this.loadPaymentRequests(chat!._id);
           
-          alert('Project started successfully! Payment request has been sent to the client.');
+          alert('Payment request sent successfully! The client will be notified to make payment.');
           
         } catch (error: any) {
-          console.error('Error starting project and requesting payment:', error);
-          this.error.set('Failed to start project and request payment');
+          console.error('Error requesting payment:', error);
+          this.error.set('Failed to request payment');
         }
       }
     });
+  }
+
+  async startProject() {
+    const project = this.project();
+    if (!project) return;
+
+    try {
+      // Update project status to 'in_progress'
+      await this.projectService.updateProjectAsync(project._id, { status: 'in_progress' });
+      
+      // Reload project data
+      await this.loadProject(project._id);
+      
+      // Trigger dashboard refresh
+      this.dashboardRefreshService.triggerRefresh();
+      
+      alert('Project started successfully! You can now begin working on the project.');
+      
+    } catch (error: any) {
+      console.error('Error starting project:', error);
+      this.error.set('Failed to start project');
+    }
   }
 
   async rejectProject() {
@@ -299,19 +439,7 @@ export class ProjectDetailsComponent implements OnInit {
     }
   }
 
-  async markInProgress() {
-    const project = this.project();
-    if (!project) return;
 
-    try {
-      await this.projectService.updateProjectAsync(project._id, { status: 'in_progress' });
-      this.loadProject(project._id); // Reload to get updated data and check for chat
-      this.dashboardRefreshService.triggerRefresh(); // Refresh dashboard counters
-    } catch (error: any) {
-      console.error('Error marking project as in progress:', error);
-      this.error.set('Failed to update project status');
-    }
-  }
 
   async requestCompletion() {
     const project = this.project();
@@ -574,6 +702,9 @@ export class ProjectDetailsComponent implements OnInit {
             // Payment was successful, reload payment requests to show updated status
             await this.loadPaymentRequests(chat._id);
             
+            // Also refresh project status in case it changed
+            await this.refreshPaymentStatus();
+            
             console.log('Payment approved successfully with method:', result.paymentMethod);
             console.log('Payment completed for amount:', result.amount);
             
@@ -609,6 +740,83 @@ export class ProjectDetailsComponent implements OnInit {
     } catch (error: any) {
       console.error('Error rejecting payment request:', error);
       this.error.set('Failed to reject payment request');
+    }
+  }
+
+  // Refresh payment status - useful for real-time updates
+  async refreshPaymentStatus() {
+    const project = this.project();
+    const chat = this.existingChat();
+    
+    if (project && chat) {
+      await this.loadPaymentRequests(chat._id);
+      
+      // Also reload the project to get the latest status
+      await this.loadProject(project._id);
+    }
+  }
+
+  // Status-based payment methods for when project status is 'payment_requested'
+  async approveProjectPayment() {
+    try {
+      const project = this.project();
+      if (!project) return;
+
+      // Get business name for display
+      const businessName = typeof project.business_id === 'string' 
+        ? 'Business Owner' 
+        : project.business_id?.name || 'Business Owner';
+
+      // Open payment modal for the project amount
+      const dialogRef = this.dialog.open(PaymentModalComponent, {
+        width: '500px',
+        disableClose: true,
+        data: {
+          amount: project.offered_price?.toString() || '0',
+          description: `Payment for project: ${project.title}`,
+          businessName: businessName,
+          projectId: project._id,
+          isProjectPayment: true
+        } as PaymentModalData
+      });
+
+      dialogRef.afterClosed().subscribe(async (result: PaymentData) => {
+        if (result && result.paymentIntentId) {
+          try {
+            // Just reload project to show updated status
+            // The backend confirmPayment method handles status updates
+            await this.loadProject(project._id);
+            
+            console.log('Project payment completed successfully');
+            
+          } catch (error: any) {
+            console.error('Error reloading project after payment:', error);
+            this.error.set('Payment completed but failed to reload project');
+          }
+        }
+      });
+      
+    } catch (error: any) {
+      console.error('Error opening project payment modal:', error);
+      this.error.set('Failed to open payment modal');
+    }
+  }
+
+  async declineProjectPayment() {
+    const reason = prompt('Please provide a reason for declining this payment:');
+    if (!reason) return;
+
+    try {
+      const project = this.project();
+      if (!project) return;
+
+      // For now, show a message that decline is not available
+      // TODO: Implement proper decline functionality once backend is ready
+      alert(`Thank you for your feedback. Reason: "${reason}"\n\nPlease contact the business owner directly to discuss payment terms. The decline functionality will be available soon.`);
+      
+    } catch (error: any) {
+      console.error('Error declining project payment:', error);
+      this.error.set('Failed to decline payment');
     }
   }
 

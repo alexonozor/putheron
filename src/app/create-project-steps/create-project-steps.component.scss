@@ -1,0 +1,135 @@
+.project-stepper {
+  .mat-stepper-horizontal-line {
+    background-color: #e5e7eb;
+    height: 2px;
+  }
+
+  .mat-step-header {
+    padding: 16px 24px;
+    
+    .mat-step-icon {
+      background-color: #6b7280;
+      color: white;
+      
+      &.mat-step-icon-selected {
+        background-color: #3b82f6;
+      }
+      
+      &.mat-step-icon-state-done {
+        background-color: #10b981;
+      }
+    }
+    
+    .mat-step-label {
+      font-weight: 500;
+      color: #374151;
+      
+      &.mat-step-label-active {
+        color: #3b82f6;
+      }
+      
+      &.mat-step-label-selected {
+        color: #3b82f6;
+      }
+    }
+  }
+}
+
+.business-info-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.stripe-payment-element {
+  min-height: 200px;
+}
+
+// Custom checkbox styling for services
+.mat-mdc-checkbox {
+  .mat-mdc-checkbox-frame {
+    border-color: #d1d5db;
+  }
+  
+  &.mat-mdc-checkbox-checked {
+    .mat-mdc-checkbox-background {
+      background-color: #3b82f6;
+    }
+  }
+}
+
+// Form field styling
+.mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper {
+    border-radius: 8px;
+  }
+  
+  &.mat-focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #3b82f6;
+    }
+  }
+}
+
+// Button styling
+.mat-mdc-raised-button {
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: none;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  
+  &.mat-primary {
+    background-color: #3b82f6;
+    
+    &:hover {
+      background-color: #2563eb;
+    }
+  }
+}
+
+.mat-mdc-outlined-button {
+  border-radius: 8px;
+  font-weight: 500;
+  text-transform: none;
+  border-color: #d1d5db;
+  color: #374151;
+  
+  &:hover {
+    background-color: #f9fafb;
+  }
+}
+
+// Service selection cards
+.service-card {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.selected {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+  }
+}
+
+// Loading states
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+// Error states
+.error-message {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}

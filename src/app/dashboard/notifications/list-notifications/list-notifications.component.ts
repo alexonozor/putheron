@@ -168,39 +168,70 @@ export class ListNotificationsComponent implements OnInit {
   }
 
   private navigateFromNotification(notification: Notification) {
+    // All project-related notifications should navigate to project details
+    const projectNotificationTypes = [
+      NotificationType.PROJECT_CREATED,
+      NotificationType.PROJECT_ACCEPTED,
+      NotificationType.PROJECT_REJECTED,
+      NotificationType.PROJECT_STARTED,
+      NotificationType.PROJECT_COMPLETED,
+      NotificationType.PROJECT_COMPLETED_BY_BUSINESS,
+      NotificationType.PROJECT_COMPLETION_APPROVED,
+      NotificationType.PROJECT_COMPLETION_REJECTED,
+      NotificationType.ADDITIONAL_PAYMENT_REQUESTED,
+      NotificationType.ADDITIONAL_PAYMENT_APPROVED,
+      NotificationType.ADDITIONAL_PAYMENT_REJECTED,
+      NotificationType.ADDITIONAL_PAYMENT_COMPLETED,
+      NotificationType.PAYMENT_REQUEST,
+      NotificationType.PAYMENT_APPROVED,
+      NotificationType.PAYMENT_REJECTED,
+      NotificationType.COMPLETION_REQUEST,
+      NotificationType.COMPLETION_APPROVED,
+      NotificationType.COMPLETION_REJECTED,
+    ];
+
+    if (projectNotificationTypes.includes(notification.type)) {
+      if (notification.project_id) {
+        // Navigate to project details page
+        const projectId = typeof notification.project_id === 'string' 
+          ? notification.project_id 
+          : notification.project_id._id;
+        this.router.navigate(['/dashboard/projects', projectId]);
+        return;
+      }
+    }
+    
+    // Handle other notification types
     switch (notification.type) {
-      case NotificationType.PROJECT_CREATED:
-      case NotificationType.PROJECT_ACCEPTED:
-      case NotificationType.PROJECT_REJECTED:
-      case NotificationType.PROJECT_STARTED:
-      case NotificationType.PROJECT_COMPLETED:
-        if (notification.project_id) {
-          this.router.navigate(['/dashboard/projects', notification.project_id._id]);
-        }
-        break;
-      
-      case NotificationType.PAYMENT_REQUEST:
-      case NotificationType.PAYMENT_APPROVED:
-      case NotificationType.PAYMENT_REJECTED:
-      case NotificationType.COMPLETION_REQUEST:
-      case NotificationType.COMPLETION_APPROVED:
-      case NotificationType.COMPLETION_REJECTED:
-        // These should navigate to the chat or project details
-        if (notification.metadata?.['chatId']) {
-          this.router.navigate(['/dashboard/messages/chat', notification.metadata['chatId']]);
-        } else if (notification.project_id) {
-          this.router.navigate(['/dashboard/projects', notification.project_id._id]);
-        }
-        break;
-      
       case NotificationType.MESSAGE_RECEIVED:
         if (notification.metadata?.['chatId']) {
           this.router.navigate(['/dashboard/messages/chat', notification.metadata['chatId']]);
         }
         break;
       
+      case NotificationType.BUSINESS_APPROVED:
+      case NotificationType.BUSINESS_REJECTED:
+      case NotificationType.BUSINESS_SUSPENDED:
+      case NotificationType.BUSINESS_REACTIVATED:
+        if (notification.business_id) {
+          const businessId = typeof notification.business_id === 'string' 
+            ? notification.business_id 
+            : notification.business_id._id;
+          this.router.navigate(['/dashboard/businesses', businessId]);
+        }
+        break;
+      
+      case NotificationType.REVIEW_RECEIVED:
+        if (notification.project_id) {
+          const projectId = typeof notification.project_id === 'string' 
+            ? notification.project_id 
+            : notification.project_id._id;
+          this.router.navigate(['/project-details', projectId]);
+        }
+        break;
+      
       default:
-        // For other types, stay on notifications page
+        // For other types (system announcements, promotions), stay on notifications page
         break;
     }
   }
@@ -240,6 +271,19 @@ export class ListNotificationsComponent implements OnInit {
       [NotificationType.PROJECT_REJECTED]: 'Project Rejected',
       [NotificationType.PROJECT_STARTED]: 'Project Started',
       [NotificationType.PROJECT_COMPLETED]: 'Project Completed',
+      [NotificationType.PROJECT_COMPLETED_BY_BUSINESS]: 'Project Completed - Awaiting Approval',
+      [NotificationType.PROJECT_COMPLETION_APPROVED]: 'Project Completion Approved',
+      [NotificationType.PROJECT_COMPLETION_REJECTED]: 'Project Completion Rejected',
+      [NotificationType.ADDITIONAL_PAYMENT_REQUESTED]: 'Payment Requested',
+      [NotificationType.ADDITIONAL_PAYMENT_APPROVED]: 'Payment Approved',
+      [NotificationType.ADDITIONAL_PAYMENT_REJECTED]: 'Payment Rejected',
+      [NotificationType.ADDITIONAL_PAYMENT_COMPLETED]: 'Payment Received',
+      [NotificationType.BUSINESS_APPROVED]: 'Business Approved',
+      [NotificationType.BUSINESS_REJECTED]: 'Business Rejected',
+      [NotificationType.BUSINESS_SUSPENDED]: 'Business Suspended',
+      [NotificationType.BUSINESS_REACTIVATED]: 'Business Reactivated',
+      [NotificationType.REVIEW_RECEIVED]: 'Review Received',
+      [NotificationType.REVIEW_REPLIED]: 'Review Replied',
       [NotificationType.PAYMENT_REQUEST]: 'Payment Request',
       [NotificationType.PAYMENT_APPROVED]: 'Payment Approved',
       [NotificationType.PAYMENT_REJECTED]: 'Payment Rejected',

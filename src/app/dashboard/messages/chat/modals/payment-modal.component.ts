@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { StripeService } from '../../../../shared/services/stripe.service';
 import { ChatService } from '../../../../shared/services/chat.service';
+import { ProjectService } from '../../../../shared/services/project.service';
 
 export interface PaymentData {
   amount: string;
@@ -22,8 +23,10 @@ export interface PaymentModalData {
   amount: string;
   description: string;
   businessName: string;
-  chatId: string;
-  messageId: string;
+  chatId?: string;
+  messageId?: string;
+  projectId?: string;
+  isProjectPayment?: boolean;
 }
 
 @Component({
@@ -298,6 +301,7 @@ export class PaymentModalComponent implements OnInit, AfterViewInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly stripeService = inject(StripeService);
   private readonly chatService = inject(ChatService);
+  private readonly projectService = inject(ProjectService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   paymentForm: FormGroup;
@@ -333,10 +337,23 @@ export class PaymentModalComponent implements OnInit, AfterViewInit {
 
     try {
       // Create payment intent on backend
-      const paymentData = await this.chatService.createAdditionalPaymentIntentAsync(
-        this.data.chatId, 
-        this.data.messageId
-      );
+      let paymentData;
+      if (this.data.isProjectPayment && this.data.projectId) {
+        console.log('Creating project payment intent for project:', this.data.projectId);
+        // Create payment intent for project payment
+        paymentData = await this.projectService.createProjectPaymentIntentAsync(this.data.projectId);
+        console.log('Project payment intent created:', paymentData);
+      } else if (this.data.chatId && this.data.messageId) {
+        console.log('Creating chat payment intent for chat:', this.data.chatId, 'message:', this.data.messageId);
+        // Create payment intent for chat-based payment
+        paymentData = await this.chatService.createAdditionalPaymentIntentAsync(
+          this.data.chatId, 
+          this.data.messageId
+        );
+        console.log('Chat payment intent created:', paymentData);
+      } else {
+        throw new Error('Missing required payment data');
+      }
       
       this.clientSecret = paymentData.clientSecret;
 
@@ -378,24 +395,76 @@ export class PaymentModalComponent implements OnInit, AfterViewInit {
     this.stripeError.set(null);
 
     try {
-      // Confirm payment with Stripe
-      const { error, paymentIntent } = await this.stripeService.confirmPaymentWithoutRedirect(
-        this.clientSecret,
-        this.elements
-      );
+      // First, retrieve the current payment intent status
+      const retrieveResult = await this.stripeService.retrievePaymentIntent(this.clientSecret);
+      console.log('Current payment intent status:', retrieveResult.paymentIntent?.status);
 
-      if (error) {
-        this.stripeError.set(error.message || 'Payment failed');
-        return;
+      let paymentIntent: any;
+
+      if (retrieveResult.paymentIntent?.status === 'succeeded') {
+        // Payment is already succeeded, skip confirmation
+        console.log('Payment already succeeded, skipping confirmation');
+        paymentIntent = retrieveResult.paymentIntent;
+      } else {
+        // Payment not yet succeeded, proceed with confirmation
+        console.log('Attempting to confirm payment intent');
+        const { error, paymentIntent: confirmedPaymentIntent } = await this.stripeService.confirmPaymentWithoutRedirect(
+          this.clientSecret,
+          this.elements
+        );
+
+        if (error) {
+          console.error('Stripe payment confirmation error:', error);
+          console.error('Error details:', {
+            type: error.type,
+            code: error.code,
+            decline_code: error.decline_code,
+            message: error.message,
+            payment_intent: error.payment_intent
+          });
+          this.stripeError.set(error.message || 'Payment failed');
+          return;
+        }
+
+        paymentIntent = confirmedPaymentIntent;
       }
 
       if (paymentIntent?.status === 'succeeded') {
+        console.log('Stripe payment succeeded:', paymentIntent.id);
+        console.log('Payment type:', this.data.isProjectPayment ? 'project' : 'chat');
+        
         // Confirm payment on backend
-        await this.chatService.confirmAdditionalPaymentAsync(
-          this.data.chatId,
-          this.data.messageId,
-          paymentIntent.id
-        );
+        try {
+          if (this.data.isProjectPayment && this.data.projectId) {
+            console.log('Confirming project payment for project:', this.data.projectId);
+            // Confirm project payment
+            await this.projectService.confirmProjectPaymentAsync(
+              this.data.projectId,
+              paymentIntent.id
+            );
+            console.log('Project payment confirmed successfully');
+          } else if (this.data.chatId && this.data.messageId) {
+            console.log('Confirming chat payment for chat:', this.data.chatId, 'message:', this.data.messageId);
+            const result = await this.chatService.confirmAdditionalPaymentAsync(
+              this.data.chatId,
+              this.data.messageId,
+              paymentIntent.id
+            );
+            console.log('Chat payment confirmed successfully, result:', result);
+          }
+        } catch (backendError: any) {
+          console.error('Backend confirmation error:', backendError);
+          
+          // If it's a duplicate payment error, we can still consider it successful
+          if (backendError?.message?.includes('already processed') || 
+              backendError?.message?.includes('already completed') ||
+              backendError?.status === 409) {
+            console.log('Payment was already processed, continuing with success flow');
+          } else {
+            // Re-throw other backend errors
+            throw backendError;
+          }
+        }
 
         // Close modal with success
         const result: PaymentData = {

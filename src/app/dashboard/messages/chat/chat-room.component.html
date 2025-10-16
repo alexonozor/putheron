@@ -54,7 +54,22 @@
                 class="action-btn accept">
                 Accept
               </button>
-            } @else if (canPerformAction('start')) {
+            }
+            @if (canPerformAction('reject')) {
+              <button 
+                (click)="handleProjectAction('reject')"
+                class="action-btn reject">
+                Reject
+              </button>
+            }
+            @if (canPerformAction('request_payment')) {
+              <button 
+                (click)="handleProjectAction('request_payment')"
+                class="action-btn request-payment">
+                Request Initial Payment
+              </button>
+            }
+            @if (canPerformAction('start') && !canPerformAction('accept') && !canPerformAction('request_payment')) {
               <button 
                 (click)="handleProjectAction('start')"
                 class="action-btn start">
@@ -105,6 +120,13 @@
                 (click)="handleProjectAction('reject')"
                 class="action-btn reject">
                 Reject
+              </button>
+            }
+            @if (canPerformAction('request_payment')) {
+              <button 
+                (click)="handleProjectAction('request_payment')"
+                class="action-btn request-payment">
+                Request Initial Payment
               </button>
             }
             @if (canPerformAction('start')) {

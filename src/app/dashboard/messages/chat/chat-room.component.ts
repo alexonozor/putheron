@@ -17,7 +17,7 @@ import { ProjectService } from '../../../shared/services/project.service';
 import { ReviewService } from '../../../shared/services/review.service';
 import { SocketService, TypingUser } from '../../../shared/services/socket.service';
 import { Subscription } from 'rxjs';
-import { PaymentRequestModalComponent, PaymentRequestData } from './modals/payment-request-modal.component';
+import { PaymentRequestModalComponent, PaymentRequestData, PaymentRequestModalData } from './modals/payment-request-modal.component';
 import { CompletionRequestModalComponent, CompletionRequestData } from './modals/completion-request-modal.component';
 import { PaymentModalComponent, PaymentData, PaymentModalData } from './modals/payment-modal.component';
 import { ReviewFormComponent } from '../../../shared/components/review-form/review-form.component';
@@ -290,6 +290,16 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       }
     });
 
+    // Subscribe to payment completed events
+    const paymentCompletedSub = this.socketService.onEvent('payment-completed').subscribe((data: any) => {
+      if (data.chatId === this.chatId) {
+        console.log('Payment completed in this chat, refreshing messages and chat data');
+        this.loadMessages(false);
+        this.loadChat(); // Reload chat to update project data with payment status
+        this.shouldScrollToBottom = true;
+      }
+    });
+
     // Subscribe to completion request events
     const completionRequestSub = this.socketService.onEvent('completion-request-created').subscribe((data: any) => {
       if (data.chatId === this.chatId) {
@@ -354,6 +364,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       paymentRequestSub,
       paymentApprovedSub,
       paymentRejectedSub,
+      paymentCompletedSub,
       completionRequestSub,
       completionApprovedSub,
       completionRejectedSub,
@@ -681,7 +692,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
-  async handleProjectAction(action: 'accept' | 'reject' | 'start' | 'complete' | 'request_completion' | 'approve_completion') {
+  async handleProjectAction(action: 'accept' | 'reject' | 'start' | 'complete' | 'request_completion' | 'approve_completion' | 'request_payment') {
     const chat = this.chat();
     if (!chat || !chat.project_id) return;
 
@@ -700,6 +711,9 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
             rejection_reason: reason 
           });
           break;
+        case 'request_payment':
+          await this.requestInitialPayment();
+          return; // Don't continue with the status update logic
         case 'start':
           await this.projectService.updateProjectAsync(projectId, { status: 'in_progress' });
           break;
@@ -719,8 +733,19 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       await this.loadChat();
       
       // Send a system message about the status change
+      let statusMessage = '';
+      if (action === 'accept') {
+        statusMessage = 'Project has been accepted';
+      } else if (action === 'reject') {
+        statusMessage = 'Project has been rejected';
+      } else if (action === 'start') {
+        statusMessage = 'Project has been started and is now in progress';
+      } else {
+        statusMessage = `Project status updated to: ${action}`;
+      }
+      
       await this.chatService.sendMessageAsync(this.chatId!, {
-        content: `Project status updated to: ${action === 'start' ? 'in progress' : action}${action === 'reject' ? 'd' : 'd'}`,
+        content: statusMessage,
         message_type: 'project_update'
       });
       
@@ -732,7 +757,7 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
-  canPerformAction(action: 'accept' | 'reject' | 'start' | 'complete' | 'request_completion' | 'approve_completion'): boolean {
+  canPerformAction(action: 'accept' | 'reject' | 'start' | 'complete' | 'request_completion' | 'approve_completion' | 'request_payment'): boolean {
     const chat = this.chat();
     const user = this.user();
     if (!chat || !user || !chat.project_id) return false;
@@ -747,9 +772,11 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     switch (action) {
       case 'accept':
       case 'reject':
-        return isBusinessOwner && status === 'pending';
-      case 'start':
+        return isBusinessOwner && (status === 'requested' || status === 'under_review');
+      case 'request_payment':
         return isBusinessOwner && status === 'accepted';
+      case 'start':
+        return isBusinessOwner && (status === 'payment_completed');
       case 'complete':
       case 'request_completion':
         return isBusinessOwner && status === 'in_progress';
@@ -801,6 +828,57 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   // Payment Request Methods
+  async requestInitialPayment() {
+    const chat = this.chat();
+    if (!chat || !chat.project_id || !this.chatId) return;
+
+    try {
+      // Get the full project details to access offered_price
+      const project = await this.projectService.getProjectAsync(chat.project_id._id);
+      
+      // Open payment request modal with pre-filled amount from project
+      const dialogRef = this.dialog.open(PaymentRequestModalComponent, {
+        width: '500px',
+        disableClose: true,
+        data: {
+          defaultAmount: project.offered_price || 0,
+          isStartPayment: true
+        }
+      });
+
+      dialogRef.afterClosed().subscribe(async (result: PaymentRequestData) => {
+        if (result) {
+          try {
+            // Update project status first
+            await this.projectService.updateProjectAsync(chat.project_id!._id, { 
+              status: 'payment_requested' 
+            });
+            
+            // Create payment request message in chat
+            await this.chatService.requestAdditionalPaymentAsync(this.chatId!, result);
+            
+            // Send system message about payment request
+            await this.chatService.sendMessageAsync(this.chatId!, {
+              content: 'Payment has been requested to start the project',
+              message_type: 'project_update'
+            });
+            
+            // Refresh chat data and messages
+            await this.loadChat();
+            await this.loadMessages(false);
+            
+          } catch (error: any) {
+            console.error('Error processing initial payment request:', error);
+            this.error.set('Failed to request initial payment');
+          }
+        }
+      });
+    } catch (error: any) {
+      console.error('Error opening initial payment modal:', error);
+      this.error.set('Failed to open payment request modal');
+    }
+  }
+
   async requestAdditionalPayment() {
     const dialogRef = this.dialog.open(PaymentRequestModalComponent, {
       width: '500px',
@@ -1092,9 +1170,16 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
     // Disable payment requests if chat is disabled (project completed/settled)
     if (this.isChatDisabled()) return false;
     
-    // Only business owner can request payment for in-progress projects
-    return chat.project_id.business_owner_id._id === user._id && 
-           (chat.project_id.status === 'in_progress' || chat.project_id.status === 'awaiting_client_approval');
+    // Only business owner can request additional payments after initial payment
+    const isBusinessOwner = chat.project_id.business_owner_id._id === user._id;
+    const allowedStatuses = [
+      'payment_completed',  // After initial payment made
+      'started',           // Project started (legacy status)
+      'in_progress',       // Project in progress
+      'awaiting_client_approval' // Awaiting completion approval
+    ];
+    
+    return isBusinessOwner && allowedStatuses.includes(chat.project_id.status);
   }
 
   async checkReviewEligibility() {

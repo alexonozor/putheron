@@ -370,4 +370,50 @@ export class ProjectService {
     }
     return response.data;
   }
+
+  // Create payment intent for existing project
+  createProjectPaymentIntent(projectId: string): Observable<{ success: boolean; data: { clientSecret: string; paymentIntentId: string }; message: string }> {
+    return this.http.post<{ success: boolean; data: { clientSecret: string; paymentIntentId: string }; message: string }>(
+      `${this.apiUrl}/${projectId}/payment-intent`,
+      {}
+    );
+  }
+
+  async createProjectPaymentIntentAsync(projectId: string): Promise<{ clientSecret: string; paymentIntentId: string }> {
+    const response = await firstValueFrom(this.createProjectPaymentIntent(projectId));
+    return response.data;
+  }
+
+  // Confirm project payment
+  confirmProjectPayment(projectId: string, paymentIntentId: string): Observable<{ success: boolean; data: Project; message: string }> {
+    return this.http.post<{ success: boolean; data: Project; message: string }>(
+      `${this.apiUrl}/${projectId}/confirm-payment`,
+      { paymentIntentId }
+    );
+  }
+
+  async confirmProjectPaymentAsync(projectId: string, paymentIntentId: string): Promise<Project> {
+    console.log('🔥 FRONTEND SERVICE: confirmProjectPaymentAsync called');
+    console.log('🔥 Project ID:', projectId);
+    console.log('🔥 Payment Intent ID:', paymentIntentId);
+    console.log('🔥 API URL:', `${this.apiUrl}/${projectId}/confirm-payment`);
+    
+    const response = await firstValueFrom(this.confirmProjectPayment(projectId, paymentIntentId));
+    console.log('🔥 FRONTEND SERVICE: Response received:', response);
+    console.log('🔥 Project status in response:', response.data?.status);
+    return response.data;
+  }
+
+  // Decline project payment
+  declineProjectPayment(projectId: string, reason: string): Observable<{ success: boolean; data: Project; message: string }> {
+    return this.http.post<{ success: boolean; data: Project; message: string }>(
+      `${this.apiUrl}/${projectId}/decline-payment`,
+      { reason }
+    );
+  }
+
+  async declineProjectPaymentAsync(projectId: string, reason: string): Promise<Project> {
+    const response = await firstValueFrom(this.declineProjectPayment(projectId, reason));
+    return response.data;
+  }
 }
