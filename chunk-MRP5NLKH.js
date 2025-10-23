@@ -1,0 +1,1 @@
+import"./chunk-JKOY2XUY.js";var t=[{path:"",loadComponent:()=>import("./chunk-HVTSJQIX.js").then(o=>o.AdminTransactionsListComponent)},{path:":id",loadComponent:()=>import("./chunk-AFJSUHYW.js").then(o=>o.AdminTransactionDetailsComponent)}];export{t as adminTransactionsRoutes};
