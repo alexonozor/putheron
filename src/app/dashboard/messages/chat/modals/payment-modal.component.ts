@@ -27,6 +27,7 @@ export interface PaymentModalData {
   messageId?: string;
   projectId?: string;
   isProjectPayment?: boolean;
+  isInitialPayment?: boolean;
 }
 
 @Component({
@@ -338,19 +339,19 @@ export class PaymentModalComponent implements OnInit, AfterViewInit {
     try {
       // Create payment intent on backend
       let paymentData;
-      if (this.data.isProjectPayment && this.data.projectId) {
+      if ((this.data.isProjectPayment || this.data.isInitialPayment) && this.data.projectId) {
         console.log('Creating project payment intent for project:', this.data.projectId);
-        // Create payment intent for project payment
+        // Create payment intent for project payment (either from project details or initial payment in chat)
         paymentData = await this.projectService.createProjectPaymentIntentAsync(this.data.projectId);
         console.log('Project payment intent created:', paymentData);
       } else if (this.data.chatId && this.data.messageId) {
-        console.log('Creating chat payment intent for chat:', this.data.chatId, 'message:', this.data.messageId);
-        // Create payment intent for chat-based payment
+        console.log('Creating additional payment intent for chat:', this.data.chatId, 'message:', this.data.messageId);
+        // Create payment intent for additional payment in chat
         paymentData = await this.chatService.createAdditionalPaymentIntentAsync(
           this.data.chatId, 
           this.data.messageId
         );
-        console.log('Chat payment intent created:', paymentData);
+        console.log('Additional payment intent created:', paymentData);
       } else {
         throw new Error('Missing required payment data');
       }
@@ -431,26 +432,42 @@ export class PaymentModalComponent implements OnInit, AfterViewInit {
 
       if (paymentIntent?.status === 'succeeded') {
         console.log('Stripe payment succeeded:', paymentIntent.id);
-        console.log('Payment type:', this.data.isProjectPayment ? 'project' : 'chat');
+        console.log('Payment type:', this.data.isProjectPayment || this.data.isInitialPayment ? 'project' : 'additional');
         
         // Confirm payment on backend
         try {
-          if (this.data.isProjectPayment && this.data.projectId) {
-            console.log('Confirming project payment for project:', this.data.projectId);
-            // Confirm project payment
+          if ((this.data.isProjectPayment || this.data.isInitialPayment) && this.data.projectId) {
+            console.log('🔍 Confirming project payment for project:', this.data.projectId);
+            console.log('📝 Payment modal data:', {
+              isInitialPayment: this.data.isInitialPayment,
+              isProjectPayment: this.data.isProjectPayment,
+              messageId: this.data.messageId,
+              chatId: this.data.chatId,
+              projectId: this.data.projectId
+            });
+            
+            const messageIdToPass = this.data.isInitialPayment ? this.data.messageId : undefined;
+            const chatIdToPass = this.data.isInitialPayment ? this.data.chatId : undefined;
+            
+            console.log('📤 Passing to backend:', { messageIdToPass, chatIdToPass });
+            
+            // Confirm project payment (either from project details or initial payment in chat)
+            // For initial payment from chat, pass messageId and chatId to update the payment request card
             await this.projectService.confirmProjectPaymentAsync(
               this.data.projectId,
-              paymentIntent.id
+              paymentIntent.id,
+              messageIdToPass,
+              chatIdToPass
             );
-            console.log('Project payment confirmed successfully');
+            console.log('✅ Project payment confirmed successfully');
           } else if (this.data.chatId && this.data.messageId) {
-            console.log('Confirming chat payment for chat:', this.data.chatId, 'message:', this.data.messageId);
+            console.log('Confirming additional payment for chat:', this.data.chatId, 'message:', this.data.messageId);
             const result = await this.chatService.confirmAdditionalPaymentAsync(
               this.data.chatId,
               this.data.messageId,
               paymentIntent.id
             );
-            console.log('Chat payment confirmed successfully, result:', result);
+            console.log('Additional payment confirmed successfully, result:', result);
           }
         } catch (backendError: any) {
           console.error('Backend confirmation error:', backendError);

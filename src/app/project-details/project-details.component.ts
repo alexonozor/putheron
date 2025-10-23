@@ -205,10 +205,7 @@ export class ProjectDetailsComponent implements OnInit {
         // Add a small delay to ensure backend has processed the update
         setTimeout(async () => {
           await this.loadProject(currentProject._id);
-          // Also reload payment requests to show updated status
-          if (currentProject.chat_room_id) {
-            await this.loadPaymentRequests(currentProject.chat_room_id);
-          }
+          // Payment requests will be loaded automatically when project loads
         }, 500);
       }
     });
@@ -236,11 +233,8 @@ export class ProjectDetailsComponent implements OnInit {
       if (['accepted', 'started', 'payment_requested', 'payment_completed', 'in_progress', 'awaiting_client_approval', 'completed'].includes(project.status)) {
         await this.checkForExistingChat(projectId);
         
-        // Load payment requests if chat exists
-        const chat = this.existingChat();
-        if (chat) {
-          await this.loadPaymentRequests(chat._id);
-        }
+        // Load payment requests from chat messages to get proper message IDs
+        await this.loadPaymentRequests();
       }
       
       // Check review eligibility for completed projects
@@ -272,51 +266,48 @@ export class ProjectDetailsComponent implements OnInit {
     }
   }
 
-  async loadPaymentRequests(chatId: string) {
+  async loadPaymentRequests() {
+    // Load additional payment requests from chat messages to get proper message IDs
+    // We need the actual message IDs from the database for operations like approve/reject
     this.loadingPaymentRequests.set(true);
     try {
-      console.log('🔄 Loading payment requests for chat:', chatId);
-      const messages = await this.chatService.getChatMessagesAsync(chatId);
+      const project = this.project();
+      if (!project || !project.chat_room_id) {
+        console.log('⚠️ No project or chat room found');
+        this.paymentRequests.set([]);
+        return;
+      }
+
+      console.log('🔄 Loading payment requests from chat messages');
       
-      // Filter for payment request messages
-      const paymentMessages = messages.filter(message => 
-        message.message_type === 'payment_request'
-      );
+      // Fetch chat messages to get proper message IDs
+      const messages = await this.chatService.getChatMessagesAsync(project.chat_room_id);
       
-      console.log('💳 Found payment request messages:', paymentMessages.map(msg => ({
+      // Filter for payment request messages, excluding initial payment
+      const paymentMessages = messages.filter(message => {
+        if (message.message_type !== 'payment_request') return false;
+        
+        // Exclude initial payment messages
+        const desc = message.payment_description?.toLowerCase() || '';
+        return desc !== 'project payment' && desc !== 'initial project payment';
+      });
+      
+      console.log('💳 Found additional payment request messages:', paymentMessages.map(msg => ({
         id: msg._id,
         amount: msg.payment_amount,
         status: msg.payment_status || 'undefined',
         description: msg.payment_description,
-        type: msg.message_type,
         createdAt: msg.createdAt
       })));
 
-      if (paymentMessages.length === 0) {
-        console.log('⚠️ No payment request messages found in chat messages');
-        console.log('All messages:', messages.map(msg => ({ id: msg._id, type: msg.message_type })));
-      }
+      console.log('➕ Additional payment requests count:', paymentMessages.length);
       
       this.paymentRequests.set(paymentMessages);
       
-      // Check if any payment was completed and update project status if needed
-      const hasCompletedPayment = paymentMessages.some(msg => 
-        msg.payment_status === 'approved' || msg.payment_status === 'paid'
-      );
-      
-      const project = this.project();
-      if (hasCompletedPayment && project && project.status === 'payment_requested') {
-        // Update project status to payment_completed
-        try {
-          await this.projectService.updateProjectAsync(project._id, { status: 'payment_completed' });
-          await this.loadProject(project._id); // Reload project to get updated status
-        } catch (error) {
-          console.error('Error updating project status after payment:', error);
-        }
-      }
     } catch (error: any) {
       console.error('Error loading payment requests:', error);
       // Don't show error for this, just keep empty array
+      this.paymentRequests.set([]);
     } finally {
       this.loadingPaymentRequests.set(false);
     }
@@ -324,9 +315,10 @@ export class ProjectDetailsComponent implements OnInit {
 
   async refreshPaymentRequests() {
     const project = this.project();
-    if (project && project.chat_room_id) {
+    if (project) {
       console.log('🔄 Manual refresh of payment requests');
-      await this.loadPaymentRequests(project.chat_room_id);
+      // Reload project to get updated payment requests
+      await this.loadProject(project._id);
     }
   }
 
@@ -385,11 +377,8 @@ export class ProjectDetailsComponent implements OnInit {
           // Update project status to 'payment_requested'
           await this.projectService.updateProjectAsync(project._id, { status: 'payment_requested' });
           
-          // Reload project data
+          // Reload project data (which will also reload payment requests)
           await this.loadProject(project._id);
-          
-          // Reload payment requests
-          await this.loadPaymentRequests(chat!._id);
           
           alert('Payment request sent successfully! The client will be notified to make payment.');
           
@@ -515,8 +504,8 @@ export class ProjectDetailsComponent implements OnInit {
           // Send payment request via chat
           await this.chatService.requestAdditionalPaymentAsync(chat!._id, result);
           
-          // Reload payment requests to show the new one
-          await this.loadPaymentRequests(chat!._id);
+          // Reload project to get updated payment requests
+          await this.loadProject(project._id);
           
           alert('Additional payment request sent successfully!');
           
@@ -699,10 +688,7 @@ export class ProjectDetailsComponent implements OnInit {
       dialogRef.afterClosed().subscribe(async (result: PaymentData) => {
         if (result && result.paymentIntentId) {
           try {
-            // Payment was successful, reload payment requests to show updated status
-            await this.loadPaymentRequests(chat._id);
-            
-            // Also refresh project status in case it changed
+            // Payment was successful, reload project to show updated status and payment requests
             await this.refreshPaymentStatus();
             
             console.log('Payment approved successfully with method:', result.paymentMethod);
@@ -734,8 +720,11 @@ export class ProjectDetailsComponent implements OnInit {
         rejection_reason: reason
       });
 
-      // Reload payment requests
-      await this.loadPaymentRequests(chat._id);
+      // Reload project to get updated payment requests
+      const project = this.project();
+      if (project) {
+        await this.loadProject(project._id);
+      }
       
     } catch (error: any) {
       console.error('Error rejecting payment request:', error);
@@ -746,12 +735,9 @@ export class ProjectDetailsComponent implements OnInit {
   // Refresh payment status - useful for real-time updates
   async refreshPaymentStatus() {
     const project = this.project();
-    const chat = this.existingChat();
     
-    if (project && chat) {
-      await this.loadPaymentRequests(chat._id);
-      
-      // Also reload the project to get the latest status
+    if (project) {
+      // Reload the project to get the latest status and payment requests
       await this.loadProject(project._id);
     }
   }

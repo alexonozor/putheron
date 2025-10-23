@@ -62,6 +62,13 @@ export interface Project {
   is_archived: boolean;
   
   // Payment Information
+  initial_payment?: {
+    amount: number;
+    description: string;
+    status: 'pending' | 'processing' | 'succeeded' | 'failed';
+    stripe_payment_intent_id?: string;
+    paid_at?: Date | string;
+  };
   additional_payments_total?: number;
   additional_payment_requests?: Array<{
     amount: number;
@@ -385,20 +392,32 @@ export class ProjectService {
   }
 
   // Confirm project payment
-  confirmProjectPayment(projectId: string, paymentIntentId: string): Observable<{ success: boolean; data: Project; message: string }> {
+  confirmProjectPayment(
+    projectId: string, 
+    paymentIntentId: string, 
+    messageId?: string, 
+    chatId?: string
+  ): Observable<{ success: boolean; data: Project; message: string }> {
     return this.http.post<{ success: boolean; data: Project; message: string }>(
       `${this.apiUrl}/${projectId}/confirm-payment`,
-      { paymentIntentId }
+      { paymentIntentId, messageId, chatId }
     );
   }
 
-  async confirmProjectPaymentAsync(projectId: string, paymentIntentId: string): Promise<Project> {
+  async confirmProjectPaymentAsync(
+    projectId: string, 
+    paymentIntentId: string, 
+    messageId?: string, 
+    chatId?: string
+  ): Promise<Project> {
     console.log('🔥 FRONTEND SERVICE: confirmProjectPaymentAsync called');
     console.log('🔥 Project ID:', projectId);
     console.log('🔥 Payment Intent ID:', paymentIntentId);
+    console.log('🔥 Message ID:', messageId);
+    console.log('🔥 Chat ID:', chatId);
     console.log('🔥 API URL:', `${this.apiUrl}/${projectId}/confirm-payment`);
     
-    const response = await firstValueFrom(this.confirmProjectPayment(projectId, paymentIntentId));
+    const response = await firstValueFrom(this.confirmProjectPayment(projectId, paymentIntentId, messageId, chatId));
     console.log('🔥 FRONTEND SERVICE: Response received:', response);
     console.log('🔥 Project status in response:', response.data?.status);
     return response.data;

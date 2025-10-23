@@ -292,11 +292,17 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
 
     // Subscribe to payment completed events
     const paymentCompletedSub = this.socketService.onEvent('payment-completed').subscribe((data: any) => {
+      console.log('💰 Payment completed event received:', data);
       if (data.chatId === this.chatId) {
-        console.log('Payment completed in this chat, refreshing messages and chat data');
+        console.log('✅ Payment completed in THIS chat, refreshing messages and chat data');
+        console.log('🔄 About to call loadMessages...');
         this.loadMessages(false);
+        console.log('🔄 About to call loadChat...');
         this.loadChat(); // Reload chat to update project data with payment status
         this.shouldScrollToBottom = true;
+        console.log('✅ Message and chat reload triggered');
+      } else {
+        console.log('❌ Payment completed in different chat:', data.chatId, 'vs', this.chatId);
       }
     });
 
@@ -355,6 +361,27 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       }
     });
 
+    // Subscribe to message updated events (e.g., payment status changes)
+    const messageUpdatedSub = this.socketService.onEvent('messageUpdated').subscribe((data: any) => {
+      console.log('Message updated:', data);
+      
+      if (data.chat_id === this.chatId) {
+        console.log('Message updated in current chat, updating message in place');
+        
+        // Update the specific message in the messages array
+        const currentMessages = this.messages();
+        const messageIndex = currentMessages.findIndex(m => m._id === data._id);
+        
+        if (messageIndex !== -1) {
+          // Create new array with updated message to trigger change detection
+          const updatedMessages = [...currentMessages];
+          updatedMessages[messageIndex] = { ...updatedMessages[messageIndex], ...data };
+          this.messages.set(updatedMessages);
+          console.log('Message status updated in UI');
+        }
+      }
+    });
+
     this.subscriptions.push(
       connectionSub, 
       newMessageSub, 
@@ -369,7 +396,8 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
       completionApprovedSub,
       completionRejectedSub,
       projectStatusUpdatedSub,
-      systemMessageSub
+      systemMessageSub,
+      messageUpdatedSub
     );
   }
 
@@ -923,6 +951,10 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
         ? 'Business Owner' 
         : chat.project_id?.business_id?.name || 'Business Owner';
 
+      // Check if this is an initial payment (project payment)
+      const isInitialPayment = this.isInitialPayment(paymentMessage);
+      const projectId = typeof chat.project_id === 'string' ? chat.project_id : chat.project_id?._id;
+
       // Open payment modal - this will handle approval and payment in one flow
       const dialogRef = this.dialog.open(PaymentModalComponent, {
         width: '500px',
@@ -932,7 +964,9 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
           description: paymentMessage.payment_description || 'Additional payment',
           businessName: businessName,
           chatId: this.chatId!,
-          messageId: messageId
+          messageId: messageId,
+          projectId: projectId,
+          isInitialPayment: isInitialPayment
         } as PaymentModalData
       });
 
@@ -1134,6 +1168,12 @@ export class ChatRoomComponent implements OnInit, OnDestroy, AfterViewChecked {
   // Helper methods for message types
   isPaymentRequest(message: Message): boolean {
     return message.message_type === 'payment_request';
+  }
+
+  isInitialPayment(message: Message): boolean {
+    // Initial payment has description "Project payment" or "Initial project payment"
+    const desc = message.payment_description?.toLowerCase() || '';
+    return desc === 'project payment' || desc === 'initial project payment';
   }
 
   isCompletionRequest(message: Message): boolean {

@@ -254,11 +254,11 @@
                           {{ message.content }}
                         </div>
                       } @else if (isPaymentRequest(message)) {
-                        <!-- Payment Request Message -->
+                        <!-- Payment Request Message (Initial or Additional) -->
                         <div class="payment-request-message">
                           <div class="payment-header">
                             <mat-icon>payment</mat-icon>
-                            <h4>Additional Payment Request</h4>
+                            <h4>{{ isInitialPayment(message) ? 'Initial Payment Request' : 'Additional Payment Request' }}</h4>
                             <span class="payment-status" [class]="'status-' + message.payment_status">
                               {{ message.payment_status }}
                             </span>
