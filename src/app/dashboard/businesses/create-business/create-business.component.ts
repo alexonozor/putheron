@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
 import { AuthService } from '../../../shared/services/auth.service';
 import { BusinessService, Category, Subcategory, CreateBusinessDto, UpdateBusinessDto, Business } from '../../../shared/services/business.service';
 import { PhoneValidators } from '../../../shared/validators/phone.validator';
@@ -31,6 +32,7 @@ declare let google: any;
     MatCardModule,
     MatStepperModule,
     MatCheckboxModule,
+    MatRadioModule,
     PhoneFormatDirective
   ],
   templateUrl: './create-business.component.html',
@@ -70,6 +72,18 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
   // Forms
   public businessInfoForm: FormGroup;
   public businessDetailsForm: FormGroup;
+  public businessComplianceForm: FormGroup;
+
+  // US States list
+  public usStates = [
+    'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
+    'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
+    'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
+    'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
+    'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
+    'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
+  ];
 
   constructor() {
     this.businessInfoForm = this.fb.group({
@@ -93,6 +107,35 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
       contact_email: ['', [Validators.required, Validators.email]],
       contact_phone: ['', [Validators.required, PhoneValidators.usaPhone()]],
       website: ['']
+    });
+
+    this.businessComplianceForm = this.fb.group({
+      business_stage: ['', Validators.required],
+      business_hours: this.fb.group({
+        monday: this.fb.group({ open: ['09:00'], close: ['17:00'], closed: [false] }),
+        tuesday: this.fb.group({ open: ['09:00'], close: ['17:00'], closed: [false] }),
+        wednesday: this.fb.group({ open: ['09:00'], close: ['17:00'], closed: [false] }),
+        thursday: this.fb.group({ open: ['09:00'], close: ['17:00'], closed: [false] }),
+        friday: this.fb.group({ open: ['09:00'], close: ['17:00'], closed: [false] }),
+        saturday: this.fb.group({ open: ['09:00'], close: ['17:00'], closed: [true] }),
+        sunday: this.fb.group({ open: ['09:00'], close: ['17:00'], closed: [true] })
+      }),
+      business_registered: [false],
+      registered_state: [''],
+      tax_id: ['', [Validators.pattern(/^(\d{3}-\d{2}-\d{4}|\d{2}-\d{7})$/)]],
+      is_certified_wbe_mbe: [false],
+      woman_owned_attestation: [false, Validators.requiredTrue]
+    });
+
+    // Watch for business_registered changes to add/remove registered_state validation
+    this.businessComplianceForm.get('business_registered')?.valueChanges.subscribe(isRegistered => {
+      const registeredStateControl = this.businessComplianceForm.get('registered_state');
+      if (isRegistered) {
+        registeredStateControl?.setValidators([Validators.required]);
+      } else {
+        registeredStateControl?.clearValidators();
+      }
+      registeredStateControl?.updateValueAndValidity();
     });
   }
 
@@ -300,6 +343,34 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
         website: business.website || ''
       });
 
+      // Populate compliance form
+      this.businessComplianceForm.patchValue({
+        business_stage: business.business_stage || '',
+        business_registered: business.business_registered || false,
+        registered_state: business.registered_state || '',
+        tax_id: business.tax_id || '',
+        is_certified_wbe_mbe: business.is_certified_wbe_mbe || false,
+        woman_owned_attestation: business.woman_owned_attestation || false
+      });
+
+      // Populate business hours if they exist
+      if (business.business_hours) {
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
+        days.forEach(day => {
+          const dayData = business.business_hours?.[day];
+          if (dayData) {
+            const dayControl = this.businessComplianceForm.get(`business_hours.${day}`) as FormGroup;
+            if (dayControl) {
+              dayControl.patchValue({
+                open: dayData.open || '',
+                close: dayData.close || '',
+                closed: dayData.closed || false
+              });
+            }
+          }
+        });
+      }
+
       // Load subcategories for the selected category
       const categoryId = typeof business.category_id === 'string' ? business.category_id : business.category_id._id;
       if (categoryId) {
@@ -351,9 +422,10 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
   }
 
   async submitBusiness() {
-    if (this.businessInfoForm.invalid || this.businessDetailsForm.invalid) {
+    if (this.businessInfoForm.invalid || this.businessDetailsForm.invalid || this.businessComplianceForm.invalid) {
       this.businessInfoForm.markAllAsTouched();
       this.businessDetailsForm.markAllAsTouched();
+      this.businessComplianceForm.markAllAsTouched();
       this.error.set('Please fill in all required fields.');
       return;
     }
@@ -371,13 +443,15 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
       // Combine form data - use getRawValue() to include disabled fields
       const businessData: CreateBusinessDto | UpdateBusinessDto = {
         ...this.businessInfoForm.value,
-        ...this.businessDetailsForm.getRawValue()
+        ...this.businessDetailsForm.getRawValue(),
+        ...this.businessComplianceForm.value
       };
 
       // Debug logging
       console.log('businessInfoForm.value:', this.businessInfoForm.value);
       console.log('businessDetailsForm.value:', this.businessDetailsForm.value);
       console.log('businessDetailsForm.getRawValue():', this.businessDetailsForm.getRawValue());
+      console.log('businessComplianceForm.value:', this.businessComplianceForm.value);
       console.log('Combined businessData:', businessData);
 
       // Remove empty subcategory_id if not selected
@@ -471,6 +545,10 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
       this.businessDetailsForm.markAllAsTouched();
       return;
     }
+    if (stepper.selectedIndex === 2 && this.businessComplianceForm.invalid) {
+      this.businessComplianceForm.markAllAsTouched();
+      return;
+    }
     stepper.next();
   }
 
@@ -495,8 +573,12 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
     return this.businessDetailsForm.valid;
   }
 
+  isBusinessComplianceValid(): boolean {
+    return this.businessComplianceForm.valid;
+  }
+
   isAllFormsValid(): boolean {
-    return this.businessInfoForm.valid && this.businessDetailsForm.valid;
+    return this.businessInfoForm.valid && this.businessDetailsForm.valid && this.businessComplianceForm.valid;
   }
 
   // File upload methods

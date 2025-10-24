@@ -525,7 +525,153 @@
             </form>
           </mat-step>
 
-          <!-- Step 3: Review & Submit -->
+          <!-- Step 3: Business Compliance & Operations -->
+          <mat-step [stepControl]="businessComplianceForm" label="Compliance & Operations">
+            <form [formGroup]="businessComplianceForm" class="p-6 space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Business Compliance & Operations
+                </h3>
+                <p class="text-gray-600 mb-6">
+                  Provide additional business details and certifications.
+                </p>
+              </div>
+
+              <!-- Business Stage -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Business Stage</mat-label>
+                <mat-select formControlName="business_stage" required>
+                  <mat-option value="side_gig">Side gig</mat-option>
+                  <mat-option value="startup">Startup</mat-option>
+                  <mat-option value="growing_business">Growing business</mat-option>
+                  <mat-option value="established_business">Established business</mat-option>
+                </mat-select>
+                @if (businessComplianceForm.get('business_stage')?.hasError('required') && businessComplianceForm.get('business_stage')?.touched) {
+                  <mat-error>Please select a business stage</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Business Hours of Operation -->
+              <div formGroupName="business_hours">
+                <h4 class="text-md font-medium text-gray-900 mb-3">Business Hours of Operation</h4>
+                <div class="space-y-3">
+                  @for (day of ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']; track day) {
+                    <div [formGroupName]="day" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <div class="w-28 font-medium text-gray-700 capitalize">{{ day }}</div>
+                      <mat-checkbox formControlName="closed" class="mr-3">Closed</mat-checkbox>
+                      <mat-form-field appearance="outline" class="flex-1" [class.opacity-50]="businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value">
+                        <mat-label>Open</mat-label>
+                        <input matInput type="time" formControlName="open" [disabled]="businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value">
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="flex-1" [class.opacity-50]="businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value">
+                        <mat-label>Close</mat-label>
+                        <input matInput type="time" formControlName="close" [disabled]="businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value">
+                      </mat-form-field>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Business Registered -->
+              <div class="space-y-4">
+                <div>
+                  <h4 class="text-md font-medium text-gray-900 mb-3">Business Registration</h4>
+                  <div class="flex items-center gap-4">
+                    <label class="text-sm font-medium text-gray-700">Is your business registered?</label>
+                    <mat-radio-group formControlName="business_registered" class="flex gap-4">
+                      <mat-radio-button [value]="true">Yes</mat-radio-button>
+                      <mat-radio-button [value]="false">No</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+                </div>
+
+                @if (businessComplianceForm.get('business_registered')?.value) {
+                  <mat-form-field appearance="outline" class="w-full">
+                    <mat-label>Registered State</mat-label>
+                    <mat-select formControlName="registered_state" required>
+                      @for (state of usStates; track state) {
+                        <mat-option [value]="state">{{ state }}</mat-option>
+                      }
+                    </mat-select>
+                    @if (businessComplianceForm.get('registered_state')?.hasError('required') && businessComplianceForm.get('registered_state')?.touched) {
+                      <mat-error>Please select the registered state</mat-error>
+                    }
+                  </mat-form-field>
+                }
+              </div>
+
+              <!-- Tax ID/EIN/SSN -->
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Tax ID/EIN/SSN</mat-label>
+                <input 
+                  matInput 
+                  formControlName="tax_id" 
+                  placeholder="SSN: 888-88-8888 or EIN: 88-8888888"
+                  maxlength="12">
+                <mat-hint>SSN format: 888-88-8888 (9 digits) or EIN format: 88-8888888 (9 digits)</mat-hint>
+                @if (businessComplianceForm.get('tax_id')?.hasError('pattern') && businessComplianceForm.get('tax_id')?.touched) {
+                  <mat-error>Please enter a valid Tax ID in format: SSN (888-88-8888) or EIN (88-8888888)</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Certified WBE/MBE -->
+              <div>
+                <h4 class="text-md font-medium text-gray-900 mb-3">Business Certifications</h4>
+                <div class="flex items-center gap-4">
+                  <label class="text-sm font-medium text-gray-700">
+                    Certified Women Business Enterprise or Minority Business Enterprise?
+                  </label>
+                  <mat-radio-group formControlName="is_certified_wbe_mbe" class="flex gap-4">
+                    <mat-radio-button [value]="true">Yes</mat-radio-button>
+                    <mat-radio-button [value]="false">No</mat-radio-button>
+                  </mat-radio-group>
+                </div>
+              </div>
+
+              <!-- Self-attestation Checkbox -->
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <mat-checkbox formControlName="woman_owned_attestation" required class="text-sm">
+                  <span class="font-medium text-gray-900">
+                    I confirm this business is 51-100% owned and operated by a woman.
+                  </span>
+                </mat-checkbox>
+                @if (businessComplianceForm.get('woman_owned_attestation')?.hasError('required') && businessComplianceForm.get('woman_owned_attestation')?.touched) {
+                  <div class="text-red-600 text-xs mt-2 ml-8">
+                    <mat-icon class="text-sm align-middle">error</mat-icon>
+                    You must confirm this attestation to continue
+                  </div>
+                }
+              </div>
+
+              <div class="flex justify-between">
+                <button 
+                  type="button"
+                  (click)="previousStep(stepper)"
+                  class="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                  <mat-icon class="mr-2">arrow_back</mat-icon>
+                  Previous
+                </button>
+                <div class="flex items-center">
+                  @if (!isBusinessComplianceValid()) {
+                    <div class="text-sm text-amber-600 mr-4 flex items-center">
+                      <mat-icon class="text-sm mr-1">info</mat-icon>
+                      Please complete all required fields
+                    </div>
+                  }
+                  <button 
+                    type="button"
+                    (click)="nextStep(stepper)"
+                    [disabled]="!isBusinessComplianceValid()"
+                    class="flex items-center px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+                    Next
+                    <mat-icon class="ml-2">arrow_forward</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </mat-step>
+
+          <!-- Step 4: Review & Submit -->
           <mat-step label="Review & Submit">
             <div class="p-6 space-y-6">
               <div>
