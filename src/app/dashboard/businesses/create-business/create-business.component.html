@@ -563,10 +563,18 @@
                   <h4 class="font-medium text-gray-900 mb-2">Location & Contact</h4>
                   <div class="space-y-2">
                     <div>
-                      <span class="text-sm font-medium text-gray-600">Location:</span>
-                      <span class="ml-2 text-gray-900">
-                        {{ businessDetailsForm.get('city')?.value }}, {{ businessDetailsForm.get('country')?.value }}
-                      </span>
+                      <span class="text-sm font-medium text-gray-600">Address:</span>
+                      <div class="ml-2 text-gray-900">
+                        @if (businessDetailsForm.get('address')?.value) {
+                          <div>{{ businessDetailsForm.get('address')?.value }}</div>
+                        }
+                        <div>
+                          {{ businessDetailsForm.get('city')?.value }}@if (businessDetailsForm.get('state')?.value) {<span>, {{ businessDetailsForm.get('state')?.value }}</span>} {{ businessDetailsForm.get('postal_code')?.value }}
+                        </div>
+                        @if (businessDetailsForm.get('country')?.value) {
+                          <div>{{ businessDetailsForm.get('country')?.value || 'USA' }}</div>
+                        }
+                      </div>
                     </div>
                     @if (businessDetailsForm.get('contact_email')?.value) {
                       <div>
@@ -578,6 +586,12 @@
                       <div>
                         <span class="text-sm font-medium text-gray-600">Phone:</span>
                         <span class="ml-2 text-gray-900">{{ businessDetailsForm.get('contact_phone')?.value }}</span>
+                      </div>
+                    }
+                    @if (businessDetailsForm.get('website')?.value) {
+                      <div>
+                        <span class="text-sm font-medium text-gray-600">Website:</span>
+                        <span class="ml-2 text-gray-900">{{ businessDetailsForm.get('website')?.value }}</span>
                       </div>
                     }
                   </div>

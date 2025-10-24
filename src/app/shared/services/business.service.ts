@@ -99,6 +99,21 @@ export interface Business {
     type: { type: string; enum: ['Point']; default: 'Point' };
     coordinates: [number, number]; // [longitude, latitude]
   };
+  business_stage?: 'side_gig' | 'startup' | 'growing_business' | 'established_business';
+  business_hours?: {
+    monday?: { open: string; close: string; closed?: boolean };
+    tuesday?: { open: string; close: string; closed?: boolean };
+    wednesday?: { open: string; close: string; closed?: boolean };
+    thursday?: { open: string; close: string; closed?: boolean };
+    friday?: { open: string; close: string; closed?: boolean };
+    saturday?: { open: string; close: string; closed?: boolean };
+    sunday?: { open: string; close: string; closed?: boolean };
+  };
+  business_registered?: boolean;
+  registered_state?: string;
+  tax_id?: string;
+  is_certified_wbe_mbe?: boolean;
+  woman_owned_attestation?: boolean;
   services?: string[];
   tags?: string[];
   contact_email?: string;
@@ -109,15 +124,6 @@ export interface Business {
     instagram?: string;
     linkedin?: string;
     youtube?: string;
-  };
-  business_hours?: {
-    monday?: { open: string; close: string; closed?: boolean };
-    tuesday?: { open: string; close: string; closed?: boolean };
-    wednesday?: { open: string; close: string; closed?: boolean };
-    thursday?: { open: string; close: string; closed?: boolean };
-    friday?: { open: string; close: string; closed?: boolean };
-    saturday?: { open: string; close: string; closed?: boolean };
-    sunday?: { open: string; close: string; closed?: boolean };
   };
   is_active: boolean;
   is_featured: boolean;
@@ -178,6 +184,12 @@ export interface CreateBusinessDto {
     saturday?: { open: string; close: string; closed?: boolean };
     sunday?: { open: string; close: string; closed?: boolean };
   };
+  business_stage?: 'side_gig' | 'startup' | 'growing_business' | 'established_business';
+  business_registered?: boolean;
+  registered_state?: string;
+  tax_id?: string;
+  is_certified_wbe_mbe?: boolean;
+  woman_owned_attestation?: boolean;
   meta_title?: string;
   meta_description?: string;
 }
