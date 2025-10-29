@@ -5,7 +5,7 @@ import { BusinessService, Business, Service } from '../../shared/services/busine
 import { AuthService } from '../../shared/services/auth.service';
 import { ProjectService, Project } from '../../shared/services/project.service';
 import { ReviewService } from '../../shared/services/review.service';
-import { User } from '../../models/user.model';
+import { User } from '../../shared/models/user.model';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { FavoriteButtonComponent } from '../../shared/components/favorite-button/favorite-button.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';

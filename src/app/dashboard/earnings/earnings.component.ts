@@ -19,15 +19,15 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { StripeConnectService } from '../../services/stripe-connect.service';
-import { StripeAccountStatus } from '../../models/stripe-account.model';
-import { WithdrawalService } from '../../services/withdrawal.service';
+import { StripeConnectService } from '../../shared/services/stripe-connect.service';
+import { StripeAccountStatus } from '../../shared/models/stripe-account.model';
+import { WithdrawalService } from '../../shared/services/withdrawal.service';
 import { 
   Withdrawal, 
   WithdrawalStatus,
   WithdrawalMethod,
   CreateWithdrawalRequest 
-} from '../../models/withdrawal.model';
+} from '../../shared/models/withdrawal.model';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
 
 interface WalletSummary {

@@ -12,7 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../shared/services';
-import { RegisterRequest } from '../../models';
+import { RegisterRequest } from '../../shared/models';
 import { COUNTRIES } from '../../shared/data/countries';
 import { USCitiesService, USCity } from '../../shared/services/us-cities.service';
 import { PhoneValidators } from '../../shared/validators/phone.validator';

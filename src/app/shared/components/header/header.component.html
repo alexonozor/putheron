@@ -1,134 +1,367 @@
-<header class="relative z-50 bg-white shadow-sm">
-    <nav class="mx-auto px-4 sm:px-6 lg:px-8" [ngClass]="{ 'max-w-12xl': isAuthenticated(), 'max-w-7xl': !isAuthenticated() }">
-        <div class="flex justify-between items-center py-4">
-            <div class="flex items-center">
-                <!-- Mobile Menu Button (only show when specified) -->
-                @if (showMobileMenuButton) {
-                    <button 
-                        mat-icon-button 
-                        (click)="onMenuToggle()"
-                        class="mr-3 text-gray-700 hover:text-blue-600 transition-colors"
-                    >
-                        <mat-icon>menu</mat-icon>
-                    </button>
-                }
-                
-                <a routerLink="/" class="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors">
-                    VouchHer
-                </a>
-            </div>
-            
-            <!-- Authentication State -->
-            <div class="flex items-center space-x-4">
-                @if (isAuthenticated(); as authenticated) {
-                    <!-- Authenticated User -->
-                    <div class="flex items-center space-x-4">
-                        <!-- Messages Icon -->
-                        <button 
-                            mat-icon-button 
-                            (click)="navigateToMessages()"
-                            class="relative text-gray-700 hover:text-blue-600 transition-colors"
-                        >
-                            <mat-icon 
-                                [matBadge]="messageCount()"
-                                [matBadgeHidden]="messageCount() === 0"
-                                matBadgeColor="warn"
-                                matBadgeSize="small"
-                            >
-                                mail
-                            </mat-icon>
-                        </button>
-
-                        <!-- Notifications Component -->
-                        <app-notification-nav></app-notification-nav>
-
-                        <!-- User Dropdown -->
-                        <div class="relative">
-                            <button 
-                                mat-button
-                                [matMenuTriggerFor]="userMenu"
-                                class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
-                            >
-                                <!-- User Avatar/Initials -->
-                                <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
-                                    {{ getUserInitials() }}
-                                </div>
-                                <mat-icon>expand_more</mat-icon>
-                            </button>
-                            
-                            <!-- Dropdown Menu -->
-                            <mat-menu #userMenu="matMenu">
-                                <!-- Mode Display -->
-                                <div class="px-4 py-2 text-sm text-gray-500 border-b">
-                                    Mode: {{ isBusinessOwner() ? 'Business Owner' : 'Client' }}
-                                </div>
-                                
-                                <!-- Dashboard/Profile Actions -->
-                                <button mat-menu-item (click)="navigateToDashboard()">
-                                    <mat-icon>dashboard</mat-icon>
-                                    <span>Dashboard</span>
-                                </button>
-                                <button mat-menu-item (click)="navigateToProfile()">
-                                    <mat-icon>person</mat-icon>
-                                    <span>Profile</span>
-                                </button>
-
-                                <!-- Admin Access (only for authorized users) -->
-                                @if (hasAdminAccess()) {
-                                    <button mat-menu-item (click)="navigateToAdmin()">
-                                        <mat-icon>admin_panel_settings</mat-icon>
-                                        <span>Admin Panel</span>
-                                    </button>
-                                }
-                                
-                                <!-- Mode Switching -->
-                                @if (!isBusinessOwner()) {
-                                    <!-- Client Mode: Show different options based on whether they have a business -->
-                                    @if (!hasBusinesses()) {
-                                        <!-- No business yet: Show "Add a Business" -->
-                                        <button mat-menu-item (click)="navigateToCreateBusiness()">
-                                            <mat-icon>add_business</mat-icon>
-                                            <span>Add a Business</span>
-                                        </button>
-                                    } @else {
-                                        <!-- Has business: Show "Switch to Business Owner" -->
-                                        <button mat-menu-item (click)="switchToBusinessMode()">
-                                            <mat-icon>business</mat-icon>
-                                            <span>Switch to Business Owner</span>
-                                        </button>
-                                    }
-                                } @else {
-                                    <!-- Business Owner Mode: Show "Switch to Client Mode" -->
-                                    <button mat-menu-item (click)="switchToClientMode()">
-                                        <mat-icon>person_outline</mat-icon>
-                                        <span>Switch to Client Mode</span>
-                                    </button>
-                                }
-                                
-                                <mat-divider></mat-divider>
-                                <button mat-menu-item (click)="navigateToSettings()">
-                                    <mat-icon>settings</mat-icon>
-                                    <span>Settings</span>
-                                </button>
-                                <mat-divider></mat-divider>
-                                <button mat-menu-item (click)="signOut()" class="text-red-600">
-                                    <mat-icon>logout</mat-icon>
-                                    <span>Sign Out</span>
-                                </button>
-                            </mat-menu>
-                        </div>
-                    </div>
-                } @else {
-                    <!-- Guest User -->
-                
-                    <a routerLink="/auth" class="text-gray-700 hover:text-blue-600 transition-colors">
-                        Sign In
-                    </a>
-                    <a routerLink="/auth" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                        Join
-                    </a>
-                }
-            </div>
+<header class="sticky top-0 z-50">
+  <!-- Desktop Navigation -->
+  <mat-toolbar class="hidden md:flex bg-white shadow-sm border-b border-gray-200">
+    <div class="w-full mx-auto px-4 sm:px-6 lg:px-8" [ngClass]="{ 'max-w-12xl': isAuthenticated(), 'max-w-7xl': !isAuthenticated() }">
+      <div class="flex justify-between items-center w-full">
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a routerLink="/" class="text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors">
+            VouchHer
+          </a>
         </div>
-    </nav>
+        
+        <!-- Desktop Auth Actions -->
+        <div class="flex items-center gap-3">
+          @if (isAuthenticated(); as authenticated) {
+            <!-- Authenticated User -->
+            <!-- Messages Icon -->
+            <button 
+              mat-icon-button 
+              (click)="navigateToMessages()"
+              class="text-gray-600 hover:text-primary-600"
+            >
+              <mat-icon 
+                [matBadge]="messageCount()"
+                [matBadgeHidden]="messageCount() === 0"
+                matBadgeColor="warn"
+                matBadgeSize="small"
+              >
+                mail_outline
+              </mat-icon>
+            </button>
+
+            <!-- Notifications -->
+            <app-notification-nav></app-notification-nav>
+
+            <!-- User Menu -->
+            <button 
+              mat-button
+              [matMenuTriggerFor]="userMenu"
+              class="flex items-center gap-2"
+            >
+              <div class="w-9 h-9 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                {{ getUserInitials() }}
+              </div>
+              <mat-icon class="text-gray-600">expand_more</mat-icon>
+            </button>
+            
+            <mat-menu #userMenu="matMenu">
+              <div class="px-4 py-2 text-sm text-gray-500 border-b">
+                Mode: {{ isBusinessOwner() ? 'Business Owner' : 'Client' }}
+              </div>
+              
+              <button mat-menu-item (click)="navigateToDashboard()">
+                <mat-icon>dashboard</mat-icon>
+                <span>Dashboard</span>
+              </button>
+              <button mat-menu-item (click)="navigateToProfile()">
+                <mat-icon>person</mat-icon>
+                <span>Profile</span>
+              </button>
+
+              @if (hasAdminAccess()) {
+                <button mat-menu-item (click)="navigateToAdmin()">
+                  <mat-icon>admin_panel_settings</mat-icon>
+                  <span>Admin Panel</span>
+                </button>
+              }
+              
+              @if (!isBusinessOwner()) {
+                @if (!hasBusinesses()) {
+                  <button mat-menu-item (click)="navigateToCreateBusiness()">
+                    <mat-icon>add_business</mat-icon>
+                    <span>Add a Business</span>
+                  </button>
+                } @else {
+                  <button mat-menu-item (click)="switchToBusinessMode()">
+                    <mat-icon>business</mat-icon>
+                    <span>Switch to Business Owner</span>
+                  </button>
+                }
+              } @else {
+                <button mat-menu-item (click)="switchToClientMode()">
+                  <mat-icon>person_outline</mat-icon>
+                  <span>Switch to Client Mode</span>
+                </button>
+              }
+              
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="navigateToSettings()">
+                <mat-icon>settings</mat-icon>
+                <span>Settings</span>
+              </button>
+              <mat-divider></mat-divider>
+              <button mat-menu-item (click)="signOut()" class="text-red-600">
+                <mat-icon>logout</mat-icon>
+                <span>Sign Out</span>
+              </button>
+            </mat-menu>
+          } @else {
+            <!-- Guest User -->
+            <button mat-button routerLink="/auth" class="text-gray-700 hover:text-primary-600">
+              Sign In
+            </button>
+            <button mat-raised-button color="primary" routerLink="/auth" class="bg-primary-600 text-white">
+              Join
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <!-- Mobile Navigation -->
+  <mat-toolbar class="md:hidden bg-white shadow-sm border-b border-gray-200 h-16">
+    <div class="w-full flex items-center justify-between px-3">
+      @if (isAuthenticated()) {
+        <!-- Logged In Mobile Header -->
+        <!-- Menu Button -->
+        <button 
+          mat-icon-button 
+          (click)="toggleMobileMenu()"
+          class="text-gray-700 -ml-2"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+
+        <!-- Logo Center -->
+        <a routerLink="/" class="flex items-center absolute left-1/2 transform -translate-x-1/2">
+          <img src="/assets/logos/logo-icon-md.png" alt="VouchHer" class="h-8 w-auto">
+        </a>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-1">
+          <!-- Messages -->
+          <button 
+            mat-icon-button 
+            (click)="navigateToMessages()"
+            class="text-gray-600"
+          >
+            <mat-icon 
+              [matBadge]="messageCount()"
+              [matBadgeHidden]="messageCount() === 0"
+              matBadgeColor="warn"
+              matBadgeSize="small"
+            >
+              mail_outline
+            </mat-icon>
+          </button>
+
+          <!-- Notifications -->
+          <app-notification-nav></app-notification-nav>
+        </div>
+      } @else {
+        <!-- Logged Out Mobile Header -->
+        <!-- Menu Button Left -->
+        <button 
+          mat-icon-button 
+          (click)="toggleMobileMenu()"
+          class="text-gray-700 -ml-2"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+
+        <!-- Logo Center -->
+        <a routerLink="/" class="flex items-center absolute left-1/2 transform -translate-x-1/2">
+          <img src="/assets/logos/logo-icon-md.png" alt="VouchHer" class="h-8 w-auto">
+        </a>
+
+        <!-- Sign Up Button Right -->
+        <button 
+          mat-raised-button 
+          color="primary" 
+          routerLink="/auth" 
+         
+        >
+          Sign up
+        </button>
+
+        
+      }
+    </div>
+  </mat-toolbar>
+
+  <!-- Mobile Drawer Menu -->
+  <div 
+    class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300"
+    [class.opacity-0]="!mobileMenuOpen()"
+    [class.pointer-events-none]="!mobileMenuOpen()"
+    (click)="closeMobileMenu()"
+  ></div>
+
+  <div 
+    class="md:hidden fixed left-0 top-0 bottom-0 w-72 bg-white z-50 transform transition-transform duration-300 shadow-xl overflow-y-auto"
+    [class.-translate-x-full]="!mobileMenuOpen()"
+    [class.translate-x-0]="mobileMenuOpen()"
+  >
+    @if (isAuthenticated()) {
+      <!-- Authenticated User Drawer -->
+      <!-- Drawer Header -->
+      <div class="flex items-center justify-between p-4 border-b border-gray-200">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center text-lg font-medium">
+            {{ getUserInitials() }}
+          </div>
+          <div>
+            <div class="font-semibold text-gray-900">{{ getUserFullName() }}</div>
+            <div class="text-xs text-gray-500">{{ isBusinessOwner() ? 'Business Owner' : 'Client' }}</div>
+          </div>
+        </div>
+        <button mat-icon-button (click)="closeMobileMenu()" class="text-gray-600">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- Drawer Menu Items -->
+      <nav class="p-2">
+        <button 
+          mat-button 
+          class="w-full justify-start text-left py-3 px-4 hover:bg-gray-50 rounded-lg"
+          (click)="navigateToDashboard(); closeMobileMenu()"
+        >
+          <mat-icon class="mr-3 text-gray-600">dashboard</mat-icon>
+          <span class="text-gray-900">Dashboard</span>
+        </button>
+
+        <button 
+          mat-button 
+          class="w-full justify-start text-left py-3 px-4 hover:bg-gray-50 rounded-lg"
+          (click)="navigateToProfile(); closeMobileMenu()"
+        >
+          <mat-icon class="mr-3 text-gray-600">person</mat-icon>
+          <span class="text-gray-900">Profile</span>
+        </button>
+
+        @if (hasAdminAccess()) {
+          <button 
+            mat-button 
+            class="w-full justify-start text-left py-3 px-4 hover:bg-gray-50 rounded-lg"
+            (click)="navigateToAdmin(); closeMobileMenu()"
+          >
+            <mat-icon class="mr-3 text-gray-600">admin_panel_settings</mat-icon>
+            <span class="text-gray-900">Admin Panel</span>
+          </button>
+        }
+
+        <mat-divider class="my-2"></mat-divider>
+
+        <!-- Mode Switching -->
+        @if (!isBusinessOwner()) {
+          @if (!hasBusinesses()) {
+            <button 
+              mat-button 
+              class="w-full justify-start text-left py-3 px-4 hover:bg-gray-50 rounded-lg"
+              (click)="navigateToCreateBusiness(); closeMobileMenu()"
+            >
+              <mat-icon class="mr-3 text-gray-600">add_business</mat-icon>
+              <span class="text-gray-900">Add a Business</span>
+            </button>
+          } @else {
+            <button 
+              mat-button 
+              class="w-full justify-start text-left py-3 px-4 hover:bg-gray-50 rounded-lg"
+              (click)="switchToBusinessMode(); closeMobileMenu()"
+            >
+              <mat-icon class="mr-3 text-gray-600">business</mat-icon>
+              <span class="text-gray-900">Switch to Business Owner</span>
+            </button>
+          }
+        } @else {
+          <button 
+            mat-button 
+            class="w-full justify-start text-left py-3 px-4 hover:bg-gray-50 rounded-lg"
+            (click)="switchToClientMode(); closeMobileMenu()"
+          >
+            <mat-icon class="mr-3 text-gray-600">person_outline</mat-icon>
+            <span class="text-gray-900">Switch to Client Mode</span>
+          </button>
+        }
+
+        <mat-divider class="my-2"></mat-divider>
+
+        <button 
+          mat-button 
+          class="w-full justify-start text-left py-3 px-4 hover:bg-gray-50 rounded-lg"
+          (click)="navigateToSettings(); closeMobileMenu()"
+        >
+          <mat-icon class="mr-3 text-gray-600">settings</mat-icon>
+          <span class="text-gray-900">Settings</span>
+        </button>
+
+        <button 
+          mat-button 
+          class="w-full justify-start text-left py-3 px-4 hover:bg-red-50 rounded-lg text-red-600"
+          (click)="signOut(); closeMobileMenu()"
+        >
+          <mat-icon class="mr-3">logout</mat-icon>
+          <span>Sign Out</span>
+        </button>
+      </nav>
+    } @else {
+      <!-- Guest User Drawer -->
+      <!-- Drawer Header -->
+      <div class="flex items-center justify-between p-4 border-b border-gray-200">
+        <div class="flex items-center gap-2">
+          <img src="/assets/logos/logo-with-text.png" alt="VouchHer" class="h-8 w-auto">
+        </div>
+        <button mat-icon-button (click)="closeMobileMenu()" class="text-gray-600">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- Guest Menu Items -->
+      <nav class="p-2">
+        <button 
+          mat-button 
+          class="w-full justify-start text-left py-3 px-4 hover:bg-gray-50 rounded-lg"
+          routerLink="/"
+          (click)="closeMobileMenu()"
+        >
+          <mat-icon class="mr-3 text-gray-600">home</mat-icon>
+          <span class="text-gray-900">Home</span>
+        </button>
+
+        <button 
+          mat-button 
+          class="w-full justify-start text-left py-3 px-4 hover:bg-gray-50 rounded-lg"
+          routerLink="/search"
+          (click)="closeMobileMenu()"
+        >
+          <mat-icon class="mr-3 text-gray-600">search</mat-icon>
+          <span class="text-gray-900">Find Services</span>
+        </button>
+
+        <button 
+          mat-button 
+          class="w-full justify-start text-left py-3 px-4 hover:bg-gray-50 rounded-lg"
+          routerLink="/how-it-works"
+          (click)="closeMobileMenu()"
+        >
+          <mat-icon class="mr-3 text-gray-600">info</mat-icon>
+          <span class="text-gray-900">How It Works</span>
+        </button>
+
+        <mat-divider class="my-2"></mat-divider>
+
+        <button 
+          mat-raised-button 
+          color="primary"
+          class="w-full bg-primary-600 text-white my-2"
+          routerLink="/auth"
+          (click)="closeMobileMenu()"
+        >
+          Sign up
+        </button>
+
+        <button 
+          mat-stroked-button 
+          class="w-full border-gray-300 text-gray-700"
+          routerLink="/auth"
+          (click)="closeMobileMenu()"
+        >
+          Sign in
+        </button>
+      </nav>
+    }
+  </div>
 </header>

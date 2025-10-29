@@ -4,14 +4,12 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AuthGuard } from './shared/guards/auth.guard';
 import { GuestGuard } from './shared/guards/guest.guard';
 import { SearchComponent } from './search/search.component';
-import { OwnBusinessComponent } from './own-business/own-business.component';
-import { PayPalCallbackComponent } from './components/paypal-callback/paypal-callback.component';
-import { StripeCallbackComponent } from './components/stripe-callback/stripe-callback.component';
+import { PayPalCallbackComponent } from './payments/paypal-callback/paypal-callback.component';
+import { StripeCallbackComponent } from './payments/stripe-callback/stripe-callback.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'search', component: SearchComponent },
-  { path: 'own-business', component: OwnBusinessComponent },
   { 
     path: 'auth', 
     loadChildren: () => import('./auth/auth.route').then(m => m.AUTH_ROUTES),

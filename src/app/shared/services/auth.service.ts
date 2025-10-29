@@ -11,7 +11,7 @@ import {
   RegisterRequest, 
   UpdateUserRequest,
   UserResponse 
-} from '../../models/user.model';
+} from '../models/user.model';
 import { ConfigService } from './config.service';
 
 @Injectable({

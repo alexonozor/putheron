@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { OverviewsComponent } from './overviews/overviews.component';
 import { ProjectsComponent } from './projects/projects.component';
-import { ProjectDetailsComponent } from '../project-details/project-details.component';
+import { ProjectDetailsComponent } from './projects/project-details/project-details.component';
 import { TestNotificationsComponent } from '../test-notifications.component';
 import { ProfileComponent } from './profile/profile.component';
 import { SettingsComponent } from './settings/settings.component';

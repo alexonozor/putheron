@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { AuthService } from '../../services/auth.service';
 import { AuthorizationService } from '../../services/authorization.service';
 import { BusinessService } from '../../services/business.service';
@@ -22,6 +24,8 @@ import { NotificationNavComponent } from '../notification-nav/notification-nav.c
     MatMenuModule,
     MatBadgeModule,
     MatDividerModule,
+    MatToolbarModule,
+    MatSidenavModule,
     NotificationNavComponent
   ],
   templateUrl: './header.component.html',
@@ -44,6 +48,7 @@ export class HeaderComponent {
   readonly user = this.authService.user;
   readonly isAuthenticated = this.authService.isAuthenticated;
   readonly showMobileMenu = signal(false);
+  readonly mobileMenuOpen = signal(false);
 
   // Mock data for messages count
   readonly messageCount = signal(3);
@@ -223,7 +228,11 @@ export class HeaderComponent {
   }
 
   toggleMobileMenu() {
-    this.showMobileMenu.update(current => !current);
+    this.mobileMenuOpen.update(current => !current);
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen.set(false);
   }
 
   onMenuToggle() {

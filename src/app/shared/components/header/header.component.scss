@@ -1,1 +1,37 @@
 // Header component styles
+
+// Smooth transitions for mobile drawer
+.mat-toolbar {
+  padding: 0;
+  height: 64px;
+}
+
+// Center logo positioning
+.absolute.left-1\/2 {
+  pointer-events: auto;
+}
+
+// Rounded Sign up button
+
+
+
+
+// Mobile menu overlay animation
+@media (max-width: 768px) {
+  .fixed.inset-0 {
+    transition: opacity 300ms ease-in-out;
+  }
+  
+  .fixed.left-0 {
+    transition: transform 300ms ease-in-out;
+  }
+}
+
+// Ensure drawer is above everything
+.z-50 {
+  z-index: 1100;
+}
+
+.z-40 {
+  z-index: 1000;
+}

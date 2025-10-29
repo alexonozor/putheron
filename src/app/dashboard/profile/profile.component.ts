@@ -15,7 +15,7 @@ import { AuthService } from '../../shared/services/auth.service';
 import { USCitiesService, USCity } from '../../shared/services/us-cities.service';
 import { COUNTRIES } from '../../shared/data/countries';
 import { US_STATES } from '../../shared/data/us-states';
-import { User } from '../../models/user.model';
+import { User } from '../../shared/models/user.model';
 
 @Component({
   selector: 'app-profile',
