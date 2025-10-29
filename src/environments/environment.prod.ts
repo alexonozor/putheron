@@ -11,5 +11,8 @@ export const environment = {
   features: {
     enableLogging: false,
     enableDevTools: false
+  },
+  stripe: {
+    publishableKey: 'pk_test_fhBCq492t3wQwU5NWvqYAm6D00ZTsX5wpW'
   }
 };
