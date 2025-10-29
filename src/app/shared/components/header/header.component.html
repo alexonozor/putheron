@@ -83,11 +83,22 @@
                                 
                                 <!-- Mode Switching -->
                                 @if (!isBusinessOwner()) {
-                                    <button mat-menu-item (click)="switchToBusinessMode()">
-                                        <mat-icon>business</mat-icon>
-                                        <span>Switch to Business Owner</span>
-                                    </button>
+                                    <!-- Client Mode: Show different options based on whether they have a business -->
+                                    @if (!hasBusinesses()) {
+                                        <!-- No business yet: Show "Add a Business" -->
+                                        <button mat-menu-item (click)="navigateToCreateBusiness()">
+                                            <mat-icon>add_business</mat-icon>
+                                            <span>Add a Business</span>
+                                        </button>
+                                    } @else {
+                                        <!-- Has business: Show "Switch to Business Owner" -->
+                                        <button mat-menu-item (click)="switchToBusinessMode()">
+                                            <mat-icon>business</mat-icon>
+                                            <span>Switch to Business Owner</span>
+                                        </button>
+                                    }
                                 } @else {
+                                    <!-- Business Owner Mode: Show "Switch to Client Mode" -->
                                     <button mat-menu-item (click)="switchToClientMode()">
                                         <mat-icon>person_outline</mat-icon>
                                         <span>Switch to Client Mode</span>

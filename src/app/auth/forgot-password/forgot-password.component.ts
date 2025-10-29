@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../shared/services';
 
 @Component({
@@ -20,7 +21,8 @@ import { AuthService } from '../../shared/services';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.scss']
@@ -30,10 +32,9 @@ export class ForgotPasswordComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
+  private readonly snackBar = inject(MatSnackBar);
 
   // Signals for component state
-  readonly error = signal('');
-  readonly successMessage = signal('');
   readonly loading = signal(false);
 
   // Reactive form
@@ -57,10 +58,13 @@ export class ForgotPasswordComponent implements OnInit {
   }
 
   async onSubmit() {
-    this.clearMessages();
-    
     if (!this.forgotPasswordForm.valid) {
-      this.error.set('Please enter a valid email address');
+      this.snackBar.open('Please enter a valid email address', 'Close', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
       return;
     }
 
@@ -71,21 +75,31 @@ export class ForgotPasswordComponent implements OnInit {
       const response = await this.authService.forgotPassword(email);
       
       if (response.success) {
-        this.successMessage.set(response.message || 'If an account with that email exists, we have sent a password reset link.');
+        this.snackBar.open(response.message || 'If an account with that email exists, we have sent a password reset link.', 'Close', {
+          duration: 8000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-success']
+        });
         this.forgotPasswordForm.reset();
       } else {
-        this.error.set(response.message || 'Failed to send password reset email. Please try again.');
+        this.snackBar.open(response.message || 'Failed to send password reset email. Please try again.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        });
       }
     } catch (error: any) {
-      this.error.set(error?.message || 'An unexpected error occurred. Please try again.');
+      this.snackBar.open(error?.message || 'An unexpected error occurred. Please try again.', 'Close', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
     } finally {
       this.loading.set(false);
     }
-  }
-
-  private clearMessages() {
-    this.error.set('');
-    this.successMessage.set('');
   }
 
   // Getter for template convenience

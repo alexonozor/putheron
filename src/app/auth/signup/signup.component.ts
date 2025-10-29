@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../shared/services';
 import { RegisterRequest } from '../../models';
 import { COUNTRIES } from '../../shared/data/countries';
@@ -33,6 +34,7 @@ import { US_STATES } from '../../shared/data/us-states';
     MatCheckboxModule,
     MatRadioModule,
     MatProgressSpinnerModule,
+    MatSnackBarModule,
     PhoneFormatDirective
   ],
   templateUrl: './signup.component.html',
@@ -44,11 +46,9 @@ export class SignupComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly citiesService = inject(USCitiesService);
+  private readonly snackBar = inject(MatSnackBar);
 
   // Signals for component state
-  readonly error = signal('');
-  readonly successMessage = signal('');
-  readonly authMessage = signal('');
   readonly filteredCities = signal<USCity[]>([]);
   readonly availableCities = signal<USCity[]>([]);
   readonly loading = signal(false);
@@ -91,16 +91,24 @@ export class SignupComponent implements OnInit {
     // Check for any query parameters or success messages
     this.route.queryParams.subscribe(params => {
       if (params['message']) {
-        this.authMessage.set(params['message']);
+        this.snackBar.open(params['message'], 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-info']
+        });
       }
     });
   }
 
   async onSubmit() {
-    this.clearMessages();
-    
     if (!this.signupForm.valid) {
-      this.error.set('Please fill in all required fields correctly');
+      this.snackBar.open('Please fill in all required fields correctly', 'Close', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
       return;
     }
 
@@ -124,14 +132,29 @@ export class SignupComponent implements OnInit {
       const response = await this.authService.signUp(registerRequest);
       
       if (response.data) {
-        this.successMessage.set('Account created successfully! Please check your email to verify your account.');
+        this.snackBar.open('Account created successfully! Please check your email to verify your account.', 'Close', {
+          duration: 6000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-success']
+        });
         // Show verification message and disable form
         this.showVerificationMessage(formData.email);
       } else {
-        this.error.set(response.error?.message || 'Registration failed. Please try again.');
+        this.snackBar.open(response.error?.message || 'Registration failed. Please try again.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        });
       }
     } catch (error: any) {
-      this.error.set(error?.message || 'An unexpected error occurred. Please try again.');
+      this.snackBar.open(error?.message || 'An unexpected error occurred. Please try again.', 'Close', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
     } finally {
       this.loading.set(false);
     }
@@ -154,13 +177,27 @@ export class SignupComponent implements OnInit {
       const response = await this.authService.resendEmailVerification(this.verificationEmail());
       
       if (response.success) {
-        this.successMessage.set('Verification email sent! Please check your inbox.');
-        this.error.set('');
+        this.snackBar.open('Verification email sent! Please check your inbox.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-success']
+        });
       } else {
-        this.error.set(response.message || 'Failed to resend verification email.');
+        this.snackBar.open(response.message || 'Failed to resend verification email.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        });
       }
     } catch (error: any) {
-      this.error.set(error?.message || 'Failed to resend verification email.');
+      this.snackBar.open(error?.message || 'Failed to resend verification email.', 'Close', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
     } finally {
       this.loading.set(false);
     }
@@ -179,12 +216,6 @@ export class SignupComponent implements OnInit {
 
   togglePasswordVisibility() {
     this.showPassword.update(current => !current);
-  }
-
-  private clearMessages() {
-    this.error.set('');
-    this.successMessage.set('');
-    this.authMessage.set('');
   }
 
   // Getters for template convenience

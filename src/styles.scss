@@ -2,6 +2,44 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Custom Snackbar Styles */
+.snackbar-info {
+  .mdc-snackbar__surface {
+    background-color: #3b82f6 !important;
+  }
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+.snackbar-success {
+  .mdc-snackbar__surface {
+    background-color: #10b981 !important;
+  }
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+.snackbar-error {
+  .mdc-snackbar__surface {
+    background-color: #ef4444 !important;
+  }
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
 .no-border {
   --mdc-outlined-text-field-outline-color: transparent;
   --mdc-outlined-text-field-hover-outline-color: transparent;

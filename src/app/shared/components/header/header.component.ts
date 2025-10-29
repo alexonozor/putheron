@@ -8,6 +8,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../services/auth.service';
 import { AuthorizationService } from '../../services/authorization.service';
+import { BusinessService } from '../../services/business.service';
 import { NotificationNavComponent } from '../notification-nav/notification-nav.component';
 
 @Component({
@@ -29,6 +30,7 @@ import { NotificationNavComponent } from '../notification-nav/notification-nav.c
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
   private readonly authorizationService = inject(AuthorizationService);
+  private readonly businessService = inject(BusinessService);
   private readonly router = inject(Router);
 
   // Input properties
@@ -45,6 +47,9 @@ export class HeaderComponent {
 
   // Mock data for messages count
   readonly messageCount = signal(3);
+
+  // Track if user has any businesses
+  readonly hasBusinesses = signal(false);
 
   // Get current user mode as computed signal
   readonly userMode = computed(() => {
@@ -70,6 +75,32 @@ export class HeaderComponent {
       const isBusiness = this.isBusinessOwner();
       console.log('Header signals updated:', { user: user?.email, mode, isBusiness });
     });
+
+    // Check if user has businesses when authenticated
+    effect(() => {
+      const user = this.user();
+      if (user) {
+        this.checkUserBusinesses();
+      } else {
+        this.hasBusinesses.set(false);
+      }
+    });
+  }
+
+  // Check if the user has any businesses
+  private async checkUserBusinesses() {
+    try {
+      const businesses = await this.businessService.getMyBusinessesAsync();
+      this.hasBusinesses.set(businesses.length > 0);
+    } catch (error) {
+      console.error('Error checking user businesses:', error);
+      this.hasBusinesses.set(false);
+    }
+  }
+
+  // Public method to refresh business check (can be called after creating a business)
+  async refreshBusinessCheck() {
+    await this.checkUserBusinesses();
   }
 
   // Get user initials for display
@@ -162,6 +193,8 @@ export class HeaderComponent {
       if (result.data) {
         console.log('Switched to business owner mode successfully');
         console.log('Updated user mode:', this.userMode());
+        // Refresh business check
+        await this.checkUserBusinesses();
         // Navigate to dashboard instead of create business page
         this.navigateToDashboard();
       } else {

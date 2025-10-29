@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../shared/services';
 
 // Custom validator for password confirmation
@@ -32,7 +33,8 @@ function passwordMatchValidator(control: AbstractControl): { [key: string]: bool
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.scss']
@@ -42,10 +44,9 @@ export class ResetPasswordComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
+  private readonly snackBar = inject(MatSnackBar);
 
   // Signals for component state
-  readonly error = signal('');
-  readonly successMessage = signal('');
   readonly loading = signal(false);
   readonly verifyingToken = signal(false);
   readonly tokenValid = signal(false);
@@ -121,7 +122,12 @@ export class ResetPasswordComponent implements OnInit {
       if (this.resetToken) {
         await this.verifyToken();
       } else {
-        this.error.set('Invalid reset link. Please request a new password reset.');
+        this.snackBar.open('Invalid reset link. Please request a new password reset.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        });
       }
     });
   }
@@ -136,11 +142,21 @@ export class ResetPasswordComponent implements OnInit {
         this.tokenValid.set(true);
         this.userEmail.set(response?.data?.email || '');
       } else {
-        this.error.set(response.message || 'Invalid or expired reset token.');
+        this.snackBar.open(response.message || 'Invalid or expired reset token.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        });
         this.tokenValid.set(false);
       }
     } catch (error: any) {
-      this.error.set(error?.message || 'Invalid or expired reset token.');
+      this.snackBar.open(error?.message || 'Invalid or expired reset token.', 'Close', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
       this.tokenValid.set(false);
     } finally {
       this.verifyingToken.set(false);
@@ -148,13 +164,21 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   async onSubmit() {
-    this.clearMessages();
-    
     if (!this.resetPasswordForm.valid) {
       if (this.resetPasswordForm.hasError('passwordMismatch')) {
-        this.error.set('Passwords do not match');
+        this.snackBar.open('Passwords do not match', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        });
       } else {
-        this.error.set('Please check all fields and try again');
+        this.snackBar.open('Please check all fields and try again', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        });
       }
       return;
     }
@@ -166,26 +190,36 @@ export class ResetPasswordComponent implements OnInit {
       const response = await this.authService.resetPassword(this.resetToken, newPassword, confirmPassword);
       
       if (response.success) {
-        this.successMessage.set(response.message || 'Password has been reset successfully!');
-        // Redirect to login after 3 seconds
+        this.snackBar.open(response.message || 'Password has been reset successfully!', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-success']
+        });
+        // Redirect to login after 2 seconds
         setTimeout(() => {
           this.router.navigate(['/auth/login'], { 
             queryParams: { message: 'Password reset successful. Please log in with your new password.' }
           });
-        }, 3000);
+        }, 2000);
       } else {
-        this.error.set(response.message || 'Failed to reset password. Please try again.');
+        this.snackBar.open(response.message || 'Failed to reset password. Please try again.', 'Close', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['snackbar-error']
+        });
       }
     } catch (error: any) {
-      this.error.set(error?.message || 'An unexpected error occurred. Please try again.');
+      this.snackBar.open(error?.message || 'An unexpected error occurred. Please try again.', 'Close', {
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['snackbar-error']
+      });
     } finally {
       this.loading.set(false);
     }
-  }
-
-  private clearMessages() {
-    this.error.set('');
-    this.successMessage.set('');
   }
 
   // Password visibility toggle methods
