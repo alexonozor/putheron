@@ -1,1 +1,0 @@
-import"./chunk-JKOY2XUY.js";var e=[{path:"",loadComponent:()=>import("./chunk-SXBVKIRR.js").then(t=>t.AdminReviewsListComponent),data:{title:"Reviews Management"}},{path:":id",loadComponent:()=>import("./chunk-6EMVP4AD.js").then(t=>t.AdminReviewDetailsComponent),data:{title:"Review Details"}}];export{e as ADMIN_REVIEWS_ROUTES};

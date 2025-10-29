@@ -1,0 +1,1 @@
+var e={production:!1,api:{baseUrl:"http://localhost:3000/api",timeout:1e4},auth:{tokenKey:"access_token",userKey:"current_user"},features:{enableLogging:!0,enableDevTools:!0},stripe:{publishableKey:"pk_test_fhBCq492t3wQwU5NWvqYAm6D00ZTsX5wpW"}};export{e as a};

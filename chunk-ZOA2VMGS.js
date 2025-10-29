@@ -1,0 +1,1 @@
+import"./chunk-JKOY2XUY.js";var t=[{path:"",loadComponent:()=>import("./chunk-WO5JTRN7.js").then(o=>o.AdminUsersListComponent)},{path:":id",loadComponent:()=>import("./chunk-45E267UZ.js").then(o=>o.AdminUserDetailsComponent)}];export{t as adminUsersRoutes};
