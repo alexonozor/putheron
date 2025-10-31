@@ -1,0 +1,40 @@
+<div
+  class="flex items-center rounded-full pl-4 pr-2 sm:py-1.5"
+  [ngStyle]="{
+    'background-color': backgroundColor(),
+    width: width(),
+    'box-shadow': boxShadow() || null
+  }"
+>
+  <input
+    type="search"
+    [placeholder]="placeholder()"
+    [(ngModel)]="query"
+    (keyup.enter)="onSearch()"
+    class="flex-1 bg-transparent outline-none border-none text-gray-700
+           text-sm sm:text-base placeholder:text-gray-500 min-w-0"
+  />
+
+  <!-- Desktop / tablet: labeled button -->
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="onSearch()"
+    class="hidden sm:inline-flex rounded-full h-9 sm:h-10 px-4 text-sm leading-none search-desktop-button"
+  >
+    Search
+  </button>
+
+  <!-- Mobile: icon-only button -->
+  <button
+    mat-icon-button
+    color="primary"
+    type="button"
+    (click)="onSearch()"
+    class="inline-flex  my-2 sm:hidden bg-green-600!  text-white rounded-full h-9 w-9 items-center justify-center search-mobile-button"
+    aria-label="Search"
+  >
+    <mat-icon class="text-white!">search</mat-icon>
+  </button>
+</div>

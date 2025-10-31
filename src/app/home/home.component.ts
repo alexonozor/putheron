@@ -7,6 +7,7 @@ import { HowItWorksComponent } from '../shared/components/how-it-works/how-it-wo
 import { SuccessStoriesComponent } from '../shared/components/success-stories/success-stories.component';
 import { FooterComponent } from '../shared/components/footer/footer.component';
 import { AuthService } from '../shared/services/auth.service';
+import { WhyChooseVoucher } from '../shared/components/why-choose-voucher/why-choose-voucher';
 
 @Component({
   selector: 'app-home',
@@ -17,6 +18,7 @@ import { AuthService } from '../shared/services/auth.service';
     HowItWorksComponent,
     // FeaturedWomenComponent,
     // SuccessStoriesComponent,
+    WhyChooseVoucher,
     FooterComponent
   ],
   templateUrl: './home.component.html',

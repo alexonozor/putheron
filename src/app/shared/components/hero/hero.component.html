@@ -1,136 +1,91 @@
-<section class="relative min-h-screen flex items-center justify-center overflow-hidden hero-bg">
-
-    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center fade-in">
-        <h2 class="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            <br>
-            <span class="text-blue-400">VouchHer Business</span>
-        </h2>
-        
-        <p class="text-xl md:text-2xl text-gray-200 mb-12 max-w-3xl mx-auto">
-            Find. Hire & Vouch for Women in Business
-        </p>
-
-        <!-- Search Bar with Country Selection -->
-        <div class="max-w-6xl mx-auto mb-8">
-            <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
-                <div class="relative">
-                    <div class="flex flex-col lg:flex-row bg-white rounded-xl shadow-2xl overflow-hidden search-input">
-                        <!-- Service Search Input -->
-                        <div class="flex-1 relative">
-                            <input 
-                                type="text" 
-                                placeholder="Search businesses, services, or locations."
-                                formControlName="searchQuery"
-                                class="w-full px-6 py-4 text-gray-700 text-lg focus:outline-none"
-                            >
-                        </div>
-                        
-                        <!-- Country Selection Dropdown -->
-                        <div class="relative lg:w-40 border-t lg:border-t-0 lg:border-l border-gray-200">
-                            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full no-border custom-mat-select">
-                                <mat-select 
-                                    formControlName="selectedCountries"
-                                    multiple
-                                    placeholder="Select heritage"
-                                    class="custom-select"
-                                >
-                                    @for (country of countries; track country.code) {
-                                        <mat-option [value]="country.name">
-                                            {{ country.name }}
-                                        </mat-option>
-                                    }
-                                </mat-select>
-                            </mat-form-field>
-                        </div>
-                        
-                        <!-- Search Button -->
-                        <button 
-                            type="submit"
-                            [disabled]="!isFormValid"
-                            class="cta-button text-white px-8 py-4 font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-                        >
-                            Search
-                        </button>
-                    </div>
+<section class="bg-[#C9F3DD] relative overflow-hidden" style="height: calc(100vh - var(--header-height, 64px));">
+    <div class="max-w-7xl mx-auto w-full h-full px-3 lg:px-8 flex flex-col lg:flex-row relative">
+        <!-- Left Content -->
+    <div class="w-full lg:w-1/2 h-full flex flex-col justify-center sm:pt-16 lg:pt-0 relative z-10 text-center lg:text-left">
+            <!-- Title -->
+            <h1 class="text-5xl lg:text-[60px]  font-bold leading-tight mb-6 poppins">
+                Find <span class="text-[#6B0FAE]">Her.</span> <br class="block lg:hidden"> Hire <span class="text-black">Her.</span>
+                <div class="mt-1">
+                    <img src="/assets/svg/VOUCHHER.svg" alt="VouchHer" class="h-10 lg:h-[51px] w-auto mx-auto lg:mx-0">
                 </div>
-            </form>
-            
-            <!-- Selected Countries Display -->
-            <div class="mt-4 flex flex-wrap gap-2 justify-center">
-                @for (countryName of searchForm.get('selectedCountries')?.value || []; track countryName) {
-                    <span class="country-tag bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                        {{ countryName }}
-                    </span>
-                }
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="text-lg lg:text-xl text-gray-700 mb-8 lg:mb-10  lg:max-w-none mx-auto lg:mx-0">
+                A trusted platform connecting women in Business nationwide.
+            </p>
+
+            <!-- Search Container -->
+            <div id="hero-search-anchor" class="mb-8 w-full mx-auto lg:mx-0 lg:max-w-xl">
+                <app-search 
+                    [width]="'100%'"
+                    [backgroundColor]="'white'"
+                    [placeholder]="'Search business or service'"
+                    [boxShadow]="'0 2px 6px 0 #20212451'"
+                />
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex flex-wrap items-center gap-2 lg:gap-3 mb-10">
+                <!-- Mobile View -->
+                <div class="grid grid-cols-2 w-full gap-2 lg:hidden">
+                    <!-- Category Button -->
+                    <button mat-stroked-button class="rounded-full border-gray-300 px-4 w-full">
+                        <span class="text-gray-700">Category</span>
+                        <mat-icon class="ml-1">expand_more</mat-icon>
+                    </button>
+
+                    <!-- Heritage Button -->
+                    <button mat-stroked-button [matMenuTriggerFor]="countryMenu" class="rounded-full border-gray-300 px-4 w-full">
+                        <span class="text-gray-700">Heritage</span>
+                        <mat-icon class="ml-1">expand_more</mat-icon>
+                    </button>
+                </div>
+
+                <!-- Desktop View -->
+                <div class="hidden lg:flex items-center gap-3 w-full">
+                    <!-- Category Button -->
+                    <button mat-stroked-button class="rounded-full border-gray-300 px-6">
+                        <span class="text-gray-700">Category</span>
+                        <mat-icon class="ml-1">expand_more</mat-icon>
+                    </button>
+
+                    <!-- Desktop Chips -->
+                    <mat-chip-listbox aria-label="Country selection">
+                        <mat-chip-option color="primary">Ghanian</mat-chip-option>
+                        <mat-chip-option color="primary">Nigerian</mat-chip-option>
+                        <mat-chip-option color="primary">Zambian</mat-chip-option>
+                        <mat-chip-option color="primary">Egyptian</mat-chip-option>
+                    </mat-chip-listbox>
+                </div>
+
+                <!-- Country Menu for Mobile -->
+                <mat-menu #countryMenu="matMenu">
+                    <button mat-menu-item>Ghanian</button>
+                    <button mat-menu-item>Nigerian</button>
+                    <button mat-menu-item>Zambian</button>
+                    <button mat-menu-item>Egyptian</button>
+                </mat-menu>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col lg:flex-row items-stretch lg:items-start gap-3 lg:gap-4  lg:px-0">
+                <button mat-flat-button color="primary" class="rounded-full py-3 lg:py-2.5 px-8 text-base font-medium w-full lg:w-fit">
+                    Find Businesses
+                </button>
+                <button mat-stroked-button color="primary" class="rounded-full py-3 lg:py-2.5 px-8 text-base font-medium w-full lg:w-fit">
+                    List A Business
+                </button>
             </div>
         </div>
 
-        <!-- Popular Searches -->
-        <div class="flex flex-wrap justify-center gap-3 mb-12">
-            <span class="text-gray-300 text-sm">Popular:</span>
-            <button 
-                type="button"
-                (click)="onPopularSearch('Bookeping & Tax prep')"
-                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
+        <!-- Right Image - Hidden on mobile -->
+        <div class="hidden lg:block lg:w-[55%] absolute inset-y-0 right-0 overflow-visible">
+            <img 
+                src="/assets/images/hero-women-images.png" 
+                alt="Professional women" 
+                class="w-full h-full object-contain object-bottom transform lg:scale-100 lg:translate-x-6"
             >
-                Bookeping & Tax prep
-                       </button>
-            <button 
-                type="button"
-                (click)="onPopularSearch('Quickbooks')"
-                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
-            >
-                Quickbooks
-            </button>
-            <button 
-                type="button"
-                (click)="onPopularSearch('eCommerce')"
-                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
-            >
-                eCommerce
-            </button>
-            <button 
-                type="button"
-                (click)="onPopularSearch('Grant Writing')"
-                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
-            >
-               Grant Writing
-            </button>
-            <button 
-                type="button"
-                (click)="onPopularSearch('Financial Advisor')"
-                class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
-            >
-                Financial Advisor
-            </button>
-            <button 
-            type="button"
-            (click)="onPopularSearch('Legal')"
-            class="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm hover:bg-white/30 transition-all"
-        >
-            Legal
-        </button>
-        </div>
-
-        <!-- CTA Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <button class="cta-button text-white px-8 py-4 rounded-xl font-semibold text-lg">
-                Find More Businesses
-            </button>
-            <button class="bg-white/20 backdrop-blur-sm border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-gray-800 transition-all">
-                List A Business
-            </button>
-        </div>
-
-       
-    </div>
-
-    <!-- Scroll Indicator -->
-    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/60">
-        <div class="animate-bounce">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-            </svg>
         </div>
     </div>
 </section>

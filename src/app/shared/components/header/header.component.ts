@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, effect, Input, Output, EventEmitter } from '@angular/core';
+import { Component, inject, signal, computed, effect, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +12,9 @@ import { AuthService } from '../../services/auth.service';
 import { AuthorizationService } from '../../services/authorization.service';
 import { BusinessService } from '../../services/business.service';
 import { NotificationNavComponent } from '../notification-nav/notification-nav.component';
+import { MatCardModule } from '@angular/material/card';
+import { Search } from '../search/search';
+import { NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -26,7 +29,9 @@ import { NotificationNavComponent } from '../notification-nav/notification-nav.c
     MatDividerModule,
     MatToolbarModule,
     MatSidenavModule,
-    NotificationNavComponent
+    NotificationNavComponent,
+    MatCardModule,
+    Search
   ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
@@ -52,6 +57,9 @@ export class HeaderComponent {
 
   // Mock data for messages count
   readonly messageCount = signal(3);
+  readonly showHeaderSearch = signal(true);
+  private intersectionObserver?: IntersectionObserver;
+  private routerSub: any;
 
   // Track if user has any businesses
   readonly hasBusinesses = signal(false);
@@ -90,6 +98,66 @@ export class HeaderComponent {
         this.hasBusinesses.set(false);
       }
     });
+
+    // Initialize behavior for showing/hiding navbar search based on route
+    // and hero search visibility
+    this.setupRouteObserver();
+  }
+
+  private setupRouteObserver() {
+    // On navigation end, enable/disable observer depending on route
+    this.routerSub = this.router.events.subscribe(evt => {
+      if (evt instanceof NavigationEnd) {
+        const isHome = evt.urlAfterRedirects === '/' || evt.urlAfterRedirects === '';
+        if (isHome) {
+          // default: hide header search until user scrolls past hero
+          this.showHeaderSearch.set(false);
+          this.attachHeroObserver();
+        } else {
+          // always show search on non-home pages
+          this.showHeaderSearch.set(true);
+          this.detachHeroObserver();
+        }
+      }
+    });
+
+    // Also do an initial check based on current url
+    const cur = this.router.url;
+    const initiallyHome = cur === '/' || cur === '';
+    if (initiallyHome) {
+      this.showHeaderSearch.set(false);
+      this.attachHeroObserver();
+    } else {
+      this.showHeaderSearch.set(true);
+    }
+  }
+
+  private attachHeroObserver() {
+    // detach any previous
+    this.detachHeroObserver();
+    // find the anchor in DOM
+    const el = document.getElementById('hero-search-anchor');
+    if (!el) {
+      // if not found, show the header search (safe fallback)
+      this.showHeaderSearch.set(true);
+      return;
+    }
+
+    this.intersectionObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        // when the hero search is visible, hide navbar search; when it leaves view, show it
+        this.showHeaderSearch.set(!entry.isIntersecting);
+      });
+    }, { root: null, threshold: 0 });
+
+    this.intersectionObserver.observe(el);
+  }
+
+  private detachHeroObserver() {
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+      this.intersectionObserver = undefined;
+    }
   }
 
   // Check if the user has any businesses
@@ -225,6 +293,14 @@ export class HeaderComponent {
     } catch (error) {
       console.error('Error switching to client mode:', error);
     }
+  }
+
+  ngOnDestroy() {
+    // cleanup
+    if (this.routerSub) {
+      this.routerSub.unsubscribe?.();
+    }
+    this.detachHeroObserver();
   }
 
   toggleMobileMenu() {

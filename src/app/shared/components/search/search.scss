@@ -1,0 +1,26 @@
+:host {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* note: shadow is applied via input for context-specific control (hero passes it) */
+
+/* Force visibility for Material buttons to avoid specificity/order issues with global styles */
+@media (max-width: 639px) {
+  :host .search-desktop-button {
+    display: none !important;
+  }
+  :host .search-mobile-button {
+    display: inline-flex !important;
+  }
+}
+
+@media (min-width: 640px) {
+  :host .search-desktop-button {
+    display: inline-flex !important;
+  }
+  :host .search-mobile-button {
+    display: none !important;
+  }
+}

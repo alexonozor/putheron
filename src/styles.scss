@@ -1,198 +1,157 @@
 @use "tailwindcss";
 @use '@angular/material' as mat;
 
-// Tailwind CSS v4 Theme Configuration
-@theme {
-  --color-primary-50: #e8f5ed;
-  --color-primary-100: #c6e5d3;
-  --color-primary-200: #a0d4b6;
-  --color-primary-300: #7ac399;
-  --color-primary-400: #5eb683;
-  --color-primary-500: #20AA62;
-  --color-primary-600: #1d9958;
-  --color-primary-700: #18864d;
-  --color-primary-800: #147343;
-  --color-primary-900: #0b5330;
-  --color-primary-950: #052918;
+@include mat.core();
 
-  --color-secondary-50: #f3e6f9;
-  --color-secondary-100: #e0c1f0;
-  --color-secondary-200: #cc97e6;
-  --color-secondary-300: #b86ddc;
-  --color-secondary-400: #a84ed5;
-  --color-secondary-500: #6B0FAE;
-  --color-secondary-600: #620e9e;
-  --color-secondary-700: #570c8c;
-  --color-secondary-800: #4d0a7a;
-  --color-secondary-900: #3c065d;
-  --color-secondary-950: #1f0330;
-}
-
-// Define custom theme with your brand colors
-$primary-palette: mat.m2-define-palette((
-  50: #e8f5ed,
-  100: #c6e5d3,
-  200: #a0d4b6,
-  300: #7ac399,
-  400: #5eb683,
-  500: #20AA62,  // Primary color
-  600: #1d9958,
-  700: #18864d,
-  800: #147343,
-  900: #0b5330,
-  contrast: (
-    50: rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: rgba(black, 0.87),
-    400: rgba(black, 0.87),
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-  )
-));
-
-$secondary-palette: mat.m2-define-palette((
-  50: #f3e6f9,
-  100: #e0c1f0,
-  200: #cc97e6,
-  300: #b86ddc,
-  400: #a84ed5,
-  500: #6B0FAE,  // Secondary color
-  600: #620e9e,
-  700: #570c8c,
-  800: #4d0a7a,
-  900: #3c065d,
-  contrast: (
-    50: rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: white,
-    400: white,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-  )
-));
-
-$warn-palette: mat.m2-define-palette(mat.$m2-red-palette);
-
-// Create the theme
-$theme: mat.m2-define-light-theme((
+// 2️⃣ Define theme using built-in palettes
+$my-theme: mat.define-theme((
   color: (
-    primary: $primary-palette,
-    accent: $secondary-palette,
-    warn: $warn-palette,
+    theme-type: light,
+    primary: mat.$green-palette,
+    tertiary: mat.$violet-palette,
   ),
-  typography: mat.m2-define-typography-config(),
-  density: 0,
+  typography: (
+    brand-family: 'Poppins, sans-serif',      // Primary font
+    plain-family: 'Roboto, sans-serif',       // Secondary font
+    bold-weight: 600,
+    medium-weight: 500,
+  ),
+  density: (
+    scale: 0
+  ),
 ));
 
-// Include theme styles for core and each component used in your app
-@include mat.all-component-themes($theme);
+// 3️⃣ Apply the theme
+@include mat.all-component-themes($my-theme);
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+@theme {
+  /* Your custom colors */
+  --color-primary-50: #e6f7ef;
+  --color-primary-100: #c2edd9;
+  --color-primary-200: #9ae2c3;
+  --color-primary-300: #6fd7ac;
+  --color-primary-400: #4dce9a;
+  --color-primary-500: #20aa62;  /* Your main green */
+  --color-primary-600: #1d9858;
+  --color-primary-700: #18844d;
+  --color-primary-800: #147142;
+  --color-primary-900: #0e5130;
+  --color-primary-950: #073321;
+
+  --color-secondary-50: #f3e6f9;
+  --color-secondary-100: #e0c2f0;
+  --color-secondary-200: #cd9ae7;
+  --color-secondary-300: #b96fde;
+  --color-secondary-400: #a94dd6;
+  --color-secondary-500: #6b0fae;  /* Your purple */
+  --color-secondary-600: #5f0d9c;
+  --color-secondary-700: #520b88;
+  --color-secondary-800: #460975;
+  --color-secondary-900: #330654;
+  --color-secondary-950: #1f0432;
+
+  /* Font family */
+  --font-family-sans: 'Poppins', 'Roboto', sans-serif;
+}
+
 
 /* Custom Snackbar Styles */
-.snackbar-info {
-  .mdc-snackbar__surface {
-    background-color: #3b82f6 !important;
-  }
-  .mat-mdc-snack-bar-label {
-    color: white !important;
-  }
-  .mat-mdc-button {
-    color: white !important;
-  }
-}
+// .snackbar-info {
+//   .mdc-snackbar__surface {
+//     background-color: #3b82f6 !important;
+//   }
+//   .mat-mdc-snack-bar-label {
+//     color: white !important;
+//   }
+//   .mat-mdc-button {
+//     color: white !important;
+//   }
+// }
 
-.snackbar-success {
-  .mdc-snackbar__surface {
-    background-color: #20AA62 !important;
-  }
-  .mat-mdc-snack-bar-label {
-    color: white !important;
-  }
-  .mat-mdc-button {
-    color: white !important;
-  }
-}
+// .snackbar-success {
+//   .mdc-snackbar__surface {
+//     background-color: #20AA62 !important;
+//   }
+//   .mat-mdc-snack-bar-label {
+//     color: white !important;
+//   }
+//   .mat-mdc-button {
+//     color: white !important;
+//   }
+// }
 
-.snackbar-error {
-  .mdc-snackbar__surface {
-    background-color: #ef4444 !important;
-  }
-  .mat-mdc-snack-bar-label {
-    color: white !important;
-  }
-  .mat-mdc-button {
-    color: white !important;
-  }
-}
+// .snackbar-error {
+//   .mdc-snackbar__surface {
+//     background-color: #ef4444 !important;
+//   }
+//   .mat-mdc-snack-bar-label {
+//     color: white !important;
+//   }
+//   .mat-mdc-button {
+//     color: white !important;
+//   }
+// }
 
-.no-border {
-  --mdc-outlined-text-field-outline-color: transparent;
-  --mdc-outlined-text-field-hover-outline-color: transparent;
-  --mdc-outlined-text-field-focus-outline-color: transparent;
-}
+// .no-border {
+//   --mat-form-field-outlined-outline-color: transparent;
+//   --mat-form-field-outlined-hover-outline-color: transparent;
+//   --mat-form-field-outlined-focus-outline-color: transparent;
+// }
 
 // Tailwind v4 theme colors are now available as:
 // bg-primary-500, text-primary-600, etc.
 // bg-secondary-500, text-secondary-600, etc.
 
-.cta-button {
-  background: linear-gradient(135deg, #20AA62 0%, #18864d 100%);
-  transition: all 0.3s ease;
-}
-.cta-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 25px -5px rgba(32, 170, 98, 0.3);
-}
+// .cta-button {
+//   background: linear-gradient(135deg, #20AA62 0%, #18864d 100%);
+//   transition: all 0.3s ease;
+// }
+// .cta-button:hover {
+//   transform: translateY(-2px);
+//   box-shadow: 0 20px 25px -5px rgba(32, 170, 98, 0.3);
+// }
 
-.search-input {
-  transition: all 0.3s ease;
-}
-.search-input:focus {
-  transform: translateY(-2px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
+// .search-input {
+//   transition: all 0.3s ease;
+// }
+// .search-input:focus {
+//   transform: translateY(-2px);
+//   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+// }
 
-.sparkle {
-  animation: sparkle 2s ease-in-out infinite;
-}
-@keyframes sparkle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.1); }
-}
-.fade-in {
-  animation: fadeInUp 0.8s ease-out;
-}
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.dropdown {
-  max-height: 200px;
-  overflow-y: auto;
-}
-.country-tag {
-  animation: slideIn 0.3s ease;
-}
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(-10px); }
-  to { opacity: 1; transform: translateX(0); }
-}
+// .sparkle {
+//   animation: sparkle 2s ease-in-out infinite;
+// }
+// @keyframes sparkle {
+//   0%, 100% { opacity: 1; transform: scale(1); }
+//   50% { opacity: 0.5; transform: scale(1.1); }
+// }
+// .fade-in {
+//   animation: fadeInUp 0.8s ease-out;
+// }
+// @keyframes fadeInUp {
+//   from {
+//     opacity: 0;
+//     transform: translateY(30px);
+//   }
+//   to {
+//     opacity: 1;
+//     transform: translateY(0);
+//   }
+// }
+// .dropdown {
+//   max-height: 200px;
+//   overflow-y: auto;
+// }
+// .country-tag {
+//   animation: slideIn 0.3s ease;
+// }
+// @keyframes slideIn {
+//   from { opacity: 0; transform: translateX(-10px); }
+//   to { opacity: 1; transform: translateX(0); }
+// }
 
 
 .mdc-notched-outline__notch {
@@ -200,32 +159,32 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 
 // Modal styles for create project dialog
-.create-project-modal {
-  .mat-mdc-dialog-container {
-    border-radius: 12px;
-    overflow: hidden;
-    max-width: 95vw;
-    max-height: 95vh;
-  }
+// .create-project-modal {
+//   .mat-mdc-dialog-container {
+//     border-radius: 12px;
+//     overflow: hidden;
+//     max-width: 95vw;
+//     max-height: 95vh;
+//   }
 
-  .mat-mdc-dialog-surface {
-    border-radius: 12px;
-    padding: 0;
-  }
+//   .mat-mdc-dialog-surface {
+//     border-radius: 12px;
+//     padding: 0;
+//   }
 
 
 
-  // Dialog title styling
-  .mat-mdc-dialog-title {
-    background: #fff;
-    border-bottom: 1px solid #e9ecef;
-  }
+  // // Dialog title styling
+  // .mat-mdc-dialog-title {
+  //   background: #fff;
+  //   border-bottom: 1px solid #e9ecef;
+  // }
 
-  // Dialog actions styling  
-  .mat-mdc-dialog-actions {
-    background: #f8f9fa;
-  }
-}
+  // // Dialog actions styling  
+  // .mat-mdc-dialog-actions {
+  //   background: #f8f9fa;
+  // }
+// }
 
 
 

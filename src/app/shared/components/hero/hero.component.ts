@@ -7,6 +7,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { COUNTRIES, Country } from '../../data/countries';
+import { Search } from "../search/search";
+import { MatChipsModule } from "@angular/material/chips";
+import { MatIconModule } from "@angular/material/icon";
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'hero-section',
@@ -17,8 +21,12 @@ import { COUNTRIES, Country } from '../../data/countries';
     MatSelectModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
-  ],
+    MatButtonModule,
+    Search,
+    MatChipsModule,
+    MatIconModule,
+    MatMenuModule
+],
   templateUrl: './hero.component.html',
   styleUrls: ['./hero.component.scss']
 })

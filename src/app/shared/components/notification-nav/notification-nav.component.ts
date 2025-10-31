@@ -3,11 +3,17 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { NotificationService, Notification, NotificationType, NotificationPriority } from '../../services/notification.service';
 import { SocketService } from '../../services/socket.service';
+import { MatIconModule } from '@angular/material/icon';
+import {MatBadgeModule} from '@angular/material/badge';
+import { MatButtonModule } from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
+
+
 
 @Component({
   selector: 'app-notification-nav',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatBadgeModule],
   templateUrl: './notification-nav.component.html',
   styleUrl: './notification-nav.component.scss'
 })
