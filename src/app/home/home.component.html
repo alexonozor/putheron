@@ -1,5 +1,23 @@
-<app-header />
-<hero-section />
-<how-it-works-section />
- <app-why-choose-voucher />
-<footer-component />
+<app-header [drawer]="drawer"></app-header>
+<mat-drawer-container class="content-body" [hasBackdrop]="true" autosize>
+    <mat-drawer #drawer [mode]="'over'" class="drawer">
+        <app-guest-sidenav />
+    </mat-drawer>
+    <mat-drawer-content class="bg-white!">
+
+        
+        
+        <div class="space-y-16 flex flex-col md:space-y-24">
+            <hero-section />
+            <how-it-works-section />
+            <app-why-choose-voucher />
+            <footer-component />
+        </div>
+        
+        
+       
+    </mat-drawer-content>
+</mat-drawer-container>
+
+
+

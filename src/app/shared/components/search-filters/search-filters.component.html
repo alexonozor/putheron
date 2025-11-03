@@ -1,0 +1,40 @@
+<!-- Filter Buttons -->
+<div class="flex flex-wrap items-center gap-2 lg:gap-3">
+    <!-- Mobile View - Category Select Button Only -->
+    <div class="w-full lg:hidden">
+        <button 
+            mat-stroked-button 
+            [matMenuTriggerFor]="categoryMenuMobile" 
+            class="rounded-full border-gray-300 px-4 w-full">
+            <span class="text-gray-700 truncate">{{ selectedCategoryName() }}</span>
+            <mat-icon class="ml-1">expand_more</mat-icon>
+        </button>
+    </div>
+
+    <!-- Desktop View - Category Chips (4 random categories) -->
+    <div class="hidden lg:flex items-center gap-3 w-full flex-wrap">
+        @for (category of displayedCategories(); track category._id) {
+            <mat-chip 
+                (click)="selectCategory(category)"
+                class="cursor-pointer">
+                {{ category.name }}
+            </mat-chip>
+        }
+    </div>
+
+    <!-- Category Menu for Mobile -->
+    <mat-menu #categoryMenuMobile="matMenu" class="search-filter-menu">
+        <div class="max-h-96 overflow-y-auto">
+            @for (category of categories(); track category._id) {
+                <button 
+                    mat-menu-item 
+                    (click)="selectCategory(category)">
+                    @if (category.icon) {
+                        <mat-icon>{{ category.icon }}</mat-icon>
+                    }
+                    <span>{{ category.name }}</span>
+                </button>
+            }
+        </div>
+    </mat-menu>
+</div>

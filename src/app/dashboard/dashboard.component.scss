@@ -1,100 +1,12 @@
-/* Dashboard Component Styles */
-
-/* Sidebar styling to match navbar */
-::ng-deep .mat-drawer {
-  background-color: white !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
-  border-radius: 0 !important; // Remove all border radius
-  border-top-right-radius: 0 !important; // Specifically remove right side radius
-  border-bottom-right-radius: 0 !important;
+// Home component styles
+.drawer {
+    height: calc(100vh - 64px);
+    border-radius: 0px;
 }
 
-::ng-deep .mat-drawer-container {
-  background-color: #f9fafb !important;
-}
-
-/* Ensure sidebar has consistent white background */
-::ng-deep mat-sidenav {
-  background-color: white !important;
-  border-right: 1px solid #e5e7eb !important;
-  border-radius: 0 !important; // Remove border radius
-}
-
-/* Remove border radius from sidenav inner container */
-::ng-deep .mat-drawer-inner-container {
-  border-radius: 0 !important;
-}
-
-/* Enhanced backdrop for mobile overlay */
-::ng-deep .mat-drawer-backdrop {
-  background-color: rgba(0, 0, 0, 0.6) !important;
-}
-
-/* Ensure sidenav content takes full width */
-::ng-deep .mat-drawer-content {
-  flex: 1 !important;
-  width: 100% !important;
-  overflow: auto !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-::ng-deep mat-sidenav-content {
-  flex: 1 !important;
-  width: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-}
-
-/* Ensure sidenav container takes full height and width */
-::ng-deep .mat-drawer-container {
-  background-color: #f9fafb !important;
-  width: 100% !important;
-  height: 100% !important;
-  display: flex !important;
-  flex-direction: row !important;
-}
-
-/* Custom sidenav container class */
-.sidenav-container {
-  width: 100% !important;
-  height: 100% !important;
-  flex: 1 !important;
-  display: flex !important;
-}
-
-/* Fix sidenav height to prevent growing with content */
-::ng-deep .mat-drawer {
-  max-height: 100vh !important;
-  height: 100% !important;
-  overflow: hidden !important;
-}
-
-/* Sidebar content container with fixed height and scrolling */
-.sidebar-content {
-  height: 100% !important;
-  max-height: 100vh !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-}
-
-/* Navigation area should be scrollable if content overflows */
-.sidebar-content nav {
-  flex: 1 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-/* Ensure main content area is properly styled with fixed height */
-main {
-  width: 100% !important;
-  height: 100% !important;
-  flex: 1 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  box-sizing: border-box !important;
+.content-body {
+    height: calc(100vh - 64px);
+    overflow-y: scroll;
 }
 
 /* Base layout styles - since we're using Tailwind classes in the template, 
@@ -178,13 +90,17 @@ main {
   opacity: 0.6;
 }
 
-/* Fix mat-sidenav-content height to prevent page growth */
+/* Fix mat-drawer-content to enable proper scrolling */
 ::ng-deep .mat-drawer-content {
-  height: 100% !important;
-  max-height: 100vh !important;
-  overflow: hidden !important;
+  height: calc(100vh - 64px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
   display: flex !important;
   flex-direction: column !important;
+}
+
+::ng-deep .mat-drawer-container {
+  height: calc(100vh - 64px) !important;
 }
 
 /* Responsive adjustments */

@@ -1,28 +1,10 @@
 @use "tailwindcss";
 @use '@angular/material' as mat;
 
-@include mat.core();
+@import './app/themes/theme.css';
 
-// 2️⃣ Define theme using built-in palettes
-$my-theme: mat.define-theme((
-  color: (
-    theme-type: light,
-    primary: mat.$green-palette,
-    tertiary: mat.$violet-palette,
-  ),
-  typography: (
-    brand-family: 'Poppins, sans-serif',      // Primary font
-    plain-family: 'Roboto, sans-serif',       // Secondary font
-    bold-weight: 600,
-    medium-weight: 500,
-  ),
-  density: (
-    scale: 0
-  ),
-));
 
-// 3️⃣ Apply the theme
-@include mat.all-component-themes($my-theme);
+
 
 html, body { height: 100%; }
 
@@ -186,6 +168,20 @@ html, body { height: 100%; }
   // }
 // }
 
+// Auth gate backdrop styling
+.auth-gate-backdrop {
+  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, 0.75) !important;
+}
 
+.auth-gate-dialog {
+  .mat-mdc-dialog-container {
+    border-radius: 12px !important;
+    padding: 0 !important;
+  }
+}
 
-
+ .drawer {
+    height: 100vh;
+    border-radius: 0px;
+  }

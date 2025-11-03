@@ -1,0 +1,51 @@
+<div class="guest-sidenav-content bg-white h-full flex flex-col">
+  <!-- Logo Section -->
+  <div class="p-6 border-b border-gray-200 pr-16 flex-shrink-0">
+    <img src="/assets/logos/logo-with-text.png" alt="VouchHer" class="h-8 w-auto">
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="flex-1 overflow-y-auto">
+    <mat-nav-list>
+      <mat-list-item (click)="navigateAndClose('/')">
+        <mat-icon matListItemIcon>home_outline</mat-icon>
+        <span matListItemTitle>Home</span>
+      </mat-list-item>
+      
+      <mat-list-item (click)="navigateAndClose('/search')">
+        <mat-icon matListItemIcon>search_outline</mat-icon>
+        <span matListItemTitle>Find Businesses</span>
+      </mat-list-item>
+      
+      <mat-list-item (click)="navigateAndClose('/how-it-works')">
+        <mat-icon matListItemIcon>info_outline</mat-icon>
+        <span matListItemTitle>How It Works</span>
+      </mat-list-item>
+      
+      <mat-list-item (click)="navigateAndClose('/about')">
+        <mat-icon matListItemIcon>business_outline</mat-icon>
+        <span matListItemTitle>About Us</span>
+      </mat-list-item>
+    </mat-nav-list>
+
+    <mat-divider class="my-4"></mat-divider>
+
+    <!-- Auth Buttons -->
+    <div class="px-4 pb-4 space-y-3 flex-shrink-0 mt-4">
+      <button 
+        (click)="navigateAndClose('/auth')"
+        mat-flat-button 
+        color="primary"
+        class="w-full">
+        Sign In
+      </button>
+      <button 
+        (click)="navigateAndClose('/auth')"
+        mat-stroked-button 
+        color="primary"
+        class="w-full">
+        Get Started
+      </button>
+    </div>
+  </nav>
+</div>

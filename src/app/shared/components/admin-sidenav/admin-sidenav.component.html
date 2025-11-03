@@ -1,0 +1,170 @@
+<div class="sidebar-content bg-white h-full flex flex-col">
+  <!-- Admin Profile Section - Fixed at top -->
+  <div class="p-4 border-b border-gray-200 flex-shrink-0">
+    <div class="flex items-center space-x-3 pr-12">
+      <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-semibold">
+        {{ getUserInitials() }}
+      </div>
+      <div class="flex-1">
+        <h3 class="font-semibold text-gray-900">{{ (user()?.first_name + ' ' + (user()?.last_name || '')).trim() || user()?.email }}</h3>
+        <p class="text-sm text-gray-500">{{ user()?.email }}</p>
+        <div class="flex items-center mt-1">
+          <mat-chip-set>
+            <mat-chip class="admin-chip">
+              <mat-icon matChipAvatar>admin_panel_settings</mat-icon>
+              Administrator
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Navigation Menu - Scrollable middle section -->
+  <nav class="bg-white flex-1 overflow-y-auto">
+    <mat-nav-list class="px-4!">
+      <!-- Overview -->
+      <mat-list-item 
+        routerLink="/admin/dashboard/overview"
+        routerLinkActive="active-link"
+        [routerLinkActiveOptions]="{exact: true}"
+        (click)="navigateAndClose('/admin/dashboard/overview')">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Overview</span>
+      </mat-list-item>
+      
+      <!-- Users Management -->
+      <mat-list-item 
+        routerLink="/admin/dashboard/users"
+        routerLinkActive="active-link"
+        (click)="navigateAndClose('/admin/dashboard/users')"
+        *hasPermission="'users.read'">
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Users</span>
+      </mat-list-item>
+      
+      <!-- Businesses Management -->
+      <mat-list-item 
+        routerLink="/admin/dashboard/businesses"
+        routerLinkActive="active-link"
+        (click)="navigateAndClose('/admin/dashboard/businesses')">
+        <mat-icon matListItemIcon>business</mat-icon>
+        <span matListItemTitle>Businesses</span>
+      </mat-list-item>
+      
+      <!-- Services Management -->
+      <mat-list-item 
+        routerLink="/admin/dashboard/services"
+        routerLinkActive="active-link"
+        (click)="navigateAndClose('/admin/dashboard/services')"
+        *hasPermission="'services.read'">
+        <mat-icon matListItemIcon>miscellaneous_services</mat-icon>
+        <span matListItemTitle>Services</span>
+      </mat-list-item>
+      
+      <!-- Categories Management -->
+      <mat-list-item 
+        routerLink="/admin/dashboard/categories"
+        routerLinkActive="active-link"
+        (click)="navigateAndClose('/admin/dashboard/categories')"
+        *hasPermission="'categories.read'">
+        <mat-icon matListItemIcon>category</mat-icon>
+        <span matListItemTitle>Categories</span>
+      </mat-list-item>
+      
+      <!-- Projects Management -->
+      <mat-list-item 
+        routerLink="/admin/dashboard/projects"
+        routerLinkActive="active-link"
+        (click)="navigateAndClose('/admin/dashboard/projects')"
+        *hasPermission="'projects.read'">
+        <mat-icon matListItemIcon>work_outline</mat-icon>
+        <span matListItemTitle>Projects</span>
+      </mat-list-item>
+      
+      <!-- Reviews Management -->
+      <mat-list-item 
+        routerLink="/admin/dashboard/reviews"
+        routerLinkActive="active-link"
+        (click)="navigateAndClose('/admin/dashboard/reviews')"
+        *hasPermission="'reviews.read'">
+        <mat-icon matListItemIcon>star_outline</mat-icon>
+        <span matListItemTitle>Reviews</span>
+      </mat-list-item>
+      
+      <!-- Transactions Management -->
+      <mat-list-item 
+        routerLink="/admin/dashboard/transactions"
+        routerLinkActive="active-link"
+        (click)="navigateAndClose('/admin/dashboard/transactions')"
+        *hasPermission="'transactions.read'">
+        <mat-icon matListItemIcon>payments</mat-icon>
+        <span matListItemTitle>Transactions</span>
+      </mat-list-item>
+      
+      <!-- Reports -->
+      <mat-list-item 
+        routerLink="/admin/dashboard/reports"
+        routerLinkActive="active-link"
+        (click)="navigateAndClose('/admin/dashboard/reports')"
+        *hasPermission="'reports.read'">
+        <mat-icon matListItemIcon>analytics</mat-icon>
+        <span matListItemTitle>Reports & Analytics</span>
+      </mat-list-item>
+    </mat-nav-list>
+
+    <mat-divider class="my-4"></mat-divider>
+
+    <!-- Security Section -->
+    <div class="space-y-3 mb-6 p-4" *hasPermission="'roles.read'">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Security</p>
+      <mat-nav-list class="!py-0">
+        <mat-list-item 
+          routerLink="/admin/dashboard/roles-and-permissions"
+          routerLinkActive="active-link"
+          (click)="navigateAndClose('/admin/dashboard/roles-and-permissions')"
+          *hasPermission="'roles.read'">
+          <mat-icon matListItemIcon>shield</mat-icon>
+          <span matListItemTitle>Roles & Permissions</span>
+        </mat-list-item>
+      </mat-nav-list>
+    </div>
+
+    <mat-divider class="my-4"></mat-divider>
+
+    <!-- System Section -->
+    <div class="space-y-3 mb-6 p-4" *hasPermission="'settings.read'">
+      <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">System</p>
+      <mat-nav-list class="!py-0">
+        <mat-list-item 
+          routerLink="/admin/dashboard/settings"
+          routerLinkActive="active-link"
+          (click)="navigateAndClose('/admin/dashboard/settings')"
+          *hasPermission="'settings.read'">
+          <mat-icon matListItemIcon>settings</mat-icon>
+          <span matListItemTitle>System Settings</span>
+        </mat-list-item>
+        
+        <mat-list-item 
+          routerLink="/admin/dashboard/audit-logs"
+          routerLinkActive="active-link"
+          (click)="navigateAndClose('/admin/dashboard/audit-logs')"
+          *hasPermission="'audit.read'">
+          <mat-icon matListItemIcon>description</mat-icon>
+          <span matListItemTitle>Audit Logs</span>
+        </mat-list-item>
+      </mat-nav-list>
+    </div>
+  </nav>
+
+  <!-- Logout - Fixed at bottom -->
+  <div class="p-4 border-t border-gray-200 bg-white flex-shrink-0">
+    <button 
+      (click)="logout()"
+      mat-button
+      class="w-full text-red-600 hover:bg-red-50">
+      <mat-icon class="mr-2">logout</mat-icon>
+      Sign Out
+    </button>
+  </div>
+</div>

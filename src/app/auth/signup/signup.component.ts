@@ -73,7 +73,8 @@ export class SignupComponent implements OnInit {
       userType: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       countryOfOrigin: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      agreeToTerms: [false, [Validators.requiredTrue]]
     });
 
     // Effect to load cities when state changes
@@ -228,4 +229,5 @@ export class SignupComponent implements OnInit {
   get emailControl() { return this.signupForm.get('email'); }
   get countryOfOriginControl() { return this.signupForm.get('countryOfOrigin'); }
   get passwordControl() { return this.signupForm.get('password'); }
+  get agreeToTermsControl() { return this.signupForm.get('agreeToTerms'); }
 }

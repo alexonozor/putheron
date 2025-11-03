@@ -1,0 +1,30 @@
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.badge {
+  background-color: #e5e7eb;
+  color: #374151;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+
+
+::ng-deep .mat-mdc-list-item.active-link {
+  background-color: var(--mdc-theme-primary, #20AA62) !important;
+  color: white !important;
+  border-radius: 8px !important;
+
+  .mat-icon {
+    color: white !important;
+  }
+
+  .mdc-list-item__primary-text {
+    color: white !important;
+  }
+}

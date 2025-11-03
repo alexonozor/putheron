@@ -11,10 +11,32 @@
   pointer-events: auto;
 }
 
-// Rounded Sign up button
+// Angular Material Drawer Container
+.mobile-drawer-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  pointer-events: none;
 
+  ::ng-deep .mat-drawer-backdrop {
+    pointer-events: auto;
+  }
 
+  ::ng-deep .mat-drawer {
+    pointer-events: auto;
+  }
+}
 
+.mobile-drawer {
+  width: 288px; // 72 * 4 = 288px (equivalent to w-72)
+  
+  ::ng-deep .mat-drawer-inner-container {
+    overflow: visible;
+  }
+}
 
 // Mobile menu overlay animation
 @media (max-width: 768px) {
@@ -44,6 +66,10 @@
 @media (min-width: 768px) {
   .desktop-toolbar { display: flex; }
   .mobile-toolbar { display: none; }
+  
+  .mobile-drawer-container {
+    display: none;
+  }
 }
 
 

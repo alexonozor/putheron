@@ -10,6 +10,7 @@
     type="search"
     [placeholder]="placeholder()"
     [(ngModel)]="query"
+    (ngModelChange)="onQueryChange()"
     (keyup.enter)="onSearch()"
     class="flex-1 bg-transparent outline-none border-none text-gray-700
            text-sm sm:text-base placeholder:text-gray-500 min-w-0"

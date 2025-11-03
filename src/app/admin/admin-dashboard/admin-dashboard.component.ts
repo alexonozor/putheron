@@ -14,6 +14,7 @@ import { ConfigService } from '../../shared/services/config.service';
 import { AuthorizationService } from '../../shared/services/authorization.service';
 import { HasPermissionDirective } from '../../shared/directives';
 import { HeaderComponent } from "../../shared/components/header/header.component";
+import { AdminSidenavComponent } from "../../shared/components/admin-sidenav/admin-sidenav.component";
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -31,7 +32,8 @@ import { HeaderComponent } from "../../shared/components/header/header.component
     MatCardModule,
     MatMenuModule,
     HasPermissionDirective,
-    HeaderComponent
+    HeaderComponent,
+    AdminSidenavComponent
 ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'

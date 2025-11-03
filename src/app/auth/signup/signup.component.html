@@ -1,281 +1,340 @@
-<div class="signup-container">
-  <!-- Registration Form -->
-  @if (!showVerificationStep()) {
-    <div class="text-center mb-8">
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">Join Our Community</h2>
-      <p class="text-gray-600">Create your account to get started</p>
+<div class="min-h-screen flex">
+  <!-- Left Side - Signup Form -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 bg-white relative overflow-hidden">
+    <!-- Mobile SVG Decorations -->
+    <div class="lg:hidden absolute top-0 right-0 w-28 h-46 pointer-events-none">
+      <img src="/assets/images/Layer-v.svg" alt="" class="w-full h-full">
+    </div>
+    <div class="lg:hidden absolute bottom-0 left-0 w-47 h-25 pointer-events-none">
+      <img src="/assets/images/Layer-x.svg" alt="" class="w-full h-full">
     </div>
 
-    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="space-y-6">
-    <!-- Name Fields Row -->
-    <div class="grid grid-cols-2 gap-4">
-      <mat-form-field appearance="outline">
-        <mat-label>First Name</mat-label>
-        <input
-          matInput
-          formControlName="firstName"
-          placeholder="First name"
-          [disabled]="loading()"
-        />
-        <mat-icon matSuffix>person</mat-icon>
-        @if (firstNameControl?.invalid && firstNameControl?.touched) {
-          <mat-error>Required</mat-error>
-        }
-      </mat-form-field>
+    <div class="w-full max-w-xl mx-auto relative z-10">
+      <!-- Registration Form -->
+      @if (!showVerificationStep()) {
+    
+        <!-- Heading -->
+        <h2 class="text-2xl lg:text-3xl font-semibold mb-2 text-center lg:text-left flex items-center justify-center lg:justify-start gap-2">
+          Sign Up with <a routerLink="/" class="inline-block"><img src="/assets/svg/VOUCHHER.svg" alt="VouchHer" class="h-8 lg:h-9"></a>
+        </h2>
+        
+        <!-- Subtitle -->
+        <p class="text-gray-600 mb-8 text-center lg:text-left">Create an account to get started</p>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Last Name</mat-label>
-        <input
-          matInput
-          formControlName="lastName"
-          placeholder="Last name"
-          [disabled]="loading()"
-        />
-        @if (lastNameControl?.invalid && lastNameControl?.touched) {
-          <mat-error>Required</mat-error>
-        }
-      </mat-form-field>
-    </div>
+        <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="space-y-4">
+          <!-- User Type Selection -->
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-3">I want to</label>
+            <mat-radio-group formControlName="userType" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label class="p-4 border-2 border-gray-200 rounded-lg hover:border-primary-600 transition-colors cursor-pointer flex items-center gap-3">
+                <mat-radio-button value="buyer"></mat-radio-button>
+                <span class="text-sm font-medium">Find women-owned businesses</span>
+              </label>
+              <label class="p-4 border-2 border-gray-200 rounded-lg hover:border-primary-600 transition-colors cursor-pointer flex items-center gap-3">
+                <mat-radio-button value="seller"></mat-radio-button>
+                <span class="text-sm font-medium">Offer service through my business</span>
+              </label>
+            </mat-radio-group>
+          </div>
 
-    <!-- Contact & Location -->
-    <mat-form-field appearance="outline">
-      <mat-label>Phone Number</mat-label>
-      <input
-        matInput
-        type="tel"
-        appPhoneFormat
-        formControlName="phone"
-        placeholder="(555) 123-4567"
-        [disabled]="loading()"
-      />
-      <mat-icon matSuffix>phone</mat-icon>
-      @if (phoneControl?.hasError('required') && phoneControl?.touched) {
-        <mat-error>Phone number is required</mat-error>
-      }
-      @if (phoneControl?.hasError('usaPhone') && phoneControl?.touched) {
-        <mat-error>{{ phoneControl?.errors?.['usaPhone']?.message }}</mat-error>
-      }
-    </mat-form-field>
+          <!-- First Name and Last Name -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>First Name</mat-label>
+              <mat-icon matPrefix class="mr-2">person_outline</mat-icon>
+              <input
+                matInput
+                formControlName="firstName"
+                placeholder="enter first name"
+                [disabled]="loading()"
+              />
+              @if (firstNameControl?.invalid && firstNameControl?.touched) {
+                <mat-error>First name is required</mat-error>
+              }
+            </mat-form-field>
 
-    <div class="grid grid-cols-2 gap-4">
-      <mat-form-field appearance="outline">
-        <mat-label>State</mat-label>
-        <mat-select
-          formControlName="state"
-          [disabled]="loading()"
-          (selectionChange)="onStateSelected($event.value)"
-        >
-          <mat-option value="">Select state</mat-option>
-          @for (state of usStates; track state.code) {
-            <mat-option [value]="state.code">{{ state.name }}</mat-option>
-          }
-        </mat-select>
-        <mat-icon matSuffix>location_on</mat-icon>
-        @if (stateControl?.invalid && stateControl?.touched) {
-          <mat-error>Required</mat-error>
-        }
-      </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Last Name</mat-label>
+              <mat-icon matPrefix class="mr-2">person_outline</mat-icon>
+              <input
+                matInput
+                formControlName="lastName"
+                placeholder="enter last name"
+                [disabled]="loading()"
+              />
+              @if (lastNameControl?.invalid && lastNameControl?.touched) {
+                <mat-error>Last name is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>City</mat-label>
-        <mat-select
-          formControlName="city"
-          [disabled]="loading() || availableCities().length === 0"
-        >
-          @if (availableCities().length === 0) {
-            <mat-option value="">Select state first</mat-option>
-          } @else {
-            <mat-option value="">Select city</mat-option>
-            @for (city of availableCities(); track city.name) {
-              <mat-option [value]="city.name">{{ city.name }}</mat-option>
+          <!-- Phone Number -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Phone Number</mat-label>
+            <mat-icon matPrefix class="mr-2">phone_outline</mat-icon>
+            <input
+              matInput
+              type="tel"
+              appPhoneFormat
+              formControlName="phone"
+              placeholder="enter phone number"
+              [disabled]="loading()"
+            />
+            @if (phoneControl?.hasError('required') && phoneControl?.touched) {
+              <mat-error>Phone number is required</mat-error>
             }
-          }
-        </mat-select>
-        <mat-icon matSuffix>location_city</mat-icon>
-        @if (cityControl?.invalid && cityControl?.touched) {
-          <mat-error>Required</mat-error>
-        }
-      </mat-form-field>
-    </div>
+            @if (phoneControl?.hasError('usaPhone') && phoneControl?.touched) {
+              <mat-error>{{ phoneControl?.errors?.['usaPhone']?.message }}</mat-error>
+            }
+          </mat-form-field>
 
-    <!-- User Type Selection -->
-    <div class="space-y-3 p-4 bg-gray-50 rounded-lg">
-      <h4 class="text-sm font-medium text-gray-700 mb-3">I want to:</h4>
-      <mat-radio-group 
-        formControlName="userType" 
-        class="radio-group-inline"
-        [disabled]="loading()"
-      >
-        <div class="radio-options">
-          <mat-radio-button value="buyer" class="radio-option">
-            Find women-owned businesses
-          </mat-radio-button>
-          <mat-radio-button value="seller" class="radio-option">
-            Offer services through my business
-          </mat-radio-button>
+          <!-- Email and Heritage Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Email</mat-label>
+              <mat-icon matPrefix class="mr-2">email_outline</mat-icon>
+              <input
+                matInput
+                type="email"
+                formControlName="email"
+                placeholder="enter email"
+                [disabled]="loading()"
+              />
+              @if (emailControl?.invalid && emailControl?.touched) {
+                <mat-error>
+                  @if (emailControl?.hasError('required')) {
+                    Email is required
+                  } @else if (emailControl?.hasError('email')) {
+                    Invalid email format
+                  }
+                </mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Heritage</mat-label>
+              <mat-select
+                formControlName="countryOfOrigin"
+                [disabled]="loading()"
+              >
+                <mat-option value="">select country</mat-option>
+                @for (country of countries; track country.code) {
+                  <mat-option [value]="country.name">{{ country.name }}</mat-option>
+                }
+              </mat-select>
+              @if (countryOfOriginControl?.invalid && countryOfOriginControl?.touched) {
+                <mat-error>Heritage is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- State and City Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>State</mat-label>
+              <mat-select
+                formControlName="state"
+                [disabled]="loading()"
+                (selectionChange)="onStateSelected($event.value)"
+              >
+                <mat-option value="">select state</mat-option>
+                @for (state of usStates; track state.code) {
+                  <mat-option [value]="state.code">{{ state.name }}</mat-option>
+                }
+              </mat-select>
+              @if (stateControl?.invalid && stateControl?.touched) {
+                <mat-error>State is required</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>City</mat-label>
+              <mat-select
+                formControlName="city"
+                [disabled]="loading() || availableCities().length === 0"
+              >
+                @if (availableCities().length === 0) {
+                  <mat-option value="">select state first</mat-option>
+                } @else {
+                  <mat-option value="">select city</mat-option>
+                  @for (city of availableCities(); track city.name) {
+                    <mat-option [value]="city.name">{{ city.name }}</mat-option>
+                  }
+                }
+              </mat-select>
+              @if (cityControl?.invalid && cityControl?.touched) {
+                <mat-error>City is required</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Password Field -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder=""
+              [disabled]="loading()"
+            />
+            <button 
+              mat-icon-button 
+              matSuffix 
+              type="button"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="'Toggle password visibility'"
+              [attr.aria-pressed]="showPassword()"
+            >
+              <mat-icon>{{ showPassword() ? 'visibility_off_outline' : 'visibility_outline' }}</mat-icon>
+            </button>
+            @if (passwordControl?.invalid && passwordControl?.touched) {
+              <mat-error>
+                @if (passwordControl?.hasError('required')) {
+                  Password is required
+                } @else if (passwordControl?.hasError('minlength')) {
+                  Minimum 6 characters
+                }
+              </mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Terms Checkbox -->
+          <div class="flex items-center gap-2">
+            <mat-checkbox formControlName="agreeToTerms" color="primary"></mat-checkbox>
+            <label class="text-sm text-gray-600">
+              I agree to the <a routerLink="/terms" class="text-primary-600 hover:underline">Terms of Service</a> and <a routerLink="/privacy" class="text-primary-600 hover:underline">Privacy Policy</a>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            class="w-full !py-3 !text-base !font-medium !rounded-lg"
+            [disabled]="loading() || !signupForm.valid"
+          >
+            @if (!(loading())) {
+              Log in
+            } @else {
+              <span class="flex items-center justify-center gap-2">
+                <mat-spinner diameter="20" class="!text-white"></mat-spinner>
+                Creating...
+              </span>
+            }
+          </button>
+
+          <!-- Already have account Link -->
+          <div class="text-center pt-4">
+            <p class="text-sm text-gray-600">
+              Already have an account? 
+              <a 
+                [routerLink]="['/auth/login']"
+                class="font-medium text-[#6B0FAE] hover:text-primary-700 ml-1"
+              >
+                Log in
+              </a>
+            </p>
+          </div>
+        </form>
+      }
+
+      <!-- Email Verification Step -->
+      @if (showVerificationStep()) {
+        <!-- Logo - Centered -->
+        <div class="mb-8 text-center">
+          <a routerLink="/" class="inline-block">
+            <img src="/assets/logos/VOUCHHER.svg" alt="VouchHer" class="h-10 lg:h-12 w-auto">
+          </a>
         </div>
-      </mat-radio-group>
-      @if (userTypeControl?.invalid && userTypeControl?.touched) {
-        <mat-error>Please select an option</mat-error>
-      }
-    </div>
 
-    <!-- Email and Heritage -->
-    <div class="grid grid-cols-2 gap-4">
-      <mat-form-field appearance="outline">
-        <mat-label>Email Address</mat-label>
-        <input
-          matInput
-          type="email"
-          formControlName="email"
-          placeholder="your@email.com"
-          [disabled]="loading()"
-        />
-        <mat-icon matSuffix>email</mat-icon>
-        @if (emailControl?.invalid && emailControl?.touched) {
-          <mat-error>
-            @if (emailControl?.hasError('required')) {
-              Email is required
-            } @else if (emailControl?.hasError('email')) {
-              Invalid email format
+        <div class="text-center space-y-6">
+          <div class="mb-8">
+            <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Check Your Email</h1>
+            <p class="text-gray-600 mb-4">
+              We've sent a verification link to:
+            </p>
+            <p class="text-lg font-medium text-gray-900 mb-4">{{ verificationEmail() }}</p>
+            <p class="text-gray-600">
+              Click the link in the email to verify your account and complete your registration.
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <button 
+            mat-flat-button 
+            color="primary"
+            (click)="resendVerification()"
+            [disabled]="loading()"
+            class="w-full !py-3 !text-base !font-medium !rounded-lg"
+          >
+            @if (!loading()) {
+              Resend Verification Email
+            } @else {
+              <span class="flex items-center justify-center gap-2">
+                <mat-spinner diameter="20" class="!text-white"></mat-spinner>
+                Sending...
+              </span>
             }
-          </mat-error>
-        }
-      </mat-form-field>
+          </button>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Heritage</mat-label>
-        <mat-select
-          formControlName="countryOfOrigin"
-          [disabled]="loading()"
-        >
-          <mat-option value="">Select country</mat-option>
-          @for (country of countries; track country.code) {
-            <mat-option [value]="country.name">{{ country.name }}</mat-option>
-          }
-        </mat-select>
-        <mat-icon matSuffix>public</mat-icon>
-        @if (countryOfOriginControl?.invalid && countryOfOriginControl?.touched) {
-          <mat-error>Required</mat-error>
-        }
-      </mat-form-field>
+          <div class="text-center pt-4">
+            <p class="text-sm text-gray-600">
+              <a 
+                [routerLink]="['/auth/login']"
+                class="font-medium text-[#6B0FAE] hover:text-primary-700"
+              >
+                Back to Login
+              </a>
+            </p>
+          </div>
+        </div>
+      }
     </div>
+  </div>
 
-    <!-- Password Field -->
-    <mat-form-field appearance="outline">
-      <mat-label>Password</mat-label>
-      <input
-        matInput
-        [type]="showPassword() ? 'text' : 'password'"
-        formControlName="password"
-        placeholder="Enter password"
-        [disabled]="loading()"
+  <!-- Right Side - Background Image (Hidden on mobile) -->
+  <div class="hidden lg:flex lg:w-1/2 relative bg-primary-600 items-center justify-center overflow-hidden">
+    <!-- Background SVG -->
+    <div class="absolute inset-0">
+      <img 
+        src="/assets/images/login-right-bakground.svg" 
+        alt="" 
+        class="w-full h-full object-cover"
       />
-      <button 
-        mat-icon-button 
-        matSuffix 
-        type="button"
-        (click)="togglePasswordVisibility()"
-        [attr.aria-label]="'Toggle password visibility'"
-        [attr.aria-pressed]="showPassword()"
-      >
-        <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-      </button>
-      @if (passwordControl?.invalid && passwordControl?.touched) {
-        <mat-error>
-          @if (passwordControl?.hasError('required')) {
-            Password is required
-          } @else if (passwordControl?.hasError('minlength')) {
-            Minimum 6 characters
-          }
-        </mat-error>
-      }
-    </mat-form-field>
-
-    <!-- Submit Button -->
-    <button
-      mat-raised-button
-      color="primary"
-      type="submit"
-      class="w-full py-3 text-base font-medium mb-4"
-      [disabled]="loading() || !signupForm.valid"
-    >
-      @if (!(loading())) {
-        Create Account
-      } @else {
-        <span class="flex items-center justify-center gap-2">
-          <mat-spinner diameter="16"></mat-spinner>
-          Creating...
-        </span>
-      }
-    </button>
-
-    <!-- Navigation to Sign In -->
-    <div class="mt-4 pt-4 border-t border-gray-200 text-center">
-      <p class="text-sm text-gray-600">
-        Already have an account? 
-        <a 
-          mat-button 
-          color="primary"
-          [routerLink]="['/auth/login']"
-          class="text-sm font-medium ml-1"
-        >
-          Sign in
-        </a>
-      </p>
     </div>
-  </form>
-  }
-
-  <!-- Email Verification Step -->
-  @if (showVerificationStep()) {
-    <div class="text-center space-y-6">
-      <div class="mb-6">
-        <mat-icon class="text-6xl text-blue-500 mb-4">email</mat-icon>
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Check Your Email</h2>
-        <p class="text-gray-600 mb-4">
-          We've sent a verification link to:
-        </p>
-        <p class="text-lg font-medium text-gray-900 mb-4">{{ verificationEmail() }}</p>
-        <p class="text-gray-600">
-          Click the link in the email to verify your account and complete your registration.
-        </p>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="space-y-3">
-        <button 
-          mat-raised-button 
-          color="accent"
-          (click)="resendVerification()"
-          [disabled]="loading()"
-          class="w-full py-3 text-base font-medium"
-        >
-          @if (!loading()) {
-            Resend Verification Email
-          } @else {
-            <span class="flex items-center justify-center gap-2">
-              <mat-spinner diameter="16"></mat-spinner>
-              Sending...
-            </span>
-          }
-        </button>
-
-        <button 
-          mat-button 
-          color="primary"
-          [routerLink]="['/auth/login']"
-          class="w-full py-3 text-base font-medium"
-        >
-          Back to Login
-        </button>
-      </div>
-
-      <div class="mt-6 pt-4 border-t border-gray-200">
-        <p class="text-sm text-gray-500">
-          Didn't receive the email? Check your spam folder or try resending.
-        </p>
+    
+    <!-- Content Overlay -->
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-12 w-full max-w-lg">
+      <img 
+        src="/assets/logos/white-logo.svg" 
+        alt="VouchHer" 
+        class="h-16 w-auto mb-12"
+      />
+      <h2 class="text-primary-600 text-2xl font-bold mb-6 text-left! self-left">
+        Women First Marketplace
+      </h2>
+      
+      <div class="space-y-4 text-white text-left w-full">
+        <div>
+          <h3 class="font-semibold text-lg mb-2">Find women-owned businesses in seconds</h3>
+          <ul class="space-y-2 text-sm">
+            <li>1. Earn extra income</li>
+            <li>2. Collaborate and grow</li>
+            <li>3. Get support from peers</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="font-semibold text-lg mb-2 mt-6">Hire qualified women with ease</h3>
+          <ul class="space-y-2 text-sm">
+            <li>1. List business(es)</li>
+            <li>2. Get offers or bids</li>
+            <li>3. Pay with ease when job is complete</li>
+          </ul>
+        </div>
       </div>
     </div>
-  }
+  </div>
 </div>

@@ -1,7 +1,88 @@
-// .line-clamp-2 {
-//   display: -webkit-box;
-//   -webkit-line-clamp: 2;
-//   line-clamp: 2;
-//   -webkit-box-orient: vertical;
-//   overflow: hidden;
-// }
+::ng-deep .notification-menu {
+  background: #ffff;
+  .mat-mdc-menu-panel {
+    max-width: 90vw !important;
+    width: 400px !important;
+    max-height: 500px !important;
+    
+    @media (max-width: 640px) {
+      width: calc(100vw - 32px) !important;
+      max-width: 400px !important;
+    }
+  }
+
+  .mat-mdc-menu-content {
+    padding: 0 !important;
+  }
+}
+
+.notification-header {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.notification-list {
+  max-height: 384px;
+  overflow-y: auto;
+  
+  @media (max-width: 640px) {
+    max-height: 60vh;
+  }
+}
+
+.notification-item {
+  white-space: normal !important;
+  line-height: normal !important;
+  
+  &.bg-red-50 {
+    background-color: #fef2f2 !important;
+    border-left: 4px solid #f87171 !important;
+  }
+  
+  &.bg-orange-50 {
+    background-color: #fff7ed !important;
+    border-left: 4px solid #fb923c !important;
+  }
+  
+  &.bg-blue-50 {
+    background-color: #eff6ff !important;
+  }
+
+  &:hover {
+    background-color: #f9fafb !important;
+  }
+}
+
+.notification-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  text-align: center;
+  color: #6b7280;
+
+  .empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #d1d5db;
+    margin-bottom: 8px;
+  }
+}
+
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}

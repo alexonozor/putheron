@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, inject } from '@angular/core';
+import { Component, signal, OnInit, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,6 +11,8 @@ import { Search } from "../search/search";
 import { MatChipsModule } from "@angular/material/chips";
 import { MatIconModule } from "@angular/material/icon";
 import { MatMenuModule } from '@angular/material/menu';
+import { SearchFiltersComponent, SearchFilters } from '../search-filters/search-filters.component';
+import { Category } from '../../services/category-new.service';
 
 @Component({
   selector: 'hero-section',
@@ -25,7 +27,8 @@ import { MatMenuModule } from '@angular/material/menu';
     Search,
     MatChipsModule,
     MatIconModule,
-    MatMenuModule
+    MatMenuModule,
+    SearchFiltersComponent
 ],
   templateUrl: './hero.component.html',
   styleUrls: ['./hero.component.scss']
@@ -34,55 +37,72 @@ export class HeroComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
 
+  @ViewChild(SearchFiltersComponent) searchFiltersComponent!: SearchFiltersComponent;
+
   searchForm!: FormGroup;
+  currentFilters: SearchFilters = {};
 
   // Use the full countries list
   countries = COUNTRIES;
 
   ngOnInit() {
     this.searchForm = this.fb.group({
-      searchQuery: [''],
-      selectedCountries: [[]]
+      searchQuery: ['']
     });
   }
 
-  get isFormValid(): boolean {
-    return this.searchForm.valid && (
-      this.searchForm.get('searchQuery')?.value?.trim() || 
-      this.searchForm.get('selectedCountries')?.value?.length > 0
-    );
+  onFiltersChanged(filters: SearchFilters) {
+    this.currentFilters = filters;
   }
 
-  get searchQueryControl() {
-    return this.searchForm.get('searchQuery');
-  }
-
-  onSearch() {
-    console.log('Search initiated with form:', this.isFormValid);
-    if (!this.isFormValid) {
-      this.searchForm.markAllAsTouched();
-      return;
-    }
-
-    const formValue = this.searchForm.value;
+  onCategorySelected(category: Category) {
+    // When a category is selected, trigger search immediately
+    const searchQuery = this.searchForm.get('searchQuery')?.value?.trim();
+    
     const queryParams: any = {};
     
-    if (formValue.searchQuery?.trim()) {
-      queryParams.q = formValue.searchQuery.trim();
+    if (searchQuery) {
+      queryParams.q = searchQuery;
     }
     
-    if (formValue.selectedCountries && formValue.selectedCountries.length > 0) {
-      // Convert country names to the format expected by the backend
-      queryParams.countries = formValue.selectedCountries.join(',');
+    if (category._id) {
+      queryParams.category = category._id;
     }
 
+    // Navigate to search page with category
     this.router.navigate(['/search'], { queryParams });
   }
 
-  onPopularSearch(searchTerm: string) {
-    this.searchForm.patchValue({ searchQuery: searchTerm });
-    // Mark the search query as touched to trigger validation
-    this.searchForm.get('searchQuery')?.markAsTouched();
+  onSearchQueryChange(query: string) {
+    this.searchForm.patchValue({ searchQuery: query });
+  }
+
+  onSearch() {
+    const searchQuery = this.searchForm.get('searchQuery')?.value?.trim();
+    const filters = this.searchFiltersComponent?.getFormValue() || {};
+
+    // Build query params
+    const queryParams: any = {};
+    
+    if (searchQuery) {
+      queryParams.q = searchQuery;
+    }
+    
+    if (filters.category) {
+      queryParams.category = filters.category;
+    }
+
+    // Only navigate if we have at least one search parameter
+    if (Object.keys(queryParams).length > 0) {
+      this.router.navigate(['/search'], { queryParams });
+    }
+  }
+
+  onFindBusinesses() {
     this.onSearch();
+  }
+
+  onListBusiness() {
+    this.router.navigate(['/list-business']);
   }
 }

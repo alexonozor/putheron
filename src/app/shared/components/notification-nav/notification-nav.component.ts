@@ -7,13 +7,16 @@ import { MatIconModule } from '@angular/material/icon';
 import {MatBadgeModule} from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 
 
 @Component({
   selector: 'app-notification-nav',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatBadgeModule],
+  imports: [CommonModule, RouterModule, MatButtonModule, MatIconModule, MatBadgeModule, MatMenuModule, MatDividerModule, MatProgressSpinnerModule],
   templateUrl: './notification-nav.component.html',
   styleUrl: './notification-nav.component.scss'
 })
@@ -23,7 +26,6 @@ export class NotificationNavComponent implements OnInit {
   private readonly router = inject(Router);
 
   // Component state
-  isDropdownOpen = false;
   isMarkingAllRead = false;
 
   // Reactive state from service
@@ -63,17 +65,9 @@ export class NotificationNavComponent implements OnInit {
     }
   }
 
-  toggleDropdown() {
-    this.isDropdownOpen = !this.isDropdownOpen;
-    
-    // Mark unseen notifications as seen when dropdown is opened
-    if (this.isDropdownOpen) {
-      this.markUnseenAsSeen();
-    }
-  }
-
-  closeDropdown() {
-    this.isDropdownOpen = false;
+  onMenuOpened() {
+    // Mark unseen notifications as seen when menu is opened
+    this.markUnseenAsSeen();
   }
 
   async markUnseenAsSeen() {
@@ -108,9 +102,6 @@ export class NotificationNavComponent implements OnInit {
 
     // Navigate based on notification type and content
     this.navigateFromNotification(notification);
-    
-    // Close dropdown
-    this.closeDropdown();
   }
 
   private navigateFromNotification(notification: Notification) {

@@ -1,0 +1,17 @@
+::ng-deep .search-filter-menu {
+  .mat-mdc-menu-content {
+    padding: 8px 0;
+  }
+
+  .mat-mdc-menu-item {
+    min-height: 44px;
+    
+    &:hover {
+      background-color: rgba(32, 170, 98, 0.08);
+    }
+  }
+}
+
+::ng-deep mat-chip {
+  cursor: pointer;
+}

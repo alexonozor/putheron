@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, effect, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, effect, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,7 +7,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenavModule, MatDrawer } from '@angular/material/sidenav';
 import { AuthService } from '../../services/auth.service';
 import { AuthorizationService } from '../../services/authorization.service';
 import { BusinessService } from '../../services/business.service';
@@ -15,7 +15,6 @@ import { NotificationNavComponent } from '../notification-nav/notification-nav.c
 import { MatCardModule } from '@angular/material/card';
 import { Search } from '../search/search';
 import { NavigationEnd } from '@angular/router';
-
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -42,13 +41,9 @@ export class HeaderComponent {
   private readonly businessService = inject(BusinessService);
   private readonly router = inject(Router);
 
-  // Input properties
-  @Input() showMobileMenuButton = false;
-  @Input() isAdminMode = false;
-  @Input() isDashboardMode = false;
 
-  // Output events
-  @Output() menuToggle = new EventEmitter<void>();
+  // Input properties
+  @Input() drawer!: MatDrawer;
 
   readonly user = this.authService.user;
   readonly isAuthenticated = this.authService.isAuthenticated;
@@ -63,7 +58,6 @@ export class HeaderComponent {
 
   // Track if user has any businesses
   readonly hasBusinesses = signal(false);
-
   // Get current user mode as computed signal
   readonly userMode = computed(() => {
     const user = this.user();
@@ -135,22 +129,30 @@ export class HeaderComponent {
   private attachHeroObserver() {
     // detach any previous
     this.detachHeroObserver();
-    // find the anchor in DOM
-    const el = document.getElementById('hero-search-anchor');
-    if (!el) {
-      // if not found, show the header search (safe fallback)
-      this.showHeaderSearch.set(true);
-      return;
-    }
+    
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(() => {
+      // find the anchor in DOM
+      const el = document.getElementById('hero-search-anchor');
+      if (!el) {
+        // if not found, show the header search (safe fallback)
+        console.warn('Hero search anchor not found, showing header search');
+        this.showHeaderSearch.set(true);
+        return;
+      }
 
-    this.intersectionObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        // when the hero search is visible, hide navbar search; when it leaves view, show it
-        this.showHeaderSearch.set(!entry.isIntersecting);
-      });
-    }, { root: null, threshold: 0 });
+      console.log('Hero search observer attached');
+      this.intersectionObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          // when the hero search is visible, hide navbar search; when it leaves view, show it
+          const shouldShowHeader = !entry.isIntersecting;
+          console.log('Hero intersection:', { isIntersecting: entry.isIntersecting, shouldShowHeader });
+          this.showHeaderSearch.set(shouldShowHeader);
+        });
+      }, { root: null, threshold: 0 });
 
-    this.intersectionObserver.observe(el);
+      this.intersectionObserver.observe(el);
+    }, 100);
   }
 
   private detachHeroObserver() {
@@ -304,19 +306,10 @@ export class HeaderComponent {
   }
 
   toggleMobileMenu() {
-    this.mobileMenuOpen.update(current => !current);
-  }
-
-  closeMobileMenu() {
-    this.mobileMenuOpen.set(false);
-  }
-
-  onMenuToggle() {
-    this.menuToggle.emit();
+    this.drawer.toggle();
   }
 
   async signOut() {
     await this.authService.signOut();
-    // Navigation is handled by the auth service
   }
 }

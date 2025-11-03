@@ -1,2 +1,8 @@
-
-<router-outlet />
+@if (isAuthenticated) {
+  <router-outlet />
+} @else {
+  <div class="auth-gate-loading">
+    <div class="spinner"></div>
+    <p>Verifying access...</p>
+  </div>
+}

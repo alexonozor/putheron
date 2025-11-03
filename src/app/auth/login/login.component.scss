@@ -1,3 +1,18 @@
 :host {
   display: block;
 }
+
+// Ensure mat-form-field takes full width
+::ng-deep .mat-mdc-form-field {
+  width: 100%;
+}
+
+// Custom styling for form fields
+::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: #f9fafb;
+}
+
+// Remove Material default label since we're using custom labels
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  margin-top: 4px;
+}

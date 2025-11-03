@@ -1,0 +1,20 @@
+.guest-sidenav-content {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+::ng-deep {
+  .mat-mdc-list-item {
+    cursor: pointer;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+  
+  .mat-mdc-list-item-icon {
+    color: rgba(0, 0, 0, 0.54);
+  }
+}

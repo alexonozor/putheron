@@ -1,0 +1,64 @@
+<div class="auth-gate-container">
+  <div class="auth-gate-header">
+    <h2 mat-dialog-title>Authorization Required</h2>
+    <p class="subtitle">Please enter your credentials to access this application</p>
+  </div>
+
+  <mat-dialog-content>
+    <form (ngSubmit)="onSubmit()" #authForm="ngForm">
+      <div class="form-group">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input 
+            matInput 
+            type="text" 
+            [(ngModel)]="username" 
+            name="username"
+            required
+            autocomplete="username"
+            placeholder="Enter username">
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-group">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input 
+            matInput 
+            [type]="showPassword ? 'text' : 'password'" 
+            [(ngModel)]="password" 
+            name="password"
+            required
+            autocomplete="current-password"
+            placeholder="Enter password">
+          <mat-icon matPrefix>lock</mat-icon>
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="'Toggle password visibility'">
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        <mat-icon>error</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div class="actions">
+        <button 
+          mat-raised-button 
+          color="primary" 
+          type="submit"
+          [disabled]="!username || !password"
+          class="submit-button">
+          Access Application
+        </button>
+      </div>
+    </form>
+  </mat-dialog-content>
+</div>

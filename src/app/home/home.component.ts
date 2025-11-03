@@ -8,6 +8,11 @@ import { SuccessStoriesComponent } from '../shared/components/success-stories/su
 import { FooterComponent } from '../shared/components/footer/footer.component';
 import { AuthService } from '../shared/services/auth.service';
 import { WhyChooseVoucher } from '../shared/components/why-choose-voucher/why-choose-voucher';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { GuestSidenavComponent } from "../shared/components/guest-sidenav/guest-sidenav.component";
 
 @Component({
   selector: 'app-home',
@@ -19,8 +24,10 @@ import { WhyChooseVoucher } from '../shared/components/why-choose-voucher/why-ch
     // FeaturedWomenComponent,
     // SuccessStoriesComponent,
     WhyChooseVoucher,
-    FooterComponent
-  ],
+    FooterComponent,
+    MatSidenavModule, MatFormFieldModule, MatSelectModule, MatButtonModule,
+    GuestSidenavComponent
+],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })

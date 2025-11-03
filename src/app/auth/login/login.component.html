@@ -1,121 +1,169 @@
-<div class="login-container">
-  <div class="text-center mb-8">
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-    <p class="text-gray-600">Sign in to your account</p>
+<div class="min-h-screen flex">
+  <!-- Left Side - Login Form -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 bg-white relative overflow-hidden">
+    <!-- Mobile SVG Decorations -->
+    <div class="lg:hidden absolute top-0 right-0 w-28 h-46 pointer-events-none">
+      <img src="/assets/images/Layer-v.svg" alt="" class="w-full h-full">
+    </div>
+    <div class="lg:hidden absolute bottom-0 left-0 w-47 h-25 pointer-events-none">
+      <img src="/assets/images/Layer-x.svg" alt="" class="w-full h-full">
+    </div>
+
+    <div class="w-full max-w-md relative z-10">
+      <!-- Logo - Centered on mobile and desktop -->
+      <div class="lg:mb-8 mb-2 text-center">
+        <a routerLink="/" class="inline-block">
+          <img src="/assets/logos/colored-logo.svg" alt="VouchHer" class="h-18 lg:h-18 w-auto">
+        </a>
+      </div>
+
+      <!-- Header - Centered on mobile -->
+      <div class="mb-8 text-center lg:text-left">
+        <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
+        <p class="text-gray-600 hidden lg:block">Sign in to your account to continue</p>
+      </div>
+
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Email Field -->
+        <div>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Email Address</mat-label>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              placeholder="your@email.com"
+              [disabled]="loading()"
+            />
+            @if (emailControl?.invalid && emailControl?.touched) {
+              <mat-error>
+                @if (emailControl?.hasError('required')) {
+                  Email is required
+                } @else if (emailControl?.hasError('email')) {
+                  Invalid email format
+                }
+              </mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Password Field -->
+        <div class="space-y-2">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Password</mat-label>
+            <input
+              matInput
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="Enter your password"
+              [disabled]="loading()"
+            />
+            <button 
+              mat-icon-button 
+              matSuffix 
+              type="button"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="'Toggle password visibility'"
+              [attr.aria-pressed]="showPassword()"
+            >
+              <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (passwordControl?.invalid && passwordControl?.touched) {
+              <mat-error>
+                @if (passwordControl?.hasError('required')) {
+                  Password is required
+                } @else if (passwordControl?.hasError('minlength')) {
+                  Minimum 6 characters
+                }
+              </mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Forgot Password Link -->
+          <div class="flex items-center justify-end">
+            <a 
+              [routerLink]="['/auth/forgot-password']"
+              class="text-sm font-medium text-gray-600 hover:text-gray-800"
+            >
+              Forgot password?
+            </a>
+          </div>
+        </div>
+
+        <!-- Resend Verification Option -->
+        @if (showResendOption()) {
+          <div class="mb-4">
+            <button 
+              mat-stroked-button 
+              color="primary"
+              (click)="resendVerification()"
+              [disabled]="loading()"
+              class="w-full"
+            >
+              Resend Verification Email
+            </button>
+          </div>
+        }
+
+        <!-- Submit Button -->
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          class="w-full !py-3 !text-base !font-medium !rounded-lg"
+          [disabled]="loading() || !loginForm.valid"
+        >
+          @if (!(loading())) {
+            Sign In
+          } @else {
+            <span class="flex items-center justify-center gap-2">
+              <mat-spinner diameter="20" class="!text-white"></mat-spinner>
+              Signing In...
+            </span>
+          }
+        </button>
+
+        <!-- Sign Up Link -->
+        <div class="text-center pt-4">
+          <p class="text-sm text-gray-600">
+            Don't have an account? 
+            <a 
+              [routerLink]="['/auth/signup']"
+              class="font-medium text-[#6B0FAE] hover:text-primary-700 ml-1"
+            >
+              Sign up
+            </a>
+          </p>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
-    <!-- Email Field -->
-    <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Email Address</mat-label>
-      <input
-        matInput
-        type="email"
-        formControlName="email"
-        placeholder="your@email.com"
-        [disabled]="loading()"
+  <!-- Right Side - Background Image (Hidden on mobile) -->
+  <div class="hidden lg:flex lg:w-1/2 relative bg-primary-600 items-center justify-center overflow-hidden">
+    <!-- Background SVG -->
+    <div class="absolute inset-0">
+      <img 
+        src="/assets/images/login-right-bakground.svg" 
+        alt="" 
+        class="w-full h-full object-cover"
       />
-      <mat-icon matSuffix>email</mat-icon>
-      @if (emailControl?.invalid && emailControl?.touched) {
-        <mat-error>
-          @if (emailControl?.hasError('required')) {
-            Email is required
-          } @else if (emailControl?.hasError('email')) {
-            Invalid email format
-          }
-        </mat-error>
-      }
-    </mat-form-field>
-
-    <!-- Password Field -->
-    <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Password</mat-label>
-      <input
-        matInput
-        [type]="showPassword() ? 'text' : 'password'"
-        formControlName="password"
-        placeholder="Enter password"
-        [disabled]="loading()"
-      />
-      <button 
-        mat-icon-button 
-        matSuffix 
-        type="button"
-        (click)="togglePasswordVisibility()"
-        [attr.aria-label]="'Toggle password visibility'"
-        [attr.aria-pressed]="showPassword()"
-      >
-        <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-      </button>
-      @if (passwordControl?.invalid && passwordControl?.touched) {
-        <mat-error>
-          @if (passwordControl?.hasError('required')) {
-            Password is required
-          } @else if (passwordControl?.hasError('minlength')) {
-            Minimum 6 characters
-          }
-        </mat-error>
-      }
-    </mat-form-field>
-
-    <!-- Resend Verification Option -->
-    @if (showResendOption()) {
-      <div class="mb-4">
-        <button 
-          mat-stroked-button 
-          color="primary"
-          (click)="resendVerification()"
-          [disabled]="loading()"
-          class="w-full"
-        >
-          Resend Verification Email
-        </button>
-      </div>
-    }
-
-    <!-- Submit Button -->
-    <button
-      mat-raised-button
-      color="primary"
-      type="submit"
-      class="w-full py-3 text-base font-medium mb-4"
-      [disabled]="loading() || !loginForm.valid"
-    >
-      @if (!(loading())) {
-        Sign In
-      } @else {
-        <span class="flex items-center justify-center gap-2">
-          <mat-spinner diameter="16"></mat-spinner>
-          Signing In...
-        </span>
-      }
-    </button>
-
-    <!-- Additional Actions -->
-    <div class="space-y-3 text-center">
-      <a 
-        mat-button 
-        color="primary"
-        [routerLink]="['/auth/forgot-password']"
-        class="text-sm"
-      >
-        Forgot your password?
-      </a>
-
-      <!-- Navigation to Sign Up -->
-      <div class="mt-4 pt-4 border-t border-gray-200">
-        <p class="text-sm text-gray-600">
-          Don't have an account? 
-          <a 
-            mat-button 
-            color="primary"
-            [routerLink]="['/auth/signup']"
-            class="text-sm font-medium ml-1"
-          >
-            Sign up
-          </a>
-        </p>
-      </div>
     </div>
-  </form>
+    
+    <!-- White Logo Overlay -->
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-12 w-full">
+      <img 
+        src="/assets/logos/white-logo.svg" 
+        alt="VouchHer" 
+        class="h-24 w-auto mb-6"
+      />
+      <p class="text-white text-lg max-w-2xl text-left leading-relaxed mx-auto">
+        We are a professional and trusted hub that connects ambitious women ready to showcase their skills with businesses seeking top talent to grow. Our platform bridges opportunity and expertise, empowering women to get hired while helping companies discover and hire the best. 
+      </p>
+      <p class="text-white text-lg max-w-2xl text-left leading-relaxed mt-4 mx-auto">
+        Together, we create a thriving ecosystem where women advance their careers, businesses achieve sustainable growth and changing the game.
+      </p>
+    </div>
+  </div>
 </div>

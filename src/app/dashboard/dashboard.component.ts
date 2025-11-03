@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, OnDestroy, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive, RouterModule } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,6 +15,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Subscription } from 'rxjs';
 import { FavoritesService } from '../shared/services/favorites.service';
 import { HeaderComponent } from "../shared/components/header/header.component";
+import { UserSidenavComponent } from "../shared/components/user-sidenav/user-sidenav.component";
 
 @Component({
   selector: 'app-dashboard',
@@ -27,9 +28,9 @@ import { HeaderComponent } from "../shared/components/header/header.component";
     MatButtonModule,
     MatDividerModule,
     RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
-    HeaderComponent
+    RouterModule,
+    HeaderComponent,
+    UserSidenavComponent
 ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'

@@ -1,1 +1,10 @@
 // Home component styles
+.drawer {
+    height: 100vh;
+    border-radius: 0px;
+}
+
+.content-body {
+    height: 100vh;
+    overflow-y: scroll;
+}

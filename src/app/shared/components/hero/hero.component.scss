@@ -1,5 +1,4 @@
 @use '@angular/material' as mat;
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
 // Customize the entire app. Change :root to your selector if you want to scope the styles.
 :root {
@@ -14,7 +13,3 @@
   border-radius: 4px;
 }
 
-.poppins {
-  font-family: 'Poppins', sans-serif;
-  // font-size: 30px;
-}

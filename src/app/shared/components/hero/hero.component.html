@@ -1,4 +1,4 @@
-<section class="bg-[#C9F3DD] relative overflow-hidden" style="height: calc(100vh - var(--header-height, 64px));">
+<section class="bg-[#C9F3DD]  relative overflow-hidden" style="height: calc(100vh - var(--header-height, 64px)); background-image: url('/assets/images/hero-background.svg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
     <div class="max-w-7xl mx-auto w-full h-full px-3 lg:px-8 flex flex-col lg:flex-row relative">
         <!-- Left Content -->
     <div class="w-full lg:w-1/2 h-full flex flex-col justify-center sm:pt-16 lg:pt-0 relative z-10 text-center lg:text-left">
@@ -22,58 +22,33 @@
                     [backgroundColor]="'white'"
                     [placeholder]="'Search business or service'"
                     [boxShadow]="'0 2px 6px 0 #20212451'"
+                    (searchEvent)="onSearch()"
+                    (queryChange)="onSearchQueryChange($event)"
                 />
             </div>
 
-            <!-- Filter Buttons -->
-            <div class="flex flex-wrap items-center gap-2 lg:gap-3 mb-10">
-                <!-- Mobile View -->
-                <div class="grid grid-cols-2 w-full gap-2 lg:hidden">
-                    <!-- Category Button -->
-                    <button mat-stroked-button class="rounded-full border-gray-300 px-4 w-full">
-                        <span class="text-gray-700">Category</span>
-                        <mat-icon class="ml-1">expand_more</mat-icon>
-                    </button>
-
-                    <!-- Heritage Button -->
-                    <button mat-stroked-button [matMenuTriggerFor]="countryMenu" class="rounded-full border-gray-300 px-4 w-full">
-                        <span class="text-gray-700">Heritage</span>
-                        <mat-icon class="ml-1">expand_more</mat-icon>
-                    </button>
-                </div>
-
-                <!-- Desktop View -->
-                <div class="hidden lg:flex items-center gap-3 w-full">
-                    <!-- Category Button -->
-                    <button mat-stroked-button class="rounded-full border-gray-300 px-6">
-                        <span class="text-gray-700">Category</span>
-                        <mat-icon class="ml-1">expand_more</mat-icon>
-                    </button>
-
-                    <!-- Desktop Chips -->
-                    <mat-chip-listbox aria-label="Country selection">
-                        <mat-chip-option color="primary">Ghanian</mat-chip-option>
-                        <mat-chip-option color="primary">Nigerian</mat-chip-option>
-                        <mat-chip-option color="primary">Zambian</mat-chip-option>
-                        <mat-chip-option color="primary">Egyptian</mat-chip-option>
-                    </mat-chip-listbox>
-                </div>
-
-                <!-- Country Menu for Mobile -->
-                <mat-menu #countryMenu="matMenu">
-                    <button mat-menu-item>Ghanian</button>
-                    <button mat-menu-item>Nigerian</button>
-                    <button mat-menu-item>Zambian</button>
-                    <button mat-menu-item>Egyptian</button>
-                </mat-menu>
+            <!-- Filter Buttons Component -->
+            <div class="mb-10">
+                <app-search-filters 
+                    (filtersChanged)="onFiltersChanged($event)"
+                    (categorySelected)="onCategorySelected($event)"
+                />
             </div>
 
             <!-- Action Buttons -->
             <div class="flex flex-col lg:flex-row items-stretch lg:items-start gap-3 lg:gap-4  lg:px-0">
-                <button mat-flat-button color="primary" class="rounded-full py-3 lg:py-2.5 px-8 text-base font-medium w-full lg:w-fit">
+                <button 
+                    mat-flat-button 
+                    color="primary" 
+                    class="rounded-full py-3 lg:py-2.5 px-8 text-base font-medium w-full lg:w-fit"
+                    (click)="onFindBusinesses()">
                     Find Businesses
                 </button>
-                <button mat-stroked-button color="primary" class="rounded-full py-3 lg:py-2.5 px-8 text-base font-medium w-full lg:w-fit">
+                <button 
+                    mat-stroked-button 
+                    color="primary" 
+                    class="rounded-full py-3 lg:py-2.5 px-8 text-base font-medium w-full lg:w-fit !border-primary-600"
+                    (click)="onListBusiness()">
                     List A Business
                 </button>
             </div>
