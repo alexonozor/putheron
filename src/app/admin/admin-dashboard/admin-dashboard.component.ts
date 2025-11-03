@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, RouterModule } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,8 +22,6 @@ import { AdminSidenavComponent } from "../../shared/components/admin-sidenav/adm
   imports: [
     CommonModule,
     RouterOutlet,
-    RouterLink,
-    RouterLinkActive,
     MatSidenavModule,
     MatListModule,
     MatIconModule,
@@ -33,7 +31,8 @@ import { AdminSidenavComponent } from "../../shared/components/admin-sidenav/adm
     MatMenuModule,
     HasPermissionDirective,
     HeaderComponent,
-    AdminSidenavComponent
+    AdminSidenavComponent,
+    RouterModule
 ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
