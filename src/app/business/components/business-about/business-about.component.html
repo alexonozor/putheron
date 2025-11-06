@@ -1,0 +1,26 @@
+<mat-card>
+  <mat-card-header class="!mb-4">
+    <mat-card-title class="text-2xl font-bold text-gray-900">About This Business</mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content>
+    @if (business().description) {
+      <p class="text-gray-700 leading-relaxed text-lg">{{ business().description }}</p>
+    } @else {
+      <p class="text-gray-500 italic">No description provided.</p>
+    }
+
+    @if (businessTags().length > 0) {
+      <div class="mt-6">
+        <h4 class="text-sm font-medium text-gray-900 mb-3">Tags</h4>
+        <div class="flex flex-wrap gap-2">
+          @for (tag of businessTags(); track tag) {
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-50 text-blue-700 border border-blue-200">
+              {{ tag }}
+            </span>
+          }
+        </div>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

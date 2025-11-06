@@ -1,0 +1,68 @@
+<section id="reviews" class="scroll-mt-24 mb-8">
+  <mat-card>
+    <mat-card-header class="!mb-4">
+      <div class="flex items-center justify-between w-full">
+        <mat-card-title class="!text-2xl">Reviews & Ratings</mat-card-title>
+        @if (hasReviews()) {
+          <div class="flex items-center gap-2">
+            <div class="flex items-center">
+              @for (star of getStarArray(averageRating()); track $index) {
+                <mat-icon class="!w-5 !h-5 !text-xl" [class.text-yellow-400]="star" [class.text-gray-300]="!star">
+                  star
+                </mat-icon>
+              }
+            </div>
+            <span class="text-lg font-semibold text-gray-900">{{ formatRating(averageRating()) }}</span>
+            <span class="text-sm text-gray-500">
+              ({{ totalReviews() }} {{ totalReviews() === 1 ? 'review' : 'reviews' }})
+            </span>
+          </div>
+        }
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (reviewsLoading()) {
+        <!-- Loading State -->
+        <div class="flex justify-center items-center py-8">
+          <mat-spinner diameter="40"></mat-spinner>
+          <span class="ml-3 text-gray-600">Loading reviews...</span>
+        </div>
+      } @else if (!hasReviews()) {
+        <!-- Empty State -->
+        <div class="text-center py-12">
+          <div class="p-4 bg-gray-50 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+            <mat-icon class="!w-10 !h-10 !text-4xl text-gray-300">star_outline</mat-icon>
+          </div>
+          <h3 class="text-xl font-medium text-gray-900 mb-2">No Reviews Yet</h3>
+          <p class="text-gray-500">This business hasn't received any reviews yet.</p>
+        </div>
+      } @else {
+        <!-- Review Summary -->
+        <div class="mb-8">
+          <app-review-stats
+            [averageRating]="averageRating()"
+            [totalReviews]="totalReviews()"
+            [reviewStats]="reviewStats()" />
+        </div>
+
+        <!-- Individual Reviews -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Reviews</h3>
+          @for (review of recentReviews(); track review._id) {
+            <app-review-card [review]="review" />
+          }
+
+          @if (totalReviews() > 5) {
+            <div class="text-center pt-4">
+              <button mat-stroked-button color="primary">
+                <mat-icon>expand_more</mat-icon>
+                View All {{ totalReviews() }} Reviews
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</section>

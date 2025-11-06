@@ -35,16 +35,16 @@ html {
   --mat-sys-on-tertiary-fixed-variant: light-dark(#0e3da8, #0e3da8);
 
   /* Neutral palette variables */
-  --mat-sys-background: light-dark(#f4fbf2, #0e1510);
+  --mat-sys-background: light-dark(#ffffff, #0e1510);
   --mat-sys-on-background: light-dark(#171d18, #dde4db);
-  --mat-sys-surface: light-dark(#f4fbf2, #0e1510);
-  --mat-sys-surface-dim: light-dark(#d5dcd3, #0e1510);
-  --mat-sys-surface-bright: light-dark(#f4fbf2, #343b35);
-  --mat-sys-surface-container-low: light-dark(#eff6ec, #171d18);
+  --mat-sys-surface: light-dark(#ffffff, #0e1510);
+  --mat-sys-surface-dim: light-dark(#f5f5f5, #0e1510);
+  --mat-sys-surface-bright: light-dark(#ffffff, #343b35);
+  --mat-sys-surface-container-low: light-dark(#fafafa, #171d18);
   --mat-sys-surface-container-lowest: light-dark(#ffffff, #09100b);
-  --mat-sys-surface-container: light-dark(#e9f0e7, #1b211c);
-  --mat-sys-surface-container-high: light-dark(#e3eae1, #252c26);
-  --mat-sys-surface-container-highest: light-dark(#dde4db, #303630);
+  --mat-sys-surface-container: light-dark(#f5f5f5, #1b211c);
+  --mat-sys-surface-container-high: light-dark(#eeeeee, #252c26);
+  --mat-sys-surface-container-highest: light-dark(#e0e0e0, #303630);
   --mat-sys-on-surface: light-dark(#171d18, #dde4db);
   --mat-sys-shadow: light-dark(#000000, #000000);
   --mat-sys-scrim: light-dark(#000000, #000000);

@@ -7,13 +7,22 @@ import { ProjectService, Project } from '../../shared/services/project.service';
 import { ReviewService } from '../../shared/services/review.service';
 import { User } from '../../shared/models/user.model';
 import { HeaderComponent } from '../../shared/components/header/header.component';
-import { FavoriteButtonComponent } from '../../shared/components/favorite-button/favorite-button.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ReportsService, ReportType as ServiceReportType } from '../../shared/services/reports.service';
 import { ReportDialogComponent, ReportType } from '../../shared/components/report-dialog/report-dialog.component';
 import { ReportConfirmationDialogComponent } from '../../shared/components/report-confirmation-dialog/report-confirmation-dialog.component';
 import { CreateProjectStepsComponent } from '../create-project-steps/create-project-steps.component';
+import { MatSidenavModule } from "@angular/material/sidenav";
+import { GuestSidenavComponent } from "../../shared/components/guest-sidenav/guest-sidenav.component";
+import { UserSidenavComponent } from "../../shared/components/user-sidenav/user-sidenav.component";
+import { BusinessProfileHeaderComponent } from '../components/business-profile-header/business-profile-header.component';
+import { BusinessServicesSectionComponent } from '../components/business-services-section/business-services-section.component';
+import { BusinessPortfolioSectionComponent } from '../components/business-portfolio-section/business-portfolio-section.component';
+import { BusinessReviewsSectionComponent } from '../components/business-reviews-section/business-reviews-section.component';
+import { BusinessAboutComponent } from '../components/business-about/business-about.component';
+import { BusinessOwnerComponent } from '../components/business-owner/business-owner.component';
+import { BusinessInformationComponent } from '../components/business-information/business-information.component';
 
 @Component({
   selector: 'app-business-profile',
@@ -21,10 +30,20 @@ import { CreateProjectStepsComponent } from '../create-project-steps/create-proj
   imports: [
     CommonModule,
     HeaderComponent,
-    FavoriteButtonComponent,
     MatDialogModule,
     MatSnackBarModule,
-  ],
+    MatSidenavModule,
+    GuestSidenavComponent,
+    UserSidenavComponent,
+    BusinessProfileHeaderComponent,
+    BusinessServicesSectionComponent,
+    BusinessPortfolioSectionComponent,
+    BusinessReviewsSectionComponent,
+    BusinessAboutComponent,
+    BusinessOwnerComponent,
+    BusinessInformationComponent,
+    UserSidenavComponent
+],
   templateUrl: './business-profile.component.html',
   styleUrl: './business-profile.component.scss'
 })
@@ -69,6 +88,10 @@ export class BusinessProfileComponent implements OnInit {
       : currentBusiness.owner_id?._id;
     
     return currentUser._id === ownerId;
+  });
+
+  currentUser = computed(() => {
+    return this.authService.user();
   });
 
   public readonly activeServices = computed(() => 
@@ -352,9 +375,14 @@ export class BusinessProfileComponent implements OnInit {
     this.activeSection.set(sectionId);
     const element = document.getElementById(sectionId);
     if (element) {
-      const yOffset = -100; // Offset for sticky header
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+      const headerOffset = 80; // Adjusted offset for sticky tabs
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      
+      window.scrollTo({ 
+        top: offsetPosition, 
+        behavior: 'smooth' 
+      });
     }
   }
 

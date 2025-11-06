@@ -1,0 +1,64 @@
+<mat-card class="review-card">
+  <mat-card-content>
+    <!-- Reviewer Info and Rating -->
+    <div class="flex items-start justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <!-- Avatar -->
+        <div class="flex-shrink-0 w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+          <mat-icon class="!w-6 !h-6 !text-2xl text-gray-500">person</mat-icon>
+        </div>
+        <!-- Name and Date -->
+        <div>
+          <h4 class="text-sm font-medium text-gray-900">{{ getReviewerName() }}</h4>
+          <p class="text-sm text-gray-500">{{ formatReviewDate(review().createdAt) }} • {{ getProjectTitle() }}</p>
+        </div>
+      </div>
+      <!-- Star Rating -->
+      <div class="flex items-center gap-2">
+        <div class="flex">
+          @for (star of getStarArray(review().rating); track $index) {
+            <mat-icon class="!w-4 !h-4 !text-base" [class.text-yellow-400]="star" [class.text-gray-300]="!star">
+              star
+            </mat-icon>
+          }
+        </div>
+        <span class="text-sm font-medium text-gray-900">{{ review().rating }}/5</span>
+      </div>
+    </div>
+
+    <!-- Review Text -->
+    @if (review().review_text || review().comment) {
+      <p class="text-gray-700 mb-4">{{ review().review_text || review().comment }}</p>
+    }
+
+    <!-- Detailed Ratings -->
+    @if (hasDetailedRatings()) {
+      <div class="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
+        @if (review().service_quality) {
+          <mat-chip class="!bg-blue-50 !text-blue-700">
+            <mat-icon class="!w-4 !h-4 !text-base mr-1">star</mat-icon>
+            Service Quality: {{ review().service_quality }}/5
+          </mat-chip>
+        }
+        @if (review().communication) {
+          <mat-chip class="!bg-green-50 !text-green-700">
+            <mat-icon class="!w-4 !h-4 !text-base mr-1">chat</mat-icon>
+            Communication: {{ review().communication }}/5
+          </mat-chip>
+        }
+        @if (review().timeliness) {
+          <mat-chip class="!bg-purple-50 !text-purple-700">
+            <mat-icon class="!w-4 !h-4 !text-base mr-1">schedule</mat-icon>
+            Timeliness: {{ review().timeliness }}/5
+          </mat-chip>
+        }
+        @if (review().value_for_money) {
+          <mat-chip class="!bg-orange-50 !text-orange-700">
+            <mat-icon class="!w-4 !h-4 !text-base mr-1">attach_money</mat-icon>
+            Value: {{ review().value_for_money }}/5
+          </mat-chip>
+        }
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

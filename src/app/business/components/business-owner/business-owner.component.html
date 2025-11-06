@@ -1,0 +1,67 @@
+<mat-card class="mb-8">
+  <mat-card-header class="!mb-4">
+    <mat-card-title class="text-lg font-semibold text-gray-900">Business Owner</mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content>
+    @if (loading()) {
+      <div class="flex items-center justify-center py-4">
+        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-600"></div>
+        <span class="ml-2 text-gray-600 text-sm">Loading owner...</span>
+      </div>
+    } @else if (owner()) {
+      <div class="space-y-4">
+        <div class="flex items-center space-x-3">
+          @if (owner()?.avatar_url) {
+            <img class="h-12 w-12 rounded-full object-cover" 
+              [src]="owner()!.avatar_url!"
+              [alt]="(owner()!.first_name + ' ' + (owner()!.last_name || '')).trim() + ' profile'">
+          } @else {
+            <div class="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
+              <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                  clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          }
+          <div>
+            <h4 class="text-sm font-medium text-gray-900">{{ (owner()?.first_name + ' ' + (owner()?.last_name || '')).trim() }}</h4>
+            <p class="text-sm text-gray-500">Business Owner</p>
+          </div>
+        </div>
+
+        @if (owner()?.bio) {
+          <p class="text-sm text-gray-700">{{ owner()?.bio }}</p>
+        }
+
+        @if (owner()?.city || owner()?.country) {
+          <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span class="text-sm text-gray-600">
+              {{ owner()?.city }}{{ owner()?.city && owner()?.country ? ', ' : '' }}{{ owner()?.country }}
+            </span>
+          </div>
+        }
+
+        @if (!isOwner()) {
+          <button (click)="contactOwnerClick.emit()"
+            class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+              </path>
+            </svg>
+            Contact Owner
+          </button>
+        }
+      </div>
+    } @else {
+      <p class="text-sm text-gray-500 text-center py-4">Owner information not available</p>
+    }
+  </mat-card-content>
+</mat-card>

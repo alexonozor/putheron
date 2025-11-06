@@ -1,0 +1,48 @@
+<mat-card>
+  <mat-card-header class="!mb-4">
+    <mat-card-title>Business Information</mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <mat-nav-list>
+      @if (business().address) {
+        <mat-list-item>
+          <mat-icon matListItemIcon>location_on</mat-icon>
+          <span matListItemTitle>Address</span>
+          <span matListItemLine>{{ business().address }}</span>
+          @if (business().city || business().state) {
+            <span matListItemLine class="text-gray-500">
+              {{ business().city }}{{ business().city && business().state ? ', ' : '' }}{{ business().state }}
+            </span>
+          }
+        </mat-list-item>
+      }
+
+      @if (business().contact_email) {
+        <mat-list-item>
+          <mat-icon matListItemIcon>email</mat-icon>
+          <span matListItemTitle>Email</span>
+          <span matListItemLine>{{ business().contact_email }}</span>
+        </mat-list-item>
+      }
+
+      @if (business().contact_phone) {
+        <mat-list-item>
+          <mat-icon matListItemIcon>phone</mat-icon>
+          <span matListItemTitle>Phone</span>
+          <span matListItemLine>{{ business().contact_phone }}</span>
+        </mat-list-item>
+      }
+
+      @if (business().website) {
+        <mat-list-item>
+          <mat-icon matListItemIcon>language</mat-icon>
+          <span matListItemTitle>Website</span>
+          <a matListItemLine [href]="business().website" target="_blank" class="text-primary hover:underline">
+            {{ business().website }}
+          </a>
+        </mat-list-item>
+      }
+    </mat-nav-list>
+  </mat-card-content>
+</mat-card>

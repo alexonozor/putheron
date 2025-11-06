@@ -1,0 +1,13 @@
+.stats-card {
+  border-radius: 0.75rem;
+  
+  ::ng-deep .mat-mdc-card-content {
+    padding: 1.5rem;
+    overflow: visible;
+  }
+
+  ::ng-deep mat-icon {
+    overflow: visible;
+    line-height: 1;
+  }
+}

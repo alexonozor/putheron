@@ -1,0 +1,61 @@
+// Slider styles
+.slider-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.slider-track {
+  display: flex;
+  gap: 1.5rem;
+  transition: transform 0.4s ease-in-out;
+  will-change: transform;
+}
+
+.slide-item {
+  flex: 0 0 calc(40% - 1rem); // Each card takes 40% width (2.5 cards visible)
+  min-width: 0;
+
+  // Mobile: Full width
+  @media (max-width: 767px) {
+    flex: 0 0 calc(100% - 1.5rem);
+  }
+
+  // Tablet: Half width
+  @media (min-width: 768px) and (max-width: 1023px) {
+    flex: 0 0 calc(50% - 1rem);
+  }
+
+  // Desktop: 40% width for 2.5 card effect
+  @media (min-width: 1024px) {
+    flex: 0 0 calc(40% - 1rem);
+  }
+}
+
+.slide-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #d1d5db;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+
+  &.active {
+    background-color: #374151;
+    width: 24px;
+    border-radius: 4px;
+  }
+
+  &:hover:not(.active) {
+    background-color: #9ca3af;
+    transform: scale(1.2);
+  }
+}
+
+.nav-button {
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

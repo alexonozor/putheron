@@ -1,0 +1,92 @@
+<mat-card class="stats-card !bg-gray-50">
+  <mat-card-content>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Overall Rating -->
+      <div class="text-center">
+        <div class="text-4xl font-bold text-gray-900 mb-2">{{ formatRating(averageRating()) }}</div>
+        <div class="flex justify-center items-center mb-2">
+          @for (star of getStarArray(averageRating()); track $index) {
+            <mat-icon class="!w-6 !h-6 !text-2xl" [class.text-yellow-400]="star" [class.text-gray-300]="!star">
+              star
+            </mat-icon>
+          }
+        </div>
+        <div class="text-sm text-gray-600">{{ getRatingLabel(averageRating()) }}</div>
+        <div class="text-sm text-gray-500 mt-1">
+          {{ totalReviews() }} {{ totalReviews() === 1 ? 'review' : 'reviews' }}
+        </div>
+      </div>
+
+      <!-- Rating Breakdown -->
+      @if (reviewStats()) {
+        <div class="space-y-2">
+          <h4 class="font-medium text-gray-900 mb-3">Rating Breakdown</h4>
+          
+          @if (reviewStats()!.service_quality_avg) {
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600">Service Quality</span>
+              <div class="flex items-center gap-2">
+                <div class="flex">
+                  @for (star of getStarArray(reviewStats()!.service_quality_avg!); track $index) {
+                    <mat-icon class="!w-4 !h-4 !text-base" [class.text-yellow-400]="star" [class.text-gray-300]="!star">
+                      star
+                    </mat-icon>
+                  }
+                </div>
+                <span class="font-medium">{{ formatRating(reviewStats()!.service_quality_avg!) }}</span>
+              </div>
+            </div>
+          }
+
+          @if (reviewStats()!.communication_avg) {
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600">Communication</span>
+              <div class="flex items-center gap-2">
+                <div class="flex">
+                  @for (star of getStarArray(reviewStats()!.communication_avg!); track $index) {
+                    <mat-icon class="!w-4 !h-4 !text-base" [class.text-yellow-400]="star" [class.text-gray-300]="!star">
+                      star
+                    </mat-icon>
+                  }
+                </div>
+                <span class="font-medium">{{ formatRating(reviewStats()!.communication_avg!) }}</span>
+              </div>
+            </div>
+          }
+
+          @if (reviewStats()!.timeliness_avg) {
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600">Timeliness</span>
+              <div class="flex items-center gap-2">
+                <div class="flex">
+                  @for (star of getStarArray(reviewStats()!.timeliness_avg!); track $index) {
+                    <mat-icon class="!w-4 !h-4 !text-base" [class.text-yellow-400]="star" [class.text-gray-300]="!star">
+                      star
+                    </mat-icon>
+                  }
+                </div>
+                <span class="font-medium">{{ formatRating(reviewStats()!.timeliness_avg!) }}</span>
+              </div>
+            </div>
+          }
+
+          @if (reviewStats()!.value_for_money_avg) {
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-600">Value for Money</span>
+              <div class="flex items-center gap-2">
+                <div class="flex">
+                  @for (star of getStarArray(reviewStats()!.value_for_money_avg!); track $index) {
+                    <mat-icon class="!w-4 !h-4 !text-base" [class.text-yellow-400]="star" [class.text-gray-300]="!star">
+                      star
+                    </mat-icon>
+                  }
+                </div>
+                <span class="font-medium">{{ formatRating(reviewStats()!.value_for_money_avg!) }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>
