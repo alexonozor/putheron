@@ -1,0 +1,1 @@
+import"./chunk-JKOY2XUY.js";var t=[{path:"",redirectTo:"roles",pathMatch:"full"},{path:"roles",loadComponent:()=>import("./chunk-4B6HX6OS.js").then(o=>o.RoleManagementComponent)}];export{t as ROLE_AND_PERMISSION_ROUTES};
