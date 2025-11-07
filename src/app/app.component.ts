@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { AuthorizationService } from './shared/services/authorization.service';
 import { AuthGateService } from './shared/services/auth-gate.service';
-
+import { NgProgressbar } from 'ngx-progressbar';
+import { NgProgressRouter } from 'ngx-progressbar/router';
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, NgProgressbar, NgProgressRouter],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

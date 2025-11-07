@@ -18,7 +18,7 @@
       </div>
 
       <!-- Rating Breakdown -->
-      @if (reviewStats()) {
+      @if (reviewStats() && hasBreakdownData()) {
         <div class="space-y-2">
           <h4 class="font-medium text-gray-900 mb-3">Rating Breakdown</h4>
           
@@ -85,6 +85,16 @@
               </div>
             </div>
           }
+        </div>
+      } @else {
+        <div class="space-y-3">
+          <!-- <h4 class="font-medium text-gray-900 mb-3">Rating Breakdown</h4> -->
+          <div class="text-center py-4">
+            <mat-icon class="!w-12 !h-12 !text-5xl text-gray-300 mb-2">analytics</mat-icon>
+            <p class="text-sm text-gray-500">
+              Detailed rating breakdown will appear here as more reviews are collected.
+            </p>
+          </div>
         </div>
       }
     </div>

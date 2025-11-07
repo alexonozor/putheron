@@ -44,24 +44,6 @@
         <span class="text-gray-700">{{ formatProjectDate(project().completed_at || project().updatedAt) }}</span>
       </div>
     </div>
-
-    <!-- Services Used -->
-    @if (project().selected_services && project().selected_services.length > 0) {
-      <div class="mt-4 pt-4 border-t border-gray-100">
-        <p class="text-xs text-gray-500 mb-2">Services Used:</p>
-        <div class="flex flex-wrap gap-1">
-          @for (service of project().selected_services.slice(0, 3); track $index) {
-            <mat-chip class="!bg-blue-50 !text-blue-700 !text-xs !px-2 !py-1">
-              {{ getServiceName(service) }}
-            </mat-chip>
-          }
-          @if (project().selected_services.length > 3) {
-            <mat-chip class="!bg-gray-100 !text-gray-600 !text-xs !px-2 !py-1">
-              +{{ project().selected_services.length - 3 }} more
-            </mat-chip>
-          }
-        </div>
-      </div>
-    }
+    
   </mat-card-content>
 </mat-card>

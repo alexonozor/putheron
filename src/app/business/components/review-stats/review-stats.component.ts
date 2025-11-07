@@ -40,10 +40,21 @@ export class ReviewStatsComponent {
 
   getRatingLabel(rating: number): string {
     if (rating >= 4.5) return 'Excellent';
-    if (rating >= 4.0) return 'Very Good';
-    if (rating >= 3.5) return 'Good';
-    if (rating >= 3.0) return 'Average';
-    if (rating >= 2.0) return 'Below Average';
+    if (rating >= 4) return 'Great';
+    if (rating >= 3) return 'Good';
+    if (rating >= 2) return 'Fair';
     return 'Poor';
+  }
+
+  hasBreakdownData(): boolean {
+    const stats = this.reviewStats();
+    if (!stats) return false;
+    
+    return !!(
+      stats.service_quality_avg ||
+      stats.communication_avg ||
+      stats.timeliness_avg ||
+      stats.value_for_money_avg
+    );
   }
 }

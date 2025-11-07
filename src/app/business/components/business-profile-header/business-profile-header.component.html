@@ -1,7 +1,7 @@
 <!-- Business Header with Banner Background -->
-<mat-card class="relative max-w-7xl mx-auto overflow-hidden">
+<mat-card class="relative max-w-7xl mx-auto rounded-t-[0px]! overflow-hidden">
   <!-- Banner Background -->
-  <div class="relative h-96 w-full overflow-hidden">
+  <div class="relative h-32 sm:h-48 md:h-64 lg:h-96 w-full overflow-hidden">
     @if (business()?.banner_url) {
     <div class="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
       [style.background-image]="'url(' + business()?.banner_url + ')'">
@@ -13,8 +13,8 @@
     <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-700"></div>
     }
 
-    <!-- Business Name and Type - Positioned on banner -->
-    <div class="absolute bottom-8 w-full">
+    <!-- Business Name - Desktop only, positioned on banner -->
+    <div class="hidden lg:block absolute bottom-8 w-full">
       <div class="px-8">
         <div class="flex items-center justify-between">
           <!-- Left side: Business name positioned next to where logo will be -->
@@ -55,28 +55,13 @@
                 {{ activeServicesCount() === 0 ? 'No Services Available' : 'Request Service' }}
               </button>
 
-              @if (business()?.website) {
-                <button (click)="visitWebsiteClick.emit()"
-                  class="inline-flex items-center px-6 py-2.5 bg-white hover:bg-gray-50 rounded-lg text-gray-700 transition-all font-medium shadow-lg">
-                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
-                  </svg>
-                  Visit Website
-                </button>
-              }
-
-              @if (business()?.contact_phone) {
-                <button
-                  class="inline-flex items-center px-6 py-2.5 bg-white hover:bg-gray-50 rounded-lg text-gray-700 transition-all font-medium shadow-lg">
-                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
-                    </path>
-                  </svg>
-                  {{ business()?.contact_phone }}
-                </button>
-              }
+              <!-- Favourite Button -->
+              <app-favorite-button
+                [businessId]="business()._id"
+                [businessName]="business().name"
+                size="medium"
+                buttonClass="inline-flex items-center justify-center p-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-lg transition-all shadow-lg">
+              </app-favorite-button>
 
               <!-- Report Button -->
               <button (click)="reportBusinessClick.emit()"
@@ -95,18 +80,18 @@
     </div>
   </div>
 
-  <!-- White Content Section Below Banner with Overlapping Logo -->
+  <!-- White Content Section Below Banner with Logo -->
   <div class="bg-white border-b border-gray-200 relative">
-    <div class="px-8 relative">
-      <!-- Logo - Positioned to overlap banner (half above, half below) -->
-      <div class="absolute -top-20 left-8 z-20">
+    <div class="px-4 sm:px-6 lg:px-8 relative">
+      <!-- Logo - Responsive positioning -->
+      <div class="absolute -top-10 sm:-top-12 lg:-top-20 left-4 sm:left-6 lg:left-8 z-20">
         @if (business()?.logo_url) {
-        <img class="h-40 w-40 rounded-full object-cover border-4 border-white shadow-xl bg-white"
+        <img class="h-20 w-20 sm:h-28 sm:w-28 lg:h-40 lg:w-40 rounded-full object-cover border-4 border-white shadow-xl bg-white"
           [src]="business()!.logo_url!" [alt]="business()!.name + ' logo'">
         } @else {
         <div
-          class="h-40 w-40 rounded-full bg-white flex items-center justify-center border-4 border-white shadow-xl">
-          <svg class="w-20 h-20 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          class="h-20 w-20 sm:h-28 sm:w-28 lg:h-40 lg:w-40 rounded-full bg-white flex items-center justify-center border-4 border-white shadow-xl">
+          <svg class="w-10 h-10 sm:w-14 sm:h-14 lg:w-20 lg:h-20 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
             </path>
@@ -115,54 +100,151 @@
         }
       </div>
 
-      <!-- Business name, type and location -->
-      <div class="pt-6 pb-4 ml-48 flex items-center justify-between">
-        <div>
-          <p class="text-base text-gray-600">
-            {{ businessTypeDisplay() }}
-          </p>
-          <p class="text-sm text-gray-500 mt-1">
-            @if (business().city && business().state) {
-              {{ business().city }}, {{ business().state }}
-            } @else if (business().city) {
-              {{ business().city }}
-            } @else if (business().state) {
-              {{ business().state }}
+      <!-- Business Info and Actions -->
+      <div class="pt-12 sm:pt-16 lg:pt-6 pb-4">
+        <!-- Mobile/Tablet Layout: Logo top, content below -->
+        <div class="lg:hidden space-y-4">
+          <!-- Business Name and Type -->
+          <div>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900">
+              {{ business()?.name }}
+            </h1>
+            <p class="text-sm sm:text-base text-gray-600 mt-1">
+              {{ businessTypeDisplay() }}
+            </p>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1">
+              @if (business().city && business().state) {
+                {{ business().city }}, {{ business().state }}
+              } @else if (business().city) {
+                {{ business().city }}
+              } @else if (business().state) {
+                {{ business().state }}
+              }
+            </p>
+          </div>
+
+          <!-- Mobile Action Buttons -->
+          <div class="flex gap-2">
+            @if (isOwner()) {
+              <button mat-stroked-button (click)="editBusinessClick.emit()" class="flex-1">
+                <mat-icon>edit</mat-icon>
+                Edit
+              </button>
+              <button mat-flat-button color="primary" (click)="addServiceClick.emit()" class="flex-1">
+                <mat-icon>add</mat-icon>
+                Service
+              </button>
+            } @else {
+              <button mat-flat-button color="primary" (click)="startProjectClick.emit()"
+                [disabled]="activeServicesCount() === 0" class="flex-1">
+                {{ activeServicesCount() === 0 ? 'No Services' : 'Request Service' }}
+              </button>
+              <app-favorite-button
+                [businessId]="business()._id"
+                [businessName]="business().name"
+                size="small"
+                buttonClass="text-gray-500 hover:text-red-500 transition-colors p-1">
+              </app-favorite-button>
+              <button mat-icon-button [matMenuTriggerFor]="mobileMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              
+              <mat-menu #mobileMenu="matMenu">
+                @if (business().contact_phone) {
+                  <button mat-menu-item>
+                    <mat-icon>phone</mat-icon>
+                    <span>{{ business().contact_phone }}</span>
+                  </button>
+                }
+                @if (business().website) {
+                  <button mat-menu-item (click)="visitWebsiteClick.emit()">
+                    <mat-icon>language</mat-icon>
+                    <span>Visit Website</span>
+                  </button>
+                }
+                <button mat-menu-item (click)="reportBusinessClick.emit()">
+                  <mat-icon>flag</mat-icon>
+                  <span>Report Business</span>
+                </button>
+              </mat-menu>
             }
-          </p>
+          </div>
         </div>
 
-        <!-- Business Stats - Simple view -->
-        <div class="flex items-center gap-8 mr-8">
-          <div class="text-center">
-            <div class="text-2xl font-bold text-gray-900">{{ business()?.rating || 0 }}/5</div>
-            <div class="text-xs text-gray-500">Rating</div>
+        <!-- Desktop Layout: Side by side -->
+        <div class="hidden lg:flex items-center justify-between ml-48">
+          <div>
+            <p class="text-base text-gray-600">
+              {{ businessTypeDisplay() }}
+            </p>
+            <p class="text-sm text-gray-500 mt-1">
+              @if (business().city && business().state) {
+                {{ business().city }}, {{ business().state }}
+              } @else if (business().city) {
+                {{ business().city }}
+              } @else if (business().state) {
+                {{ business().state }}
+              }
+            </p>
           </div>
-          <div class="text-center">
-            <div class="text-2xl font-bold text-gray-900">{{ business()?.review_count || 0 }}</div>
-            <div class="text-xs text-gray-500">Reviews</div>
-          </div>
-          <div class="text-center">
-            <div class="text-2xl font-bold text-gray-900">{{ business()?.view_count || 0 }}</div>
-            <div class="text-xs text-gray-500">Views</div>
-          </div>
-          <div class="text-center">
-            <div class="text-2xl font-bold text-gray-900">{{ activeServicesCount() }}</div>
-            <div class="text-xs text-gray-500">Services</div>
+
+          <!-- Business Stats - Desktop -->
+          <div class="flex items-center gap-8 mr-8">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-gray-900">{{ business()?.rating || 0 }}/5</div>
+              <div class="text-xs text-gray-500">Rating</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-gray-900">{{ business()?.review_count || 0 }}</div>
+              <div class="text-xs text-gray-500">Reviews</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-gray-900">{{ business()?.view_count || 0 }}</div>
+              <div class="text-xs text-gray-500">Views</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-gray-900">{{ activeServicesCount() }}</div>
+              <div class="text-xs text-gray-500">Services</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    
-    <!-- Navigation Tabs - Sticky within header -->
-    <div class="sticky top-0 z-40 bg-white border-t border-gray-200 shadow-sm">
+  </div>
+
+  <!-- Mobile Stats Grid (visible only on mobile) -->
+  <div class="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+    <div class="grid grid-cols-4 gap-2 text-center">
+      <div>
+        <div class="text-sm font-bold text-gray-900">{{ business().rating || 0 }}/5</div>
+        <div class="text-xs text-gray-500">Rating</div>
+      </div>
+      <div>
+        <div class="text-sm font-bold text-gray-900">{{ business().review_count || 0 }}</div>
+        <div class="text-xs text-gray-500">Reviews</div>
+      </div>
+      <div>
+        <div class="text-sm font-bold text-gray-900">{{ business().view_count || 0 }}</div>
+        <div class="text-xs text-gray-500">Followers</div>
+      </div>
+      <div>
+        <div class="text-sm font-bold text-gray-900">{{ activeServicesCount() }}</div>
+        <div class="text-xs text-gray-500">Services</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Navigation Tabs - Inside mat-card (original position) -->
+  <div class="tabs-container-original bg-white border-t border-b border-gray-200 shadow-sm" #originalTabs>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <nav mat-tab-nav-bar  
         mat-stretch-tabs="false" 
         mat-align-tabs="start"
-        [tabPanel]="tabPanel">
+        [tabPanel]="tabPanel"
+        class="mobile-tabs">
         @for (link of links; track link) { 
           <a mat-tab-link 
-            (click)="scrollToSection.emit(link.toLowerCase())"
+            (click)="onTabClick(link.toLowerCase())"
             [active]="activeSection() === link.toLowerCase()">
             {{ link }}
           </a>
@@ -172,3 +254,25 @@
     </div>
   </div>
 </mat-card>
+
+<!-- Sticky Navigation Tabs - Shows when original tabs scroll out of view -->
+<div class="tabs-container-sticky bg-white border-t border-b border-gray-200 shadow-sm" 
+     [class.visible]="showStickyTabs()"
+     [attr.data-sticky-visible]="showStickyTabs()">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav mat-tab-nav-bar  
+      mat-stretch-tabs="false" 
+      mat-align-tabs="start"
+      [tabPanel]="tabPanel2"
+      class="mobile-tabs">
+      @for (link of links; track link) { 
+        <a mat-tab-link 
+          (click)="onTabClick(link.toLowerCase())"
+          [active]="activeSection() === link.toLowerCase()">
+          {{ link }}
+        </a>
+      }
+    </nav>
+    <mat-tab-nav-panel #tabPanel2></mat-tab-nav-panel>
+  </div>
+</div>

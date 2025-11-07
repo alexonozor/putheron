@@ -29,3 +29,16 @@
     transform: rotate(360deg);
   }
 }
+
+.root-progress-bar {
+  --ng-progress-thickness: 3;
+  ::ng-deep {
+    .ng-bar-placeholder {
+      background-color: lightgray;
+    }
+    .ng-bar {
+      background: #690aac;
+      background: linear-gradient(to right, #690aac, #00F260);
+    }
+  }
+}

@@ -1,0 +1,56 @@
+// Original tabs container inside the card
+.tabs-container-original {
+  background-color: white;
+}
+
+// Sticky tabs container that appears when original scrolls out of view
+.tabs-container-sticky {
+  position: fixed;
+  top: 64px; // Height of the app-header (adjust if needed)
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-100%);
+  opacity: 0;
+  visibility: hidden;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, visibility 0s 0.3s;
+  pointer-events: none;
+
+  &.visible {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, visibility 0s 0s;
+  }
+}
+
+// Mobile-specific tab styles
+.mobile-tabs {
+  ::ng-deep {
+    .mat-mdc-tab-link {
+      min-width: auto !important;
+      padding: 0 12px !important;
+      font-size: 14px !important;
+      
+      @media (min-width: 640px) {
+        padding: 0 20px !important;
+        font-size: 15px !important;
+      }
+      
+      @media (min-width: 1024px) {
+        padding: 0 24px !important;
+        font-size: 16px !important;
+      }
+    }
+  }
+}
+
+// Remove border radius on mobile for header card only
+@media (max-width: 1023px) {
+  :host > mat-card {
+    border-radius: 0 !important;
+  }
+}

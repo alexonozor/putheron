@@ -44,6 +44,7 @@ export class HeaderComponent {
 
   // Input properties
   @Input() drawer!: MatDrawer;
+  @Input() maxWidth: string = 'max-w-12xl'; // Default max width for desktop
 
   readonly user = this.authService.user;
   readonly isAuthenticated = this.authService.isAuthenticated;

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BusinessService, Business, Service } from '../../shared/services/business.service';
@@ -23,6 +23,7 @@ import { BusinessReviewsSectionComponent } from '../components/business-reviews-
 import { BusinessAboutComponent } from '../components/business-about/business-about.component';
 import { BusinessOwnerComponent } from '../components/business-owner/business-owner.component';
 import { BusinessInformationComponent } from '../components/business-information/business-information.component';
+import { FooterComponent } from '../../shared/components/footer/footer.component';
 
 @Component({
   selector: 'app-business-profile',
@@ -42,7 +43,8 @@ import { BusinessInformationComponent } from '../components/business-information
     BusinessAboutComponent,
     BusinessOwnerComponent,
     BusinessInformationComponent,
-    UserSidenavComponent
+    UserSidenavComponent,
+    FooterComponent
 ],
   templateUrl: './business-profile.component.html',
   styleUrl: './business-profile.component.scss'
@@ -57,6 +59,9 @@ export class BusinessProfileComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly reportsService = inject(ReportsService);
+
+  // ViewChild for scrollable container
+  @ViewChild('drawerContent', { read: ElementRef }) drawerContent?: ElementRef;
 
   // Loading states
   public readonly loading = signal(false);
@@ -152,6 +157,63 @@ export class BusinessProfileComponent implements OnInit {
         this.loadReviews(businessId);
       }
     });
+
+    // Set up scroll tracking after a delay to ensure DOM is ready
+    setTimeout(() => {
+      this.updateActiveSection();
+      // Add scroll listener to the drawer content
+      const container = this.getScrollContainer();
+      if (container) {
+        container.addEventListener('scroll', () => this.updateActiveSection());
+      }
+    }, 100);
+  }
+
+  // Track scroll position to update active section (keeping for window scroll as fallback)
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    this.updateActiveSection();
+  }
+
+  // Get the scrollable container
+  private getScrollContainer(): Element {
+    // The mat-drawer-content is the scrollable container
+    if (this.drawerContent?.nativeElement) {
+      return this.drawerContent.nativeElement;
+    }
+    const container = document.querySelector('mat-drawer-content');
+    return container || document.documentElement;
+  }
+
+  // Update active section based on scroll position
+  private updateActiveSection() {
+    const sections = ['about', 'services', 'portfolio', 'reviews'];
+    const headerOffset = 116; // Same as scroll offset - tabs + header height
+    const activationThreshold = 20; // Small buffer zone for activation
+    
+    let currentSection = 'about'; // Default to first section
+    
+    for (const sectionId of sections) {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        
+        // A section is active if its top is within the threshold below our header
+        // This means: top of section is between (headerOffset - threshold) and (headerOffset + threshold)
+        const distanceFromTarget = rect.top - headerOffset;
+        
+        if (distanceFromTarget <= activationThreshold && rect.bottom > headerOffset) {
+          currentSection = sectionId;
+          break;
+        }
+      }
+    }
+    
+    // Only update if it's different to avoid unnecessary re-renders
+    if (this.activeSection() !== currentSection) {
+      console.log('Active section changed to:', currentSection);
+      this.activeSection.set(currentSection);
+    }
   }
 
   private async loadBusiness() {
@@ -372,18 +434,38 @@ export class BusinessProfileComponent implements OnInit {
 
   // Navigation methods
   scrollToSection(sectionId: string) {
+    console.log('Scrolling to section:', sectionId);
     this.activeSection.set(sectionId);
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const headerOffset = 80; // Adjusted offset for sticky tabs
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    
+    // Small delay to ensure DOM is ready
+    setTimeout(() => {
+      const element = document.getElementById(sectionId);
+      console.log('Found element:', element);
       
-      window.scrollTo({ 
-        top: offsetPosition, 
-        behavior: 'smooth' 
-      });
-    }
+      if (element) {
+        const container = this.getScrollContainer();
+        // Reduced offset: app-header (64px) + sticky tabs height (~50px) + tiny gap (2px)
+        const headerOffset = 50; 
+        
+        // Calculate the exact position
+        const elementTop = element.offsetTop;
+        const scrollPosition = elementTop - headerOffset;
+        
+        console.log('Container:', container);
+        console.log('Element offsetTop:', elementTop);
+        console.log('Scrolling to position:', scrollPosition);
+        
+        container.scrollTo({ 
+          top: scrollPosition, 
+          behavior: 'smooth' 
+        });
+
+        // Update active section again after scroll completes
+        setTimeout(() => {
+          this.activeSection.set(sectionId);
+        }, 500);
+      }
+    }, 100);
   }
 
   // Get dynamic service count for navigation

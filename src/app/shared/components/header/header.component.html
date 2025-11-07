@@ -2,13 +2,13 @@
     <!-- Desktop Navigation -->
     <mat-toolbar class="desktop-toolbar bg-white shadow-sm border-b border-gray-200">
         <div class="w-full mx-auto px-4 sm:px-6 lg:px-8"
-            [ngClass]="{ 'max-w-12xl': isAuthenticated(), 'max-w-7xl': !isAuthenticated() }">
+            [ngClass]="maxWidth">
             <div class="flex justify-between items-center w-full">
                 <!-- Logo -->
                 <div class="flex items-center gap-4">
                     <a routerLink="/"
                         class="text-2xl font-bold text-primary-600 hover:text-primary-700 transition-colors">
-                        <img src="/assets/logos/colored-logo.svg" alt="VouchHer" class="h-10 w-auto">
+                        <img src="/assets/logos/logo-icon-md.png" alt="VouchHer" class="h-10 w-auto">
                     </a>
                     <!-- navbar search: hidden on home until user scrolls past hero -->
                     @if(showHeaderSearch()) {
@@ -118,15 +118,15 @@
         <div class="w-full flex items-center justify-between px-3">
             @if (isAuthenticated()) {
             <!-- Logged In Mobile Header -->
-            <!-- Menu Button -->
-            <button mat-icon-button (click)="toggleMobileMenu()" class="text-gray-700 -ml-2">
-                <mat-icon>menu</mat-icon>
-            </button>
-
-            <!-- Logo Center -->
-            <a routerLink="/" class="flex items-center absolute left-1/2 transform -translate-x-1/2">
-                <img src="/assets/logos/logo-icon-md.png" alt="VouchHer" class="h-8 w-auto">
-            </a>
+            <!-- Menu Button and Logo Left -->
+            <div class="flex items-center gap-3">
+                <button mat-icon-button (click)="toggleMobileMenu()" class="text-gray-700 -ml-2">
+                    <mat-icon>menu</mat-icon>
+                </button>
+                <a routerLink="/" class="flex items-center">
+                    <img src="/assets/logos/logo-icon-md.png" alt="VouchHer" class="h-8 w-auto">
+                </a>
+            </div>
 
             <!-- Right Actions -->
             <div class="flex items-center gap-1">
@@ -149,15 +149,15 @@
             </div>
             } @else {
             <!-- Logged Out Mobile Header -->
-            <!-- Menu Button Left -->
-            <button mat-icon-button (click)="toggleMobileMenu()" class="text-gray-700 -ml-2">
-                <mat-icon>menu</mat-icon>
-            </button>
-
-            <!-- Logo Center -->
-            <a routerLink="/" class="flex items-center absolute left-1/2 transform -translate-x-1/2">
-                <img src="/assets/logos/logo-icon-md.png" alt="VouchHer" class="h-8 w-auto">
-            </a>
+            <!-- Menu Button and Logo Left -->
+            <div class="flex items-center gap-3">
+                <button mat-icon-button (click)="toggleMobileMenu()" class="text-gray-700 -ml-2">
+                    <mat-icon>menu</mat-icon>
+                </button>
+                <a routerLink="/" class="flex items-center">
+                    <img src="/assets/logos/logo-icon-md.png" alt="VouchHer" class="h-8 w-auto">
+                </a>
+            </div>
 
             <!-- Sign Up Button Right -->
             <button mat-flat-button color="primary" routerLink="/auth/signup">

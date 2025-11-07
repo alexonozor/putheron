@@ -185,3 +185,34 @@ html, body { height: 100%; }
     height: 100vh;
     border-radius: 0px;
   }
+
+// Mobile-first: Remove border radius only from section wrapper cards on mobile
+@media (max-width: 1023px) {
+  // Target only the main section container cards, not inner cards
+  app-business-about,
+  app-business-services-section,
+  app-business-portfolio-section,
+  app-business-reviews-section,
+  app-business-owner,
+  app-business-information {
+    > mat-card, > .mat-mdc-card {
+      border-radius: 0 !important;
+    }
+  }
+  
+  // Remove border radius from portfolio cards on mobile
+  app-portfolio-card {
+    mat-card, .mat-mdc-card {
+      border-radius: 0 !important;
+    }
+  }
+  
+  // Keep border radius on other inner component cards
+  app-service-card,
+  app-review-card,
+  app-review-stats {
+    mat-card, .mat-mdc-card {
+      border-radius: 0.5rem !important; // Keep default Material rounded corners
+    }
+  }
+}
