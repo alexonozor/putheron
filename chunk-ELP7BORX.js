@@ -1,1 +1,0 @@
-import"./chunk-JKOY2XUY.js";var t=[{path:"",loadComponent:()=>import("./chunk-R3O3CGSA.js").then(o=>o.AdminReportsComponent),children:[{path:"",loadComponent:()=>import("./chunk-AIXKEOXP.js").then(o=>o.AdminReportsListComponent)},{path:":id",loadComponent:()=>import("./chunk-XF3RE4IL.js").then(o=>o.AdminReportDetailsComponent)}]}];export{t as adminReportsRoutes};
