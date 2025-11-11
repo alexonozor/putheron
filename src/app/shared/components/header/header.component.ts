@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, effect, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -14,7 +14,6 @@ import { BusinessService } from '../../services/business.service';
 import { NotificationNavComponent } from '../notification-nav/notification-nav.component';
 import { MatCardModule } from '@angular/material/card';
 import { Search } from '../search/search';
-import { NavigationEnd } from '@angular/router';
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -40,11 +39,15 @@ export class HeaderComponent {
   private readonly authorizationService = inject(AuthorizationService);
   private readonly businessService = inject(BusinessService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
 
   // Input properties
   @Input() drawer!: MatDrawer;
   @Input() maxWidth: string = 'max-w-12xl'; // Default max width for desktop
+
+  // Search query signal for two-way binding
+  readonly headerSearchQuery = signal<string>('');
 
   readonly user = this.authService.user;
   readonly isAuthenticated = this.authService.isAuthenticated;
@@ -97,6 +100,27 @@ export class HeaderComponent {
     // Initialize behavior for showing/hiding navbar search based on route
     // and hero search visibility
     this.setupRouteObserver();
+
+    // Sync header search query with URL params
+    this.syncHeaderSearchWithUrl();
+  }
+
+  private syncHeaderSearchWithUrl() {
+    // Listen to route changes and update header search query
+    this.router.events.subscribe(evt => {
+      if (evt instanceof NavigationEnd) {
+        // Get query params from current route
+        const tree = this.router.parseUrl(this.router.url);
+        const searchQuery = tree.queryParams['q'] || '';
+        this.headerSearchQuery.set(searchQuery);
+        console.log('Header search synced with URL:', searchQuery);
+      }
+    });
+
+    // Also do an initial sync
+    const tree = this.router.parseUrl(this.router.url);
+    const searchQuery = tree.queryParams['q'] || '';
+    this.headerSearchQuery.set(searchQuery);
   }
 
   private setupRouteObserver() {
@@ -308,6 +332,14 @@ export class HeaderComponent {
 
   toggleMobileMenu() {
     this.drawer.toggle();
+  }
+
+  onHeaderSearch(query: string) {
+    console.log('Header search triggered with query:', query);
+    // Navigate to search page with query
+    this.router.navigate(['/search'], { 
+      queryParams: { q: query.trim() } 
+    });
   }
 
   async signOut() {

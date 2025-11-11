@@ -15,3 +15,90 @@
 ::ng-deep mat-chip {
   cursor: pointer;
 }
+
+// Fixed filters container positioned below header
+.filters-container {
+  position: fixed;
+  top: 64px; // Height of the app-header
+  left: 0;
+  right: 0;
+  z-index: 40; // Below header (z-50) but above content
+  background-color: white;
+}
+
+// Compact field styling for smaller filters
+::ng-deep .compact-field {
+  width: auto;
+  min-width: 160px;
+  
+  .mat-mdc-form-field-infix {
+    padding: 8px 0;
+    min-height: 40px;
+  }
+
+  .mat-mdc-text-field-wrapper {
+    padding: 0 12px;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+// Sort button styling
+::ng-deep .sort-button {
+  height: 40px;
+  border-radius: 20px;
+  padding: 0 16px;
+  font-size: 14px;
+  white-space: nowrap;
+
+  .mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-left: 4px;
+  }
+}
+
+// Mobile filter and sort buttons
+::ng-deep .mobile-filter-button,
+::ng-deep .mobile-sort-button {
+  height: 48px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+  
+  .mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// Clear button styling
+::ng-deep .clear-button {
+  height: 40px;
+  border-radius: 20px;
+  padding: 0 16px;
+  font-size: 14px;
+  white-space: nowrap;
+
+  .mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+  }
+}
+
+// Mobile bottom sheet custom styling
+::ng-deep .mobile-sort-bottom-sheet,
+::ng-deep .mobile-filter-bottom-sheet {
+  .mat-bottom-sheet-container {
+    padding: 0;
+    border-radius: 16px 16px 0 0;
+    max-height: 90vh;
+  }
+}

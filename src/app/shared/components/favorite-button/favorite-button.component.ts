@@ -39,10 +39,13 @@ export class FavoriteButtonComponent {
   constructor() {
     // Effect to watch for changes in favorited business IDs
     effect(() => {
-      if (this.businessId) {
+      // Only check favorite status if user is authenticated
+      if (this.businessId && this.isAuthenticated()) {
         this.favoritesService.isBusinessFavorited(this.businessId).subscribe(
           isFavorited => this.isFavorited.set(isFavorited)
         );
+      } else {
+        this.isFavorited.set(false);
       }
     });
   }

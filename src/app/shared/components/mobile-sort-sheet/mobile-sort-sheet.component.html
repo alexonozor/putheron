@@ -1,0 +1,33 @@
+<div class="mobile-sort-sheet">
+  <!-- Header -->
+  <div class="sheet-header">
+    <h2 class="sheet-title">Sort Businesses by</h2>
+    <button mat-icon-button (click)="close()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Sort Options -->
+  <mat-nav-list class="sort-options">
+    @for (option of sortOptions; track option.value) {
+      <mat-list-item (click)="onSortChange(option.value)" class="sort-option-item">
+        <div class="option-content">
+          <mat-radio-button 
+            [value]="option.value"
+            [checked]="selectedSort === option.value"
+            (change)="onSortChange(option.value)"
+            class="sort-radio">
+            {{ option.label }}
+          </mat-radio-button>
+        </div>
+      </mat-list-item>
+    }
+  </mat-nav-list>
+
+  <!-- Action Button -->
+  <div class="sheet-footer">
+    <button mat-flat-button color="primary" (click)="showResults()" class="show-results-button">
+      Show Results
+    </button>
+  </div>
+</div>

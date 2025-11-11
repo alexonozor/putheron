@@ -1,5 +1,24 @@
 // Header component styles
 
+// Ensure header is sticky on all screen sizes
+:host {
+  display: block;
+  position: relative;
+  z-index: 50;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: white;
+}
+
+.mat-toolbar {
+  position: relative;
+  z-index: 50;
+}
+
 // Smooth transitions for mobile drawer
 .mat-toolbar {
   padding: 0;

@@ -1,0 +1,88 @@
+<mat-card 
+  class=" overflow-hidden cursor-pointer transition-all duration-300  hover:-translate-y-1 relative h-full flex flex-col" 
+   
+  (click)="onCardClick()">
+  
+  <!-- Card Header with Owner Avatar, Name, Location -->
+  <mat-card-header class="!relative">
+    <div mat-card-avatar class="!w-12 !h-12 !rounded-full !overflow-hidden !flex !items-center !justify-center" [style.background-color]="getOwnerProfilePicture() ? 'transparent' : getOwnerAvatarColor()">
+      @if (getOwnerProfilePicture()) {
+        <img [src]="getOwnerProfilePicture()" [alt]="getOwnerFullName()" class="w-full h-full object-cover" />
+      } @else {
+        <span class="text-white font-bold text-base">{{ getOwnerInitials() }}</span>
+      }
+    </div>
+    <mat-card-title class="!text-base !font-normal !leading-tight !m-0 !mb-1 !text-gray-900">
+      {{ getOwnerFullName() }}
+    </mat-card-title>
+    <mat-card-subtitle class="text-sm! !text-light !text-gray-600 !mt-0 !flex !items-center !gap-1.5">
+      @if (getBusinessLocation()) {
+        <span>{{ getBusinessLocation() }}</span>
+      }
+      @if (getOwnerCountryFlag()) {
+        <span class="text-lg leading-none" [matTooltip]="getOwnerCountryName()">{{ getOwnerCountryFlag() }}</span>
+      }
+    </mat-card-subtitle>
+    
+    <!-- Favorite Button in Header (Top Right) -->
+    <div class="absolute top-3 right-3 z-10" (click)="onFavoriteClick($event)">
+      <app-favorite-button
+        [businessId]="business()._id"
+        [businessName]="business().name"
+        size="small"
+      />
+    </div>
+  </mat-card-header>
+
+  <!-- Banner Image -->
+  @if (business().banner_url && business().banner_url!.trim() !== '') {
+    <div class="relative w-full h-52 bg-gray-100">
+      <img 
+        [src]="business().banner_url" 
+        [alt]="business().name"
+        class="w-full h-full object-cover" />
+      <!-- Category Badge on Banner -->
+      <div class="absolute top-3 left-3 bg-green-600 text-white text-xs font-semibold px-3 py-1.5 rounded-md">
+        {{ getCategoryInitials() }}
+      </div>
+    </div>
+  } @else {
+    <div class="relative w-full h-52 bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+      <div class="bg-green-600 text-white text-2xl font-bold px-4 py-2 rounded-md absolute top-3 left-3">
+        {{ getCategoryInitials() }}
+      </div>
+    </div>
+  }
+
+  <!-- Card Content -->
+  <mat-card-content class="!p-4 !pt-3 flex-grow flex flex-col">
+    <!-- Business Name -->
+    <h3 class="text-lg font-bold text-gray-900 m-0 mb-2 leading-tight">{{ business().name }}</h3>
+    
+    <!-- Description -->
+    <p class="text-sm leading-relaxed text-gray-700 m-0 mb-3 line-clamp-3 flex-grow">
+      {{ getBusinessDescription() }}
+    </p>
+
+    
+  </mat-card-content>
+  <mat-card-actions class="flex justify-between border-t border-gray-100 px-4 py-3">
+    @if (hasRating()) {
+        <div class="flex items-center gap-1 bg-green-50 px-2.5 py-1 rounded text-sm">
+          <span class="text-green-700 font-semibold text-xs">Top Rated</span>
+          <mat-icon class="!w-4 !h-4 !text-base !text-yellow-500 !leading-none">star</mat-icon>
+          <span class="font-bold text-gray-900 text-sm">{{ getRatingDisplay() }}</span>
+          <span class="text-gray-500 text-xs">({{ getReviewCount() }})</span>
+        </div>
+      } @else {
+        <div class="bg-secondary-50 text-secondary-700 font-semibold text-xs px-2.5 py-1 rounded">
+          New Business
+        </div>
+      }
+    @if (hasStartingPrice()) {
+      <div class="text-base font-normal text-gray-900">
+        From {{ getStartingPrice() | currency}}
+      </div>
+    }
+  </mat-card-actions>
+</mat-card>

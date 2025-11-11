@@ -1,0 +1,26 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.business-card {
+  // Ensure card has rounded corners
+  border-radius: 8px !important;
+  
+  // Override Material's default card header styles
+  ::ng-deep mat-card-header {
+    .mat-mdc-card-avatar {
+      margin-right: 0 !important;
+    }
+    
+    .mat-mdc-card-header-text {
+      margin: 0 !important;
+      flex: 1;
+    }
+  }
+  
+  // Ensure content padding is removed for image
+  ::ng-deep .mat-mdc-card-content:first-of-type {
+    padding-top: 0 !important;
+  }
+}

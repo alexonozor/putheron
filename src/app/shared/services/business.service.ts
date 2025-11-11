@@ -97,7 +97,7 @@ export interface Business {
   postal_code?: string;
   location?: {
     type: { type: string; enum: ['Point']; default: 'Point' };
-    coordinates: [number, number]; // [longitude, latitude]
+    coordinates: [number, number];
   };
   business_stage?: 'side_gig' | 'startup' | 'growing_business' | 'established_business';
   business_hours?: {
@@ -115,6 +115,7 @@ export interface Business {
   is_certified_wbe_mbe?: boolean;
   woman_owned_attestation?: boolean;
   services?: string[];
+  servicesData?: Array<{ _id: string; name: string; price?: number; pricing_type?: PricingType }>; // Populated services with prices
   tags?: string[];
   contact_email?: string;
   contact_phone?: string;
@@ -336,10 +337,14 @@ export class BusinessService {
     limit = 20,
     filters: {
       category?: string;
+      categories?: string[];
       subcategory?: string;
+      businessType?: string;
+      rating?: number;
       city?: string;
       state?: string;
       featured?: boolean;
+      sortBy?: string;
     } = {}
   ): Observable<ApiResponse<{ businesses: Business[], total: number, page: number, totalPages: number }>> {
     const params = new URLSearchParams({
@@ -359,8 +364,20 @@ export class BusinessService {
       params.append('category', filters.category);
     }
 
+    if (filters.categories && filters.categories.length > 0) {
+      params.append('categories', filters.categories.join(','));
+    }
+
     if (filters.subcategory) {
       params.append('subcategory', filters.subcategory);
+    }
+
+    if (filters.businessType) {
+      params.append('businessType', filters.businessType);
+    }
+
+    if (filters.rating !== undefined && filters.rating > 0) {
+      params.append('rating', filters.rating.toString());
     }
 
     if (filters.city) {
@@ -373,6 +390,10 @@ export class BusinessService {
 
     if (filters.featured !== undefined) {
       params.append('featured', filters.featured.toString());
+    }
+
+    if (filters.sortBy && filters.sortBy !== 'relevance') {
+      params.append('sortBy', filters.sortBy);
     }
 
     return this.http.get<ApiResponse<{ businesses: Business[], total: number, page: number, totalPages: number }>>(

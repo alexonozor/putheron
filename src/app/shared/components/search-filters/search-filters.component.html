@@ -1,40 +1,157 @@
-<!-- Filter Buttons -->
-<div class="flex flex-wrap items-center gap-2 lg:gap-3">
-    <!-- Mobile View - Category Select Button Only -->
-    <div class="w-full lg:hidden">
-        <button 
-            mat-stroked-button 
-            [matMenuTriggerFor]="categoryMenuMobile" 
-            class="rounded-full border-gray-300 px-4 w-full">
-            <span class="text-gray-700 truncate">{{ selectedCategoryName() }}</span>
-            <mat-icon class="ml-1">expand_more</mat-icon>
-        </button>
-    </div>
-
-    <!-- Desktop View - Category Chips (4 random categories) -->
-    <div class="hidden lg:flex items-center gap-3 w-full flex-wrap">
-        @for (category of displayedCategories(); track category._id) {
-            <mat-chip 
-                (click)="selectCategory(category)"
-                class="cursor-pointer">
-                {{ category.name }}
-            </mat-chip>
-        }
-    </div>
-
-    <!-- Category Menu for Mobile -->
-    <mat-menu #categoryMenuMobile="matMenu" class="search-filter-menu">
-        <div class="max-h-96 overflow-y-auto">
-            @for (category of categories(); track category._id) {
-                <button 
-                    mat-menu-item 
-                    (click)="selectCategory(category)">
-                    @if (category.icon) {
-                        <mat-icon>{{ category.icon }}</mat-icon>
-                    }
-                    <span>{{ category.name }}</span>
-                </button>
-            }
+<!-- Fixed filters container always positioned below header -->
+<div class="filters-container fixed top-16 left-0 right-0 z-40 bg-white border-b border-gray-200 transition-shadow duration-300"
+     [class.shadow-md]="isScrolled()">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="space-y-4">
+      
+      <!-- Mobile Search Input (if enabled) -->
+      @if (showSearchInput()) {
+        <div class="lg:hidden">
+          <app-search 
+            [(searchQuery)]="searchQuery"
+            [backgroundColor]="'#ffffff'"
+            [boxShadow]="'0 2px 6px 0 #20212451'"
+            [placeholder]="'Search business or service'"
+            (searchEvent)="onSearchChange($event)">
+          </app-search>
+          
+          <!-- Mobile Filter and Sort Buttons -->
+          <div class="grid grid-cols-2 gap-3 mt-3">
+            <button mat-stroked-button class="mobile-filter-button" (click)="openMobileFilterSheet()">
+              <div class="flex items-center justify-center gap-2">
+                <mat-icon class="text-green-600">tune</mat-icon>
+                <span>Filter</span>
+                @if (hasActiveFilters()) {
+                  <span class="bg-green-600 text-white text-xs rounded-full px-2 py-0.5 ml-1">
+                    {{ getActiveFiltersCount() }}
+                  </span>
+                }
+              </div>
+            </button>
+            
+            <button mat-stroked-button class="mobile-sort-button" (click)="openMobileSortSheet()">
+              <div class="flex items-center justify-center gap-2">
+                <mat-icon class="text-green-600">sort</mat-icon>
+                <span>Sort</span>
+              </div>
+            </button>
+          </div>
         </div>
-    </mat-menu>
+      }
+
+      <!-- Desktop Filters and Sort Row -->
+      <div class="hidden lg:flex lg:flex-row lg:items-center gap-3">
+        
+        <!-- Left Side: Filters -->
+        <div class="flex flex-wrap items-center gap-2">
+          
+          <!-- Category Filter -->
+          <mat-form-field appearance="outline" class="compact-field">
+            <mat-label>Category</mat-label>
+            <mat-select [formControl]="selectedCategoriesControl" 
+                        multiple
+                        (selectionChange)="onFilterChange()">
+              @for (category of categories(); track category._id) {
+                <mat-option [value]="category._id">{{ category.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Business Type Filter -->
+          <mat-form-field appearance="outline" class="compact-field">
+            <mat-label>Service Type</mat-label>
+            <mat-select [formControl]="businessTypeControl" 
+                        (selectionChange)="onFilterChange()">
+              <mat-option value="">All Types</mat-option>
+              <mat-option value="service">Services</mat-option>
+              <mat-option value="product">Products</mat-option>
+              <mat-option value="both">Both</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Heritage Filter -->
+          <mat-form-field appearance="outline" class="compact-field">
+            <mat-label>Heritage/Origin</mat-label>
+            <mat-select [formControl]="selectedCountriesControl" 
+                        multiple
+                        (selectionChange)="onFilterChange()">
+              @for (country of countries(); track country.code) {
+                <mat-option [value]="country.name">{{ country.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Rating Filter -->
+          <mat-form-field appearance="outline" class="compact-field">
+            <mat-label>Minimum Rating</mat-label>
+            <mat-select [formControl]="selectedRatingControl" 
+                        (selectionChange)="onFilterChange()">
+              <mat-option [value]="0">All ratings</mat-option>
+              <mat-option [value]="1">1+ stars</mat-option>
+              <mat-option [value]="2">2+ stars</mat-option>
+              <mat-option [value]="3">3+ stars</mat-option>
+              <mat-option [value]="4">4+ stars</mat-option>
+              <mat-option [value]="5">5 stars</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Right Side: Sort Button -->
+        <div class="flex items-center gap-3 ml-auto">
+          <!-- Sort Button -->
+          <button 
+            mat-stroked-button 
+            [matMenuTriggerFor]="sortMenu"
+            class="sort-button">
+            Sort by: {{ getSortLabel() }}
+            <mat-icon class="ml-1">expand_more</mat-icon>
+          </button>
+          
+          <mat-menu #sortMenu="matMenu">
+            <button mat-menu-item (click)="onSortChange('relevance')">
+              <mat-icon *ngIf="sortByControl.value === 'relevance'">check</mat-icon>
+              <span [class.ml-6]="sortByControl.value !== 'relevance'">Relevance</span>
+            </button>
+            <button mat-menu-item (click)="onSortChange('best_selling')">
+              <mat-icon *ngIf="sortByControl.value === 'best_selling'">check</mat-icon>
+              <span [class.ml-6]="sortByControl.value !== 'best_selling'">Best selling</span>
+            </button>
+            <button mat-menu-item (click)="onSortChange('newest')">
+              <mat-icon *ngIf="sortByControl.value === 'newest'">check</mat-icon>
+              <span [class.ml-6]="sortByControl.value !== 'newest'">Newest arrivals</span>
+            </button>
+            <button mat-menu-item (click)="onSortChange('price_low')">
+              <mat-icon *ngIf="sortByControl.value === 'price_low'">check</mat-icon>
+              <span [class.ml-6]="sortByControl.value !== 'price_low'">Price: Low to High</span>
+            </button>
+            <button mat-menu-item (click)="onSortChange('price_high')">
+              <mat-icon *ngIf="sortByControl.value === 'price_high'">check</mat-icon>
+              <span [class.ml-6]="sortByControl.value !== 'price_high'">Price: High to Low</span>
+            </button>
+            <button mat-menu-item (click)="onSortChange('rating')">
+              <mat-icon *ngIf="sortByControl.value === 'rating'">check</mat-icon>
+              <span [class.ml-6]="sortByControl.value !== 'rating'">Highest Rated</span>
+            </button>
+          </mat-menu>
+
+          <!-- Clear Filters -->
+          @if (hasActiveFilters()) {
+            <button mat-stroked-button 
+                    type="button"
+                    (click)="clearFilters()"
+                    color="warn"
+                    class="clear-button">
+              <mat-icon>clear</mat-icon>
+              Clear filters
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Results Count -->
+      <div class="text-sm text-gray-600">
+        <span class="font-medium">{{ totalResults() }}</span> businesses found
+      </div>
+    </div>
+  </div>
 </div>

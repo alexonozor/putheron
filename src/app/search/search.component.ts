@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ViewChild, effect } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -17,11 +17,15 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { HeaderComponent } from '../shared/components/header/header.component';
+import { FooterComponent } from '../shared/components/footer/footer.component';
 import { BusinessService, Business } from '../shared/services/business.service';
 import { CategoryService } from '../shared/services/category-new.service';
-import { FavoriteButtonComponent } from '../shared/components/favorite-button/favorite-button.component';
+import { BusinessCardComponent } from '../shared/components/business-card/business-card.component';
+import { SearchFiltersComponent, SearchFilters } from '../shared/components/search-filters/search-filters.component';
 import { AuthService } from '../shared/services/auth.service';
 import { COUNTRIES } from '../shared/data/countries';
+import { UserSidenavComponent } from "../shared/components/user-sidenav/user-sidenav.component";
+import { GuestSidenavComponent } from "../shared/components/guest-sidenav/guest-sidenav.component";
 
 @Component({
   selector: 'app-search',
@@ -44,8 +48,12 @@ import { COUNTRIES } from '../shared/data/countries';
     MatDividerModule,
     MatTooltipModule,
     HeaderComponent,
-    FavoriteButtonComponent
-  ],
+    FooterComponent,
+    BusinessCardComponent,
+    SearchFiltersComponent,
+    UserSidenavComponent,
+    GuestSidenavComponent
+],
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss']
 })
@@ -57,12 +65,16 @@ export class SearchComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private authService = inject(AuthService);
   
+  // ViewChild to access header component
+  @ViewChild(HeaderComponent) headerComponent!: HeaderComponent;
+  
   // Signals
   searchQuery = signal<string>('');
   selectedCountries = signal<string[]>([]);
   selectedCategories = signal<string[]>([]);
   selectedBusinessTypes = signal<string[]>([]);
   selectedRating = signal<number>(0);
+  selectedSortBy = signal<string>('relevance');
   businesses = signal<Business[]>([]);
   categories = signal<any[]>([]);
   loading = signal<boolean>(false);
@@ -71,6 +83,10 @@ export class SearchComponent implements OnInit {
   currentPage = signal<number>(1);
   totalPages = signal<number>(0);
   filtersOpen = signal<boolean>(false);
+
+  currentUser = computed(() => {
+    return this.authService.user();
+  });
   
   // Computed properties
   readonly isClientMode = computed(() => {
@@ -118,6 +134,28 @@ export class SearchComponent implements OnInit {
              form?.selectedRating > 0);
   });
 
+  constructor() {
+    // Effect to sync header search query with form
+    effect(() => {
+      if (this.headerComponent) {
+        const headerQuery = this.headerComponent.headerSearchQuery();
+        if (headerQuery !== this.searchQuery()) {
+          this.searchQuery.set(headerQuery);
+          this.filterForm?.patchValue({ searchQuery: headerQuery }, { emitEvent: false });
+          this.onSearch();
+        }
+      }
+    });
+
+    // Effect to sync search query to header when URL params change
+    effect(() => {
+      const query = this.searchQuery();
+      if (this.headerComponent && query !== this.headerComponent.headerSearchQuery()) {
+        this.headerComponent.headerSearchQuery.set(query);
+      }
+    });
+  }
+
   ngOnInit() {
     this.initializeForm();
     this.loadCategories();
@@ -127,8 +165,10 @@ export class SearchComponent implements OnInit {
       this.searchQuery.set(params['q'] || '');
       this.selectedCountries.set(params['countries'] ? params['countries'].split(',') : []);
       this.selectedCategories.set(params['categories'] ? params['categories'].split(',') : []);
-      this.selectedBusinessTypes.set(params['businessTypes'] ? params['businessTypes'].split(',') : []);
+      // Fix: Read businessType (singular) from URL params
+      this.selectedBusinessTypes.set(params['businessType'] ? [params['businessType']] : []);
       this.selectedRating.set(parseInt(params['rating']) || 0);
+      this.selectedSortBy.set(params['sortBy'] || 'relevance');
       this.currentPage.set(parseInt(params['page']) || 1);
       
       // Update form with URL params
@@ -169,16 +209,25 @@ export class SearchComponent implements OnInit {
   async performSearch() {
     const query = this.searchQuery();
     const countries = this.selectedCountries();
+    const categories = this.selectedCategories();
+    const businessTypes = this.selectedBusinessTypes();
+    const rating = this.selectedRating();
+    const sortBy = this.selectedSortBy();
     const page = this.currentPage();
     
-    // If no query and user is in client mode, show verified businesses
-    if (!query && countries.length === 0 && this.isClientMode()) {
+    // Build filters object
+    const hasFilters = countries.length > 0 || categories.length > 0 || 
+                       businessTypes.length > 0 || rating > 0 || 
+                       (sortBy && sortBy !== 'relevance');
+    
+    // If no query and no filters and user is in client mode, show verified businesses
+    if (!query && !hasFilters && this.isClientMode()) {
       this.loadVerifiedBusinesses();
       return;
     }
     
-    // Skip search if no query and no countries for non-client mode
-    if (!query && countries.length === 0) {
+    // If no query and no filters for non-client mode, show nothing
+    if (!query && !hasFilters) {
       this.businesses.set([]);
       this.total.set(0);
       this.totalPages.set(0);
@@ -189,11 +238,31 @@ export class SearchComponent implements OnInit {
       this.loading.set(true);
       this.error.set(null);
 
+      // Build filter object with all active filters
+      const filters: any = {};
+      
+      if (categories.length > 0) {
+        filters.categories = categories;
+      }
+      
+      if (businessTypes.length > 0 && businessTypes[0]) {
+        filters.businessType = businessTypes[0]; // Use first selected type
+      }
+      
+      if (rating > 0) {
+        filters.rating = rating;
+      }
+
+      if (sortBy && sortBy !== 'relevance') {
+        filters.sortBy = sortBy;
+      }
+
       const response = await this.businessService.searchBusinesses(
         query || undefined,
         countries.length > 0 ? countries : undefined,
         page,
-        12 // Items per page
+        12, // Items per page
+        filters
       ).toPromise();
 
       if (response?.success && response.data) {
@@ -238,6 +307,36 @@ export class SearchComponent implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  onFiltersChange(filters: SearchFilters) {
+    const queryParams: any = { page: 1 }; // Reset to first page on new search
+    
+    if (filters.searchQuery?.trim()) {
+      queryParams.q = filters.searchQuery.trim();
+    }
+    
+    if (filters.selectedCountries && filters.selectedCountries.length > 0) {
+      queryParams.countries = filters.selectedCountries.join(',');
+    }
+
+    if (filters.selectedCategories && filters.selectedCategories.length > 0) {
+      queryParams.categories = filters.selectedCategories.join(',');
+    }
+
+    if (filters.businessType) {
+      queryParams.businessType = filters.businessType;
+    }
+
+    if (filters.selectedRating && filters.selectedRating > 0) {
+      queryParams.rating = filters.selectedRating;
+    }
+
+    if (filters.sortBy && filters.sortBy !== 'relevance') {
+      queryParams.sortBy = filters.sortBy;
+    }
+
+    this.router.navigate(['/search'], { queryParams });
   }
 
   onSearch() {

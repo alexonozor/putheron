@@ -1,0 +1,109 @@
+<div class="mobile-filter-sheet">
+  <!-- Header -->
+  <div class="sheet-header">
+    <h2 class="sheet-title">Filters</h2>
+    <button mat-icon-button (click)="close()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Filter Content -->
+  <div class="filter-content">
+    
+    <!-- Categories Section -->
+    <div class="filter-section">
+      <h3 class="section-title">Category</h3>
+      <mat-nav-list class="filter-list">
+        @for (category of categories; track category._id) {
+          <mat-list-item class="filter-item">
+            <div class="option-content">
+              <mat-checkbox 
+                [checked]="isCategorySelected(category._id)"
+                (change)="onCategoryChange(category._id, $event.checked)"
+                class="filter-checkbox">
+                {{ category.name }}
+              </mat-checkbox>
+            </div>
+          </mat-list-item>
+        }
+      </mat-nav-list>
+    </div>
+
+    <!-- Service Type Section -->
+    <div class="filter-section">
+      <h3 class="section-title">Service Type</h3>
+      <mat-nav-list class="filter-list">
+        @for (option of businessTypeOptions; track option.value) {
+          <mat-list-item (click)="onBusinessTypeChange(option.value)" class="filter-item">
+            <div class="option-content">
+              <mat-radio-button 
+                [value]="option.value"
+                [checked]="businessType === option.value"
+                (change)="onBusinessTypeChange(option.value)"
+                class="filter-radio">
+                {{ option.label }}
+              </mat-radio-button>
+            </div>
+          </mat-list-item>
+        }
+      </mat-nav-list>
+    </div>
+
+    <!-- Heritage/Origin Section -->
+    <div class="filter-section">
+      <h3 class="section-title">Heritage/Origin</h3>
+      <mat-nav-list class="filter-list">
+        @for (country of countries; track country.code) {
+          <mat-list-item class="filter-item">
+            <div class="option-content">
+              <mat-checkbox 
+                [checked]="isCountrySelected(country.name)"
+                (change)="onCountryChange(country.name, $event.checked)"
+                class="filter-checkbox">
+                {{ country.name }}
+              </mat-checkbox>
+            </div>
+          </mat-list-item>
+        }
+      </mat-nav-list>
+    </div>
+
+    <!-- Rating Section -->
+    <div class="filter-section">
+      <h3 class="section-title">Minimum Rating</h3>
+      <mat-nav-list class="filter-list">
+        @for (option of ratingOptions; track option.value) {
+          <mat-list-item (click)="onRatingChange(option.value)" class="filter-item">
+            <div class="option-content">
+              <mat-radio-button 
+                [value]="option.value"
+                [checked]="selectedRating === option.value"
+                (change)="onRatingChange(option.value)"
+                class="filter-radio">
+                {{ option.label }}
+              </mat-radio-button>
+            </div>
+          </mat-list-item>
+        }
+      </mat-nav-list>
+    </div>
+
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="sheet-footer">
+    <div class="footer-actions">
+      @if (getActiveFiltersCount() > 0) {
+        <button mat-stroked-button (click)="clearAll()" class="clear-button">
+          Clear All
+        </button>
+      }
+      <button mat-flat-button color="primary" (click)="showResults()" class="show-results-button">
+        Show Results
+        @if (getActiveFiltersCount() > 0) {
+          <span class="filter-badge">{{ getActiveFiltersCount() }}</span>
+        }
+      </button>
+    </div>
+  </div>
+</div>

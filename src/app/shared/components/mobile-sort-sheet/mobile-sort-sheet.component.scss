@@ -1,0 +1,99 @@
+.mobile-sort-sheet {
+  padding: 0;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.close-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  ::ng-deep .mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.sort-options {
+  flex: 1;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.sort-option-item {
+  height: 60px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f9fafb;
+  }
+
+  ::ng-deep .mdc-list-item__content {
+    width: 100%;
+  }
+}
+
+.option-content {
+  width: 100%;
+  padding: 0 20px;
+}
+
+.sort-radio {
+  width: 100%;
+  
+  ::ng-deep .mdc-form-field {
+    width: 100%;
+  }
+
+  ::ng-deep .mdc-label {
+    font-size: 16px;
+    color: #374151;
+    padding-left: 12px;
+  }
+
+  ::ng-deep .mdc-radio__native-control:checked ~ .mdc-radio__background .mdc-radio__inner-circle {
+    border-color: #10b981;
+    background-color: #10b981;
+  }
+
+  ::ng-deep .mdc-radio__native-control:checked ~ .mdc-radio__background .mdc-radio__outer-circle {
+    border-color: #10b981;
+  }
+}
+
+.sheet-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  background-color: white;
+}
+
+.show-results-button {
+  width: 100%;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}

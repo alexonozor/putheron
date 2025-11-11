@@ -3,14 +3,13 @@
   [ngStyle]="{
     'background-color': backgroundColor(),
     width: width(),
-    'box-shadow': boxShadow() || null
+    'box-shadow': boxShadow() ? boxShadow() : undefined
   }"
 >
   <input
     type="search"
     [placeholder]="placeholder()"
-    [(ngModel)]="query"
-    (ngModelChange)="onQueryChange()"
+    [(ngModel)]="searchQuery"
     (keyup.enter)="onSearch()"
     class="flex-1 bg-transparent outline-none border-none text-gray-700
            text-sm sm:text-base placeholder:text-gray-500 min-w-0"

@@ -23,15 +23,7 @@
                     [placeholder]="'Search business or service'"
                     [boxShadow]="'0 2px 6px 0 #20212451'"
                     (searchEvent)="onSearch()"
-                    (queryChange)="onSearchQueryChange($event)"
-                />
-            </div>
-
-            <!-- Filter Buttons Component -->
-            <div class="mb-10">
-                <app-search-filters 
-                    (filtersChanged)="onFiltersChanged($event)"
-                    (categorySelected)="onCategorySelected($event)"
+                    [(searchQuery)]="heroSearchQuery"
                 />
             </div>
 

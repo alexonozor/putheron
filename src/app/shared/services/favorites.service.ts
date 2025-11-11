@@ -1,8 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, firstValueFrom } from 'rxjs';
+import { Observable, BehaviorSubject, firstValueFrom, catchError, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { ConfigService } from './config.service';
+import { AuthService } from './auth.service';
 
 export interface Favorite {
   _id: string;
@@ -57,6 +58,7 @@ export interface ApiResponse<T> {
 export class FavoritesService {
   private readonly http = inject(HttpClient);
   private readonly config = inject(ConfigService);
+  private readonly authService = inject(AuthService);
 
   private readonly apiUrl = `${this.config.apiBaseUrl}/favorites`;
   
@@ -68,14 +70,21 @@ export class FavoritesService {
   private favoritedBusinessIds = new BehaviorSubject<Set<string>>(new Set());
   
   constructor() {
-    // Load user favorites on service initialization
-    this.loadUserFavorites();
+    // Only load user favorites if user is authenticated
+    if (this.authService.isAuthenticated()) {
+      this.loadUserFavorites();
+    }
   }
 
   /**
    * Add a business to user's favorites
    */
   addToFavorites(businessId: string): Observable<ApiResponse<Favorite>> {
+    // Check if user is authenticated
+    if (!this.authService.isAuthenticated()) {
+      return of({ success: false, data: {} as Favorite, error: 'User must be authenticated to add favorites' });
+    }
+
     this.loading.set(true);
     
     return this.http.post<ApiResponse<Favorite>>(this.apiUrl, { business_id: businessId })
@@ -92,6 +101,11 @@ export class FavoritesService {
             this.favoritedBusinessIds.next(currentIds);
           }
           this.loading.set(false);
+        }),
+        catchError(error => {
+          this.loading.set(false);
+          console.error('Error adding to favorites:', error);
+          return of({ success: false, data: {} as Favorite, error: error.message });
         })
       );
   }
@@ -100,6 +114,11 @@ export class FavoritesService {
    * Remove a business from user's favorites
    */
   removeFromFavorites(businessId: string): Observable<ApiResponse<{ message: string }>> {
+    // Check if user is authenticated
+    if (!this.authService.isAuthenticated()) {
+      return of({ success: false, data: { message: '' }, error: 'User must be authenticated to remove favorites' });
+    }
+
     this.loading.set(true);
     
     return this.http.delete<ApiResponse<{ message: string }>>(`${this.apiUrl}/${businessId}`)
@@ -117,6 +136,11 @@ export class FavoritesService {
             this.favoritedBusinessIds.next(currentIds);
           }
           this.loading.set(false);
+        }),
+        catchError(error => {
+          this.loading.set(false);
+          console.error('Error removing from favorites:', error);
+          return of({ success: false, data: { message: '' }, error: error.message });
         })
       );
   }
@@ -125,6 +149,11 @@ export class FavoritesService {
    * Get all user's favorites
    */
   getUserFavorites(): Observable<ApiResponse<Favorite[]>> {
+    // Don't make request if user is not authenticated
+    if (!this.authService.isAuthenticated()) {
+      return of({ success: true, data: [] });
+    }
+
     return this.http.get<ApiResponse<Favorite[]>>(this.apiUrl)
       .pipe(
         tap(response => {
@@ -137,6 +166,10 @@ export class FavoritesService {
             ));
             this.favoritedBusinessIds.next(businessIds);
           }
+        }),
+        catchError(error => {
+          console.error('Error fetching favorites:', error);
+          return of({ success: false, data: [], error: error.message });
         })
       );
   }
@@ -207,6 +240,12 @@ export class FavoritesService {
    * Load user favorites on service initialization
    */
   private async loadUserFavorites(): Promise<void> {
+    // Only load if user is authenticated
+    if (!this.authService.isAuthenticated()) {
+      console.log('User not authenticated, skipping favorites load');
+      return;
+    }
+
     try {
       console.log('Loading user favorites...');
       await this.getUserFavoritesAsync();

@@ -1,113 +1,49 @@
-<app-header />
+<app-header [drawer]="drawer" [maxWidth]="'max-w-7xl'" />
+<mat-drawer-container class="content-body" [hasBackdrop]="true" autosize>
+  <mat-drawer #drawer [mode]="'over'" class="drawer">
+    @if (currentUser()) {
+    <app-user-sidenav />
+    } @else {
+    <app-guest-sidenav />
+    }
+  </mat-drawer>
+  <mat-drawer-content class="bg-[#F4F2EE]!" #drawerContent>
+    <div class="min-h-screen bg-[#F4F2EE]">
+  <!-- Filters Section - Desktop Only (Below Header) -->
+  <div class="hidden lg:block">
+    <app-search-filters
+      [countries]="countries"
+      [totalResults]="total()"
+      [initialSearchQuery]="searchQuery()"
+      [initialCategories]="selectedCategories()"
+      [initialBusinessType]="selectedBusinessTypes()[0] || ''"
+      [initialCountries]="selectedCountries()"
+      [initialRating]="selectedRating()"
+      [initialSortBy]="selectedSortBy()"
+      (filtersChange)="onFiltersChange($event)">
+    </app-search-filters>
+  </div>
 
-<div class="min-h-screen bg-gray-50">
-  <!-- Search Section -->
-  <div class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      
-      <!-- Main Search Bar -->
-      <form [formGroup]="filterForm" class="space-y-6">
-        <div class="relative">
-          <mat-form-field appearance="outline" class="w-full">
-            <mat-label>Find women-owned businesses and services...</mat-label>
-            <input matInput 
-                   formControlName="searchQuery"
-                   placeholder="Search for services, products, or businesses"
-                   (input)="onSearch()">
-            <mat-icon matPrefix>search</mat-icon>
-          </mat-form-field>
-        </div>
-
-        <!-- Filters Row -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          
-          <!-- Category Filter -->
-          <mat-form-field appearance="outline">
-            <mat-label>Category</mat-label>
-            <mat-select formControlName="selectedCategories" 
-                        multiple
-                        (selectionChange)="onSearch()">
-              @for (category of categories(); track category._id) {
-                <mat-option [value]="category._id">{{ category.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <!-- Business Type Filter -->
-          <mat-form-field appearance="outline">
-            <mat-label>Service Type</mat-label>
-            <mat-select formControlName="businessType" 
-                        (selectionChange)="onSearch()">
-              <mat-option value="">All Types</mat-option>
-              <mat-option value="service">Services</mat-option>
-              <mat-option value="product">Products</mat-option>
-              <mat-option value="both">Both</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <!-- Heritage Filter -->
-          <mat-form-field appearance="outline">
-            <mat-label>Heritage/Origin</mat-label>
-            <mat-select formControlName="selectedCountries" 
-                        multiple
-                        (selectionChange)="onSearch()">
-              @for (country of countries; track country.code) {
-                <mat-option [value]="country.name">{{ country.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <!-- Location Filter -->
-          <mat-form-field appearance="outline">
-            <mat-label>Location</mat-label>
-            <input matInput 
-                   formControlName="location"
-                   placeholder="City, State"
-                   (input)="onSearch()">
-            <mat-icon matPrefix>location_on</mat-icon>
-          </mat-form-field>
-
-          <!-- Rating Filter -->
-          <mat-form-field appearance="outline">
-            <mat-label>Minimum Rating</mat-label>
-            <mat-select formControlName="selectedRating" 
-                        (selectionChange)="onSearch()">
-              <mat-option [value]="0">All ratings</mat-option>
-              <mat-option [value]="1">1+ stars</mat-option>
-              <mat-option [value]="2">2+ stars</mat-option>
-              <mat-option [value]="3">3+ stars</mat-option>
-              <mat-option [value]="4">4+ stars</mat-option>
-              <mat-option [value]="5">5 stars</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <!-- Additional Options Row -->
-        <div class="flex flex-wrap items-center gap-4 justify-between">
-          <div class="flex items-center gap-4">
-            <!-- Clear Filters -->
-            @if (hasActiveFilters()) {
-              <button mat-stroked-button 
-                      type="button"
-                      (click)="clearFilters()"
-                      color="warn">
-                <mat-icon>clear</mat-icon>
-                Clear all filters
-              </button>
-            }
-          </div>
-
-          <!-- Results Count -->
-          <div class="text-sm text-gray-600">
-            <span class="font-medium">{{ total() }}</span> services found
-          </div>
-        </div>
-      </form>
-    </div>
+  <!-- Search Section - Mobile Only -->
+  <div class="lg:hidden">
+    <app-search-filters
+      [countries]="countries"
+      [showSearchInput]="true"
+      [totalResults]="total()"
+      [initialSearchQuery]="searchQuery()"
+      [initialCategories]="selectedCategories()"
+      [initialBusinessType]="selectedBusinessTypes()[0] || ''"
+      [initialCountries]="selectedCountries()"
+      [initialRating]="selectedRating()"
+      [initialSortBy]="selectedSortBy()"
+      (filtersChange)="onFiltersChange($event)">
+    </app-search-filters>
   </div>
 
   <!-- Results Section -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Mobile: header(64px) + py-4(32px) + search(40px) + mt-3(12px) + buttons(48px) + offset(16px) = 212px -->
+  <!-- Desktop: header(64px) + py-4(32px) + filters(40px) + results(20px) + offset(16px) = 172px -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-[212px] lg:pt-[172px]">
     
     <!-- Loading State -->
     @if (loading()) {
@@ -145,155 +81,20 @@
     @if (!loading() && hasResults()) {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         @for (business of businesses(); track business._id) {
-          <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden group cursor-pointer"
-               (click)="onBusinessClick(business)">
-            
-            <!-- Banner Section -->
-            <div class="relative h-32 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-              @if (business.banner_url && business.banner_url.trim() !== '') {
-                <img 
-                  [src]="business.banner_url" 
-                  [alt]="business.name + ' banner'"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-              } @else {
-                <div class="w-full h-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
-                  <mat-icon class="text-white text-4xl opacity-60">business</mat-icon>
-                </div>
-              }
-              
-              <!-- Pro Badge -->
-              @if (business.is_featured) {
-                <div class="absolute top-3 left-3">
-                  <span class="bg-yellow-100 text-yellow-800 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium backdrop-blur-sm">
-                    <mat-icon class="w-3 h-3 mr-1">star</mat-icon>
-                    PRO
-                  </span>
-                </div>
-              }
-              
-              <!-- Status Badge -->
-              <div class="absolute top-3 right-3">
-                <span class="bg-green-100 text-green-800 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium backdrop-blur-sm">
-                  {{ business.business_type | titlecase }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Logo and Business Info Container -->
-            <div class="relative px-6 pb-6">
-              <!-- Logo positioned to overlap banner -->
-              <div class="flex justify-center -mt-8 mb-4">
-                <div class="w-16 h-16 rounded-full bg-white shadow-lg ring-2 ring-white overflow-hidden">
-                  @if (business.logo_url) {
-                    <img 
-                      [src]="business.logo_url" 
-                      [alt]="business.name + ' logo'"
-                      class="w-full h-full object-cover">
-                  } @else {
-                    <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-                      <mat-icon class="text-gray-400 text-lg">business</mat-icon>
-                    </div>
-                  }
-                </div>
-              </div>
-
-              <!-- Business Details -->
-              <div class="text-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 truncate mb-1 group-hover:text-green-600 transition-colors">
-                  {{ business.name }}
-                </h3>
-                <p class="text-sm text-gray-600 mb-1">{{ getCategoryName(business) }}</p>
-                @if (business.city && business.state) {
-                  <p class="text-xs text-gray-500 flex items-center justify-center">
-                    <mat-icon class="w-3 h-3 mr-1 text-xs">location_on</mat-icon>
-                    {{ business.city }}, {{ business.state }}
-                  </p>
-                }
-              </div>
-
-              <!-- Business Description -->
-              <p class="text-sm text-gray-600 mb-4 line-clamp-2 text-center">
-                {{ business.short_description || business.description || 'Professional service provider' }}
-              </p>
-
-              <!-- Rating Section -->
-              <div class="flex items-center justify-center mb-4">
-                @if (business.rating != null && business.rating > 0) {
-                  <div class="flex items-center gap-1">
-                    <mat-icon class="text-yellow-400 text-sm">star</mat-icon>
-                    <span class="text-sm font-bold text-gray-900">{{ business.rating.toFixed(1) }}</span>
-                    <span class="text-xs text-gray-500">({{ business.review_count || 0 }} {{ (business.review_count || 0) === 1 ? 'review' : 'reviews' }})</span>
-                  </div>
-                } @else {
-                  <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">New business</span>
-                }
-              </div>
-
-              @if (business.tags && business.tags.length > 0) {
-                <div class="mb-4">
-                  <div class="flex flex-wrap gap-1 justify-center">
-                    @for (tag of business.tags.slice(0, 2); track tag) {
-                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
-                        {{ tag }}
-                      </span>
-                    }
-                    @if (business.tags.length > 2) {
-                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
-                        +{{ business.tags.length - 2 }}
-                      </span>
-                    }
-                  </div>
-                </div>
-              }
-
-              <!-- Owner Info Footer (replaces action buttons) -->
-              <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div class="flex items-center gap-2">
-                  <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                    @if (getOwnerAvatar(business)) {
-                      <img [src]="getOwnerAvatar(business)" [alt]="getOwnerName(business)" 
-                           class="w-full h-full object-cover">
-                    } @else {
-                      <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <mat-icon class="text-gray-400 text-sm">person</mat-icon>
-                      </div>
-                    }
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900 truncate">{{ getOwnerName(business) }}</p>
-                    <p class="text-xs text-gray-500">{{ getOwnerCountry(business) }}</p>
-                  </div>
-                </div>
-                
-                <!-- Favorite Button and View Count -->
-                <div class="flex items-center gap-2">
-                  <!-- Favorite Button (stops click propagation) -->
-                  <div (click)="$event.stopPropagation()">
-                    <app-favorite-button
-                      [businessId]="business._id"
-                      [businessName]="business.name"
-                      size="small"
-                      buttonClass="text-gray-500 hover:text-red-500 transition-colors p-1">
-                    </app-favorite-button>
-                  </div>
-                  
-                  <!-- View count -->
-                  @if (business.view_count > 0) {
-                    <div class="text-xs text-gray-500 flex items-center">
-                      <mat-icon class="w-3 h-3 mr-1 text-xs">visibility</mat-icon>
-                      {{ business.view_count }}
-                    </div>
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
+          <app-business-card
+            [business]="business"
+            [ownerName]="getOwnerName(business)"
+            [ownerAvatar]="getOwnerAvatar(business)"
+            [ownerCountry]="getOwnerCountry(business)"
+            [categoryName]="getCategoryName(business)"
+            (businessClick)="onBusinessClick($event)">
+          </app-business-card>
         }
       </div>
 
       <!-- Pagination -->
       @if (totalPages() > 1) {
-        <div class="flex justify-center">
+        <div class="flex justify-left">
           <mat-paginator 
             [length]="total()"
             [pageSize]="12"
@@ -306,4 +107,12 @@
       }
     }
   </div>
+
+  <!-- Footer -->
+  <footer-component />
 </div>
+  </mat-drawer-content>
+  
+</mat-drawer-container>
+
+
