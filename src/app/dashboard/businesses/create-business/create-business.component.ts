@@ -11,6 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService } from '../../../shared/services/auth.service';
 import { BusinessService, Category, Subcategory, CreateBusinessDto, UpdateBusinessDto, Business } from '../../../shared/services/business.service';
 import { PhoneValidators } from '../../../shared/validators/phone.validator';
@@ -46,6 +47,7 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private businessService = inject(BusinessService);
+  private breakpointObserver = inject(BreakpointObserver);
 
   private autocomplete: any;
 
@@ -62,6 +64,7 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
   public isEditMode = signal(false);
   public businessId = signal<string | null>(null);
   public currentBusiness = signal<Business | null>(null);
+  public isMobile = signal<boolean>(false);
 
   // File storage
   public logoFile: File | null = null;
@@ -86,6 +89,11 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
   ];
 
   constructor() {
+    // Detect mobile breakpoint
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
+      this.isMobile.set(result.matches);
+    });
+
     this.businessInfoForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
