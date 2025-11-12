@@ -1,7 +1,7 @@
 <app-header [drawer]="drawer"></app-header>
 <mat-drawer-container class="content-body" [hasBackdrop]="true" autosize>
     <mat-drawer #drawer [mode]="'over'" class="drawer">
-        <app-guest-sidenav />
+        <app-guest-sidenav [drawer]="drawer" />
     </mat-drawer>
     <mat-drawer-content class="bg-white!">
 

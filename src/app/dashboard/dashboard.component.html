@@ -2,7 +2,7 @@
 <app-header [drawer]="drawer"></app-header>
 <mat-drawer-container  [hasBackdrop]="isMobile()">
     <mat-drawer #drawer position="start" [opened]="sidenavOpened()"  [disableClose]="!isMobile()" [mode]="isMobile() ? 'over' : 'side'" class="drawer">
-      <app-user-sidenav />
+      <app-user-sidenav [drawer]="drawer" />
     </mat-drawer>
     <mat-drawer-content class="content-body">
         <router-outlet />

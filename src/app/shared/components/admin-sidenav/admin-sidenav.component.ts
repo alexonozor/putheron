@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, effect, output } from '@angular/core';
+import { Component, Input, inject, signal, computed, effect } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDrawer } from '@angular/material/sidenav';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user.model';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
@@ -28,17 +30,21 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
   styleUrls: ['./admin-sidenav.component.scss']
 })
 export class AdminSidenavComponent {
+  @Input() drawer?: MatDrawer;
+
   private router = inject(Router);
   private authService = inject(AuthService);
-  
-  // Output event to notify parent when navigation occurs (to close sidenav on mobile)
-  navigationClick = output<void>();
+  private breakpointObserver = inject(BreakpointObserver);
 
   // User signal
   user = computed(() => this.authService.currentUser);
+  readonly isMobile = signal<boolean>(false);
 
   constructor() {
-    // No need for subscription with signals
+    // Detect mobile breakpoint
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
+      this.isMobile.set(result.matches);
+    });
   }
 
   getUserInitials(): string {
@@ -61,16 +67,25 @@ export class AdminSidenavComponent {
 
   navigateAndClose(path: string): void {
     this.router.navigate([path]);
-    this.navigationClick.emit();
+    // Only close sidenav on mobile
+    if (this.isMobile() && this.drawer) {
+      this.drawer.toggle();
+    }
   }
 
   onNavigationClick(): void {
-    this.navigationClick.emit();
+    // Only close sidenav on mobile
+    if (this.isMobile() && this.drawer) {
+      this.drawer.toggle();
+    }
   }
 
   navigateTo(route: string): void {
     this.router.navigate([`/admin/dashboard/${route}`]);
-    this.onNavigationClick();
+    // Only close sidenav on mobile
+    if (this.isMobile() && this.drawer) {
+      this.drawer.toggle();
+    }
   }
 
   logout(): void {

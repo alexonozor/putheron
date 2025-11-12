@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, inject, signal, computed, effect } from '@angular/core';
+import { Component, Input, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDrawer } from '@angular/material/sidenav';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService } from '../../services/auth.service';
 import { BusinessService } from '../../services/business.service';
 import { ProjectService } from '../../services/project.service';
@@ -32,13 +34,15 @@ export class UserSidenavComponent {
   private readonly businessService = inject(BusinessService);
   private readonly projectService = inject(ProjectService);
   private readonly favoritesService = inject(FavoritesService);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
-  @Output() closeSidenav = new EventEmitter<void>();
+  @Input() drawer?: MatDrawer;
 
   readonly user = this.authService.user;
   readonly userBusinessCount = signal<number>(0);
   readonly totalServices = signal<number>(0);
   readonly totalProjects = signal<number>(0);
+  readonly isMobile = signal<boolean>(false);
   
   readonly favoritesCount = computed(() => this.favoritesService.getFavoritesCount());
 
@@ -52,6 +56,11 @@ export class UserSidenavComponent {
   });
 
   constructor() {
+    // Detect mobile breakpoint
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
+      this.isMobile.set(result.matches);
+    });
+
     effect(() => {
       const user = this.user();
       if (user) {
@@ -104,7 +113,10 @@ export class UserSidenavComponent {
 
   navigateAndClose(route: string) {
     this.router.navigate([route]);
-    this.closeSidenav.emit();
+    // Only close sidenav on mobile
+    if (this.isMobile() && this.drawer) {
+      this.drawer.toggle();
+    }
   }
 
   async switchToBusinessMode() {
@@ -112,7 +124,10 @@ export class UserSidenavComponent {
       const result = await this.authService.switchMode('business_owner');
       if (result.data) {
         await this.loadDashboardCounts();
-        this.closeSidenav.emit();
+        // Only close sidenav on mobile
+        if (this.isMobile() && this.drawer) {
+          this.drawer.toggle();
+        }
       }
     } catch (error) {
       console.error('Error switching to business mode:', error);
@@ -123,7 +138,11 @@ export class UserSidenavComponent {
     try {
       const result = await this.authService.switchMode('client');
       if (result.data) {
-        this.navigateAndClose('/search');
+        this.router.navigate(['/search']);
+        // Only close sidenav on mobile
+        if (this.isMobile() && this.drawer) {
+          this.drawer.toggle();
+        }
       }
     } catch (error) {
       console.error('Error switching to client mode:', error);
@@ -132,6 +151,9 @@ export class UserSidenavComponent {
 
   async logout() {
     await this.authService.signOut();
-    this.closeSidenav.emit();
+    // Only close sidenav on mobile
+    if (this.isMobile() && this.drawer) {
+      this.drawer.toggle();
+    }
   }
 }

@@ -1,10 +1,12 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDrawer } from '@angular/material/sidenav';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-guest-sidenav',
@@ -21,12 +23,25 @@ import { MatDividerModule } from '@angular/material/divider';
   styleUrls: ['./guest-sidenav.component.scss']
 })
 export class GuestSidenavComponent {
-  @Output() closeSidenav = new EventEmitter<void>();
+  @Input() drawer?: MatDrawer;
 
-  constructor(private router: Router) {}
+  private readonly router = inject(Router);
+  private readonly breakpointObserver = inject(BreakpointObserver);
+  
+  readonly isMobile = signal<boolean>(false);
+
+  constructor() {
+    // Detect mobile breakpoint
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
+      this.isMobile.set(result.matches);
+    });
+  }
 
   navigateAndClose(route: string) {
     this.router.navigate([route]);
-    this.closeSidenav.emit();
+    // Only close sidenav on mobile
+    if (this.isMobile() && this.drawer) {
+      this.drawer.toggle();
+    }
   }
 }

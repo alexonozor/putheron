@@ -118,22 +118,7 @@
                 }
               </mat-form-field>
 
-              <!-- Short Description -->
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Short Description</mat-label>
-                <textarea
-                  matInput
-                  formControlName="short_description"
-                  rows="2"
-                  placeholder="Brief description for search results and previews"
-                  maxlength="160"
-                ></textarea>
-                <mat-hint align="end">{{ (short_description?.value || '').length }}/160 characters</mat-hint>
-                @if (short_description?.hasError('maxlength') && short_description?.touched) {
-                  <mat-error>Short description cannot exceed 160 characters</mat-error>
-                }
-              </mat-form-field>
-
+             
               <!-- Description -->
               <mat-form-field appearance="outline" class="w-full">
                 <mat-label>Full Description</mat-label>

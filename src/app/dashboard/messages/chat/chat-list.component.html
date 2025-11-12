@@ -49,11 +49,13 @@
         @for (chat of chats(); track chat._id) {
           <div 
             class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer hover:shadow-md transition-all duration-200"
+            [class.bg-blue-50]="getUnreadCountForChat(chat._id) > 0"
+            [class.border-blue-200]="getUnreadCountForChat(chat._id) > 0"
             (click)="openChat(chat)">
             
             <div class="flex items-start space-x-4">
               <!-- Avatar/Business Logo -->
-              <div class="flex-shrink-0">
+              <div class="flex-shrink-0 relative">
                 @if (chat.project_id?.business_id?.logo_url) {
                   <img 
                     [src]="chat.project_id!.business_id!.logo_url!" 
@@ -64,6 +66,13 @@
                     <mat-icon class="text-white">business</mat-icon>
                   </div>
                 }
+                
+                <!-- Unread indicator badge -->
+                @if (getUnreadCountForChat(chat._id) > 0) {
+                  <div class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                    {{ getUnreadCountForChat(chat._id) > 9 ? '9+' : getUnreadCountForChat(chat._id) }}
+                  </div>
+                }
               </div>
 
               <!-- Chat Info -->
@@ -71,7 +80,12 @@
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
                     <!-- Project Title -->
-                    <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ chat.title }}</h3>
+                    <h3 
+                      class="text-lg font-semibold text-gray-900 mb-1"
+                      [class.font-bold]="getUnreadCountForChat(chat._id) > 0"
+                      [class.text-blue-900]="getUnreadCountForChat(chat._id) > 0">
+                      {{ chat.title }}
+                    </h3>
                     
                     <!-- Participant Info -->
                     <div class="flex items-center space-x-2 mb-2">

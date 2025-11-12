@@ -747,6 +747,12 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
     return 'This field is invalid';
   }
 
+  // Helper method to format business stage text
+  formatBusinessStage(stage: string): string {
+    if (!stage) return '';
+    return stage.replace(/_/g, ' ');
+  }
+
   // Form field getters
   get contact_phone() { return this.businessDetailsForm.get('contact_phone'); }
 }

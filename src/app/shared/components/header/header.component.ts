@@ -11,6 +11,7 @@ import { MatSidenavModule, MatDrawer } from '@angular/material/sidenav';
 import { AuthService } from '../../services/auth.service';
 import { AuthorizationService } from '../../services/authorization.service';
 import { BusinessService } from '../../services/business.service';
+import { ChatService } from '../../services/chat.service';
 import { NotificationNavComponent } from '../notification-nav/notification-nav.component';
 import { MatCardModule } from '@angular/material/card';
 import { Search } from '../search/search';
@@ -38,6 +39,7 @@ export class HeaderComponent {
   private readonly authService = inject(AuthService);
   private readonly authorizationService = inject(AuthorizationService);
   private readonly businessService = inject(BusinessService);
+  private readonly chatService = inject(ChatService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -54,8 +56,8 @@ export class HeaderComponent {
   readonly showMobileMenu = signal(false);
   readonly mobileMenuOpen = signal(false);
 
-  // Mock data for messages count
-  readonly messageCount = signal(3);
+  // Unread messages count
+  readonly unreadMessageCount = signal(0);
   readonly showHeaderSearch = signal(true);
   private intersectionObserver?: IntersectionObserver;
   private routerSub: any;
@@ -85,6 +87,26 @@ export class HeaderComponent {
       const mode = this.userMode();
       const isBusiness = this.isBusinessOwner();
       console.log('Header signals updated:', { user: user?.email, mode, isBusiness });
+    });
+
+    // Load unread message count when user is authenticated
+    effect(() => {
+      const isAuth = this.isAuthenticated();
+      if (isAuth) {
+        this.loadUnreadMessageCount();
+      } else {
+        this.unreadMessageCount.set(0);
+      }
+    });
+
+    // Refresh unread count when navigating back from chat
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        // Refresh unread count on any navigation to ensure it's up to date
+        if (this.isAuthenticated()) {
+          this.loadUnreadMessageCount();
+        }
+      }
     });
 
     // Check if user has businesses when authenticated
@@ -195,6 +217,17 @@ export class HeaderComponent {
     } catch (error) {
       console.error('Error checking user businesses:', error);
       this.hasBusinesses.set(false);
+    }
+  }
+
+  // Load unread message count
+  private async loadUnreadMessageCount() {
+    try {
+      const count = await this.chatService.getUnreadMessageCountAsync();
+      this.unreadMessageCount.set(count);
+    } catch (error) {
+      console.error('Error loading unread message count:', error);
+      this.unreadMessageCount.set(0);
     }
   }
 

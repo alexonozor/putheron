@@ -2,9 +2,9 @@
 <mat-drawer-container class="content-body" [hasBackdrop]="true" autosize>
   <mat-drawer #drawer [mode]="'over'" class="drawer">
     @if (currentUser()) {
-    <app-user-sidenav />
+    <app-user-sidenav [drawer]="drawer" />
     } @else {
-    <app-guest-sidenav />
+    <app-guest-sidenav [drawer]="drawer" />
     }
   </mat-drawer>
   <mat-drawer-content class="bg-[#F4F2EE]!" #drawerContent>

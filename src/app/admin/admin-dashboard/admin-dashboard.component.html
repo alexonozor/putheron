@@ -3,7 +3,7 @@
 <app-header [drawer]="drawer"></app-header>
 <mat-drawer-container class="content-body" [hasBackdrop]="isMobile()" autosize>
     <mat-drawer #drawer position="start" [opened]="sidenavOpened()"  [disableClose]="!isMobile()" [mode]="isMobile() ? 'over' : 'side'" class="drawer">
-         <app-admin-sidenav />
+         <app-admin-sidenav [drawer]="drawer" />
     </mat-drawer>
     <mat-drawer-content>
          <router-outlet />

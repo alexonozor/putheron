@@ -157,7 +157,7 @@
 
           <!-- Step 2: Business Details -->
           <mat-step [stepControl]="businessDetailsForm" label="Contact & Location">
-            <form [formGroup]="businessDetailsForm" class="p-6 space-y-6">
+            <form [formGroup]="businessDetailsForm" class="p-6 space-y-6" autocomplete="off">
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
                   Contact Information & Location
@@ -176,9 +176,11 @@
                     <input 
                       matInput 
                       #addressInput
-                      formControlName="address" 
+                      formControlName="address"
+                      autocomplete="off" 
                       placeholder="Start typing your business address...">
                     <mat-icon matSuffix>location_on</mat-icon>
+                    <mat-icon matPrefix>search</mat-icon>
                     <mat-hint>Start typing to search for your business address (USA only)</mat-hint>
                   </mat-form-field>
 
@@ -871,6 +873,84 @@
                     }
                   </div>
                 </div>
+
+                <!-- Business Compliance & Operations Section -->
+                @if (businessComplianceForm.get('business_stage')?.value) {
+                  <div class="border-t border-gray-200 pt-4">
+                    <h4 class="font-medium text-gray-900 mb-3">Business Compliance & Operations</h4>
+                    <div class="space-y-3">
+                      <!-- Business Stage -->
+                      <div>
+                        <span class="text-sm font-medium text-gray-600">Business Stage:</span>
+                        <span class="ml-2 text-gray-900 capitalize">{{ formatBusinessStage(businessComplianceForm.get('business_stage')?.value) }}</span>
+                      </div>
+
+                      <!-- Business Hours -->
+                      @if (businessComplianceForm.get('business_hours')) {
+                        <div>
+                          <span class="text-sm font-medium text-gray-600 block mb-2">Business Hours:</span>
+                          <div class="ml-2 space-y-1 text-sm">
+                            @for (day of ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']; track day) {
+                              @if (!businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value) {
+                                <div class="text-gray-700">
+                                  <span class="font-medium capitalize">{{ day }}:</span>
+                                  {{ businessComplianceForm.get('business_hours')?.get(day)?.get('open')?.value }} - {{ businessComplianceForm.get('business_hours')?.get(day)?.get('close')?.value }}
+                                </div>
+                              } @else {
+                                <div class="text-gray-600">
+                                  <span class="font-medium capitalize">{{ day }}:</span>
+                                  <span class="text-gray-500">Closed</span>
+                                </div>
+                              }
+                            }
+                          </div>
+                        </div>
+                      }
+
+                      <!-- Business Registered -->
+                      @if (businessComplianceForm.get('business_registered')?.value !== null) {
+                        <div>
+                          <span class="text-sm font-medium text-gray-600">Business Registered:</span>
+                          <span class="ml-2 text-gray-900">{{ businessComplianceForm.get('business_registered')?.value ? 'Yes' : 'No' }}</span>
+                        </div>
+                      }
+
+                      <!-- Registered State -->
+                      @if (businessComplianceForm.get('registered_state')?.value) {
+                        <div>
+                          <span class="text-sm font-medium text-gray-600">Registered State:</span>
+                          <span class="ml-2 text-gray-900">{{ businessComplianceForm.get('registered_state')?.value }}</span>
+                        </div>
+                      }
+
+                      <!-- Tax ID -->
+                      @if (businessComplianceForm.get('tax_id')?.value) {
+                        <div>
+                          <span class="text-sm font-medium text-gray-600">Tax ID/EIN/SSN:</span>
+                          <span class="ml-2 text-gray-900 font-mono">{{ businessComplianceForm.get('tax_id')?.value }}</span>
+                        </div>
+                      }
+
+                      <!-- Certified WBE/MBE -->
+                      @if (businessComplianceForm.get('is_certified_wbe_mbe')?.value !== null) {
+                        <div>
+                          <span class="text-sm font-medium text-gray-600">Certified WBE/MBE:</span>
+                          <span class="ml-2 text-gray-900">{{ businessComplianceForm.get('is_certified_wbe_mbe')?.value ? 'Yes' : 'No' }}</span>
+                        </div>
+                      }
+
+                      <!-- Woman Owned Attestation -->
+                      @if (businessComplianceForm.get('woman_owned_attestation')?.value) {
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3 mt-2">
+                          <div class="flex items-start">
+                            <mat-icon class="text-green-600 mr-2 text-base mt-0.5">check_circle</mat-icon>
+                            <span class="text-sm text-green-900">This business is confirmed to be 51-100% owned and operated by a woman.</span>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
 
                 <div>
                   <h4 class="font-medium text-gray-900 mb-2">Next Steps</h4>

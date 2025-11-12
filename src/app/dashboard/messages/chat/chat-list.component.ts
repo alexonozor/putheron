@@ -9,6 +9,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { ChatService, Chat } from '../../../shared/services/chat.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { ProjectService } from '../../../shared/services/project.service';
+import { NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-chat-list',
@@ -37,6 +38,7 @@ export class ChatListComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly chats = signal<Chat[]>([]);
   readonly unreadCount = signal(0);
+  readonly chatUnreadCounts = signal<Map<string, number>>(new Map());
 
   // Computed signals
   readonly user = this.authService.user;
@@ -50,6 +52,17 @@ export class ChatListComponent implements OnInit {
     
     this.loadChats();
     this.loadUnreadCount();
+
+    // Listen for navigation back to chat list to refresh unread counts
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd && event.url.includes('/messages')) {
+        // Check if we're on the chat list page
+        if (!event.url.includes('/chat/')) {
+          // We're back on the chat list, refresh unread counts
+          this.refreshUnreadCounts();
+        }
+      }
+    });
   }
 
   async loadChats() {
@@ -59,11 +72,41 @@ export class ChatListComponent implements OnInit {
     try {
       const chats = await this.chatService.getUserChatsAsync();
       this.chats.set(chats);
+      
+      // Load unread count for each chat
+      await this.loadUnreadCountsPerChat(chats);
     } catch (error: any) {
       console.error('Error loading chats:', error);
       this.error.set('Failed to load chats');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async loadUnreadCountsPerChat(chats: Chat[]) {
+    const unreadCounts = new Map<string, number>();
+    
+    for (const chat of chats) {
+      try {
+        const count = await this.chatService.getChatUnreadCountAsync(chat._id);
+        unreadCounts.set(chat._id, count);
+      } catch (error) {
+        console.error(`Error loading unread count for chat ${chat._id}:`, error);
+        unreadCounts.set(chat._id, 0);
+      }
+    }
+    
+    this.chatUnreadCounts.set(unreadCounts);
+  }
+
+  async refreshUnreadCounts() {
+    try {
+      // Reload all unread counts
+      await this.loadUnreadCountsPerChat(this.chats());
+      // Also update the header unread count
+      await this.loadUnreadCount();
+    } catch (error) {
+      console.error('Error refreshing unread counts:', error);
     }
   }
 
@@ -125,6 +168,10 @@ export class ChatListComponent implements OnInit {
     } else {
       return d.toLocaleDateString();
     }
+  }
+
+  getUnreadCountForChat(chatId: string): number {
+    return this.chatUnreadCounts().get(chatId) || 0;
   }
 
   async refreshChats() {

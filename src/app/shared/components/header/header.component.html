@@ -23,11 +23,13 @@
                     @if (isAuthenticated(); as authenticated) {
                     <!-- Authenticated User -->
                     <!-- Messages Icon -->
-                    <button mat-icon-button (click)="navigateToMessages()" class="text-gray-600 hover:text-primary-600">
-                        <mat-icon [matBadge]="messageCount()" [matBadgeHidden]="messageCount() === 0"
-                            matBadgeColor="warn" matBadgeSize="small">
-                            mail_outline
-                        </mat-icon>
+                    <button mat-icon-button (click)="navigateToMessages()" class="text-gray-600 hover:text-primary-600 relative">
+                        <mat-icon>mail_outline</mat-icon>
+                        @if (unreadMessageCount() > 0) {
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                {{ unreadMessageCount() > 99 ? '99+' : unreadMessageCount() }}
+                            </span>
+                        }
                     </button>
 
                     <!-- Notifications -->
@@ -131,11 +133,13 @@
             <!-- Right Actions -->
             <div class="flex items-center gap-1">
                 <!-- Messages -->
-                <button mat-icon-button (click)="navigateToMessages()" class="text-gray-600">
-                    <mat-icon [matBadge]="messageCount()" [matBadgeHidden]="messageCount() === 0" matBadgeColor="warn"
-                        matBadgeSize="small">
-                        mail_outline
-                    </mat-icon>
+                <button mat-icon-button (click)="navigateToMessages()" class="text-gray-600 relative">
+                    <mat-icon>mail_outline</mat-icon>
+                    @if (unreadMessageCount() > 0) {
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                            {{ unreadMessageCount() > 99 ? '99+' : unreadMessageCount() }}
+                        </span>
+                    }
                 </button>
 
                 <!-- Notifications -->

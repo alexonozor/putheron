@@ -66,7 +66,6 @@ export class CreateServiceComponent implements OnInit {
     this.serviceInfoForm = this.fb.group({
       business_id: ['', [Validators.required]],
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      short_description: ['', [Validators.maxLength(160)]],
       description: ['']
     });
 
