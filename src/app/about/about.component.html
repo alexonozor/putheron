@@ -1,0 +1,306 @@
+<app-header [drawer]="drawer" [maxWidth]="'max-w-7xl'"></app-header>
+<mat-drawer-container class="content-body" [hasBackdrop]="true" autosize>
+    <mat-drawer #drawer [mode]="'over'" class="drawer">
+        @if (currentUser()) {
+        <app-user-sidenav />
+        } @else {
+        <app-guest-sidenav />
+        }
+    </mat-drawer>
+    <mat-drawer-content class="bg-[#F4F2EE]!" #drawerContent>
+        <div class="about-page min-h-screen">
+            
+            <!-- Hero Section -->
+                        <!-- Hero Section -->
+            <section class="relative overflow-hidden bg-primary-300" style="background-image: url('/assets/images/contact-us-background-image.svg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+                <div class="relative min-h-[300px] lg:min-h-[350px]">
+                    <!-- Left Content with max-w-7xl constraint -->
+                    <div class="max-w-7xl mx-auto w-full px-3 lg:px-8 relative z-10 min-h-[300px] lg:min-h-[350px] flex items-center justify-center lg:justify-start">
+                        <div class="w-full lg:w-1/2 py-12 lg:py-16 text-center lg:text-left">
+                            <!-- Title -->
+                            <h1 class="text-4xl lg:text-5xl font-bold leading-tight mb-2 poppins">
+                                <span class="text-secondary-600">Women </span> 
+                                <span class="text-black">Doing</span>
+                            </h1>
+                            <h1 class="text-4xl lg:text-5xl font-bold leading-tight poppins">
+                                <span class="text-black">Business, Together.</span>
+                            </h1>
+                        </div>
+                    </div>
+
+                    <!-- Right Image - absolute positioned at extreme right, touching top -->
+                    <div class="hidden lg:block absolute right-0 top-0 bottom-0 pointer-events-none" style="width: 450px; max-width: 35%;">
+                        <img 
+                            src="/assets/images/woman-writing.svg" 
+                            alt="Woman writing" 
+                            class="w-full h-full object-cover object-bottom"
+                        >
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mission Statement Section -->
+            <div class="py-12 md:py-16 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-4xl mx-auto">
+                        <p class="text-base md:text-lg text-gray-700 leading-relaxed">
+                            Connect, list, and grow, building stronger businesses. Partner with 
+                            women-owned businesses and shaping the future of commerce and community.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Our Mission Section with Image -->
+            <div class="py-12 md:py-16 bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                        <!-- Text Content -->
+                        <div class="order-2 md:order-1">
+                            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Our Mission</h2>
+                            <div class="space-y-4 text-gray-700 leading-relaxed text-[0.95rem]">
+                                <p>
+                                    VouchHer gives women business owners <span class="font-semibold">visibility</span> and customers an easy way to 
+                                    find and support them.
+                                </p>
+                                <p>
+                                    Whether you're looking for a woman-owned business near you, or you're a 
+                                    woman running a business (or business) who wants to get found and get hired – 
+                                    VouchHer makes it simple.
+                                </p>
+                                <p class="font-semibold">
+                                    Free to list. Free to search. Everything in one place: profiles, reviews, secure 
+                                    booking, and payment.
+                                </p>
+                                <p>
+                                    Find women-owned businesses you can trust. Support women who support each other.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Image Placeholder -->
+                        <div class="order-1 md:order-2">
+                            <div class="rounded-lg overflow-hidden shadow-lg h-64 md:h-96">
+                                <img 
+                                    src="/assets/images/woman-presenting.svg" 
+                                    alt="Woman presenting" 
+                                    class="w-full h-full object-cover"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How It Works Section -->
+            <div class="py-12 md:py-16 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">How it Works</h2>
+                    
+                    <div class="grid md:grid-cols-2 gap-8 md:gap-12">
+                        <!-- Images Column with Stacked Card Effect - Hidden on Mobile -->
+                        <div class="hidden md:flex relative w-full h-full items-center justify-center">
+                            <!-- Image 1 - Bottom Card (Right) -->
+                            <div class="absolute w-72 rounded-lg overflow-hidden shadow-lg h-80 z-30" style="bottom: 0px; right: 100px;">
+                                <div class="bg-gray-200 w-full h-full flex items-center justify-center text-gray-400">
+                                    <img 
+                                    src="/assets/images/how-it-works-bottom.svg" 
+                                    alt="Woman presenting" 
+                                    class="w-full h-full object-cover"
+                                >
+                                </div>
+                            </div>
+                            
+                            <!-- Image 2 - Top Card (Left, Overlapping) -->
+                            <div class="absolute w-72 rounded-lg overflow-hidden shadow-lg h-80 z-20" style="top: 0px; left: 100px;">
+                                <div class="bg-gray-200 w-full h-full flex items-center justify-center text-gray-400">
+                                    <img 
+                                    src="/assets/images/how-it-works-top-image.svg" 
+                                    alt="Woman presenting" 
+                                    class="w-full h-full object-cover"
+                                >
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content Column -->
+                        <div class="space-y-8">
+                            @for (section of howItWorks; track section.title) {
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900 mb-3">{{ section.title }}</h3>
+                                    <ul class="space-y-2">
+                                        @for (item of section.items; track item) {
+                                            <li class="flex items-start text-[0.95rem] leading-relaxed">
+                                                <span class="text-green-600 mr-2 text-2xl leading-none">•</span>
+                                                <span class="text-gray-700">{{ item }}</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Bottom Image for Mobile -->
+                    <div class="md:hidden mt-12 flex flex-col gap-6">
+                        <div class="w-full rounded-lg overflow-hidden shadow-lg">
+                            <img 
+                                src="/assets/images/how-it-works-bottom.svg" 
+                                alt="Woman presenting" 
+                                class="w-full h-64 object-cover"
+                            >
+                        </div>
+                        <div class="w-full rounded-lg overflow-hidden shadow-lg">
+                            <img 
+                                src="/assets/images/how-it-works-top-image.svg" 
+                                alt="Woman presenting" 
+                                class="w-full h-64 object-cover"
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Who VouchHer Serves Section -->
+            <div class="py-12 md:py-16 bg-primary-600 text-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Who VouchHer Serves</h2>
+                    
+                    <div class="grid md:grid-cols-3 gap-8">
+                        @for (item of whoWeServe; track item.title) {
+                            <div class=" rounded-lg p-6 backdrop-blur-sm">
+                                <h3 class="text-xl font-bold mb-2">{{ item.title }}</h3>
+                                <p class="font-semibold mb-4">{{ item.subtitle }}</p>
+                                <p class="text-sm leading-relaxed">{{ item.description }}</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform Features Section -->
+            <div class="py-12 md:py-16 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">Platform Features</h2>
+                    
+                    <div class="space-y-16">
+                        @for (feature of platformFeatures; track feature.title; let index = $index) {
+                            <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center" [ngClass]="{'md:flex-row-reverse': feature.imagePosition === 'right'}">
+                                <!-- Image -->
+                                <div [ngClass]="{'order-2 md:order-1': feature.imagePosition === 'right', 'order-1 md:order-2': feature.imagePosition === 'left'}">
+                                    <div class="rounded-lg overflow-visible h-72 md:h-80 flex items-center justify-center">
+                                        <img 
+                                            [src]="feature.image" 
+                                            [alt]="feature.title"
+                                            class="w-full h-full object-contain"
+                                        >
+                                    </div>
+                                </div>
+                                
+                                <!-- Content -->
+                                <div [ngClass]="{'order-1 md:order-2': feature.imagePosition === 'right', 'order-2 md:order-1': feature.imagePosition === 'left'}">
+                                    <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ feature.title }}</h3>
+                                    <ul class="space-y-3">
+                                        @for (item of feature.items; track item) {
+                                            <li class="flex items-start text-gray-700 text-base">
+                                                <span class="text-primary-600 mr-3 mt-1">•</span>
+                                                <span>{{ item }}</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trusted Businesses Section -->
+            <div class="py-12 md:py-16 bg-primary-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                            <span class="italic text-secondary-600">Trusted</span> 
+                            <span class="text-black">Businesses</span>
+                        </h2>
+                        <p class="text-base md:text-lg text-gray-700 leading-relaxed max-w-3xl mx-auto">
+                            Every business on VouchHer goes through our review process - whether through WBE/MBE certifications, business registration documentation or community volunteer review. Trust is built over time through customer reviews, ratings and successful transactions. We give you the information you need to make confident hiring decisions.
+                        </p>
+                    </div>
+                    
+                  
+                </div>
+            </div>
+
+            <!-- Our Values Section -->
+            <div class="py-12 md:py-16 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">Our Values</h2>
+                    <div class="w-20 h-1 bg-primary-600 mx-auto mb-12"></div>
+                    
+                    <div class="grid md:grid-cols-3 gap-8 md:gap-12">
+                        @for (value of ourValues; track value.title) {
+                            <div class="text-center relative">
+                                <div class="text-6xl font-bold text-gray-200 mb-4">{{ value.number }}</div>
+                                <h3 class="text-xl font-bold text-gray-900 mb-3">{{ value.title }}</h3>
+                                <p class="text-gray-700 text-sm leading-relaxed">{{ value.description }}</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- VouchHer Community Rules Section -->
+            <div class="py-12 md:py-16 bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">VouchHer Community Rules</h2>
+                        <p class="text-base md:text-lg text-gray-700 max-w-3xl mx-auto">
+                            VouchHer is more than a website - it's a network of women supporting women. By joining, you agree to treat everyone with respect.
+                        </p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
+                        <!-- Image -->
+                        <div class="order-2 md:order-1 flex items-start">
+                            <div class="rounded-lg overflow-hidden w-full" [style.max-height]="rulesHeight()">
+                                <img 
+                                    src="/assets/images/woman.svg" 
+                                    alt="VouchHer Community" 
+                                    class="w-full h-auto object-cover"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Rules -->
+                        <div class="order-1 md:order-2 space-y-6" #rulesContainer>
+                            @for (rule of communityRules; track rule.title) {
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-900 mb-3">{{ rule.number }} {{ rule.title }}</h3>
+                                    <ul class="space-y-2 ml-4">
+                                        @for (item of rule.items; track item) {
+                                            <li class="flex items-start text-gray-700 text-sm">
+                                                <span class="text-primary-600 mr-3 mt-0.5">•</span>
+                                                <span>{{ item }}</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Footer Text -->
+                    <div class="mt-12 text-center max-w-3xl mx-auto space-y-2">
+                        <p class="text-gray-700 font-semibold">If you see someone breaking these rules, report it.</p>
+                        <p class="text-gray-700">We'll remove content or suspend accounts that violate these guidelines.</p>
+                        <p class="text-gray-700">VouchHer exists to give women business owners visibility and create connections that help everyone grow.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer-component />
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

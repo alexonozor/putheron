@@ -1,0 +1,57 @@
+.drawer {
+    height: calc(100vh - 64px);
+    border-radius: 0px;
+}
+
+.content-body {
+    height: calc(100vh - 64px);
+    overflow-y: scroll;
+}
+.faq-page {
+  .faq-accordion {
+    ::ng-deep {
+      .mat-expansion-panel {
+        background: white;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        
+        &:not(.mat-expanded) {
+          &:hover {
+            background: #f9fafb;
+          }
+        }
+
+        &.mat-expanded {
+          border-color: #10b981;
+        }
+      }
+
+      .mat-expansion-panel-header {
+        padding: 0 24px;
+        
+        &:hover {
+          background: transparent !important;
+        }
+
+        &.mat-expanded {
+          background: #f0fdf4;
+        }
+      }
+
+      .mat-expansion-panel-header-title {
+        color: #111827;
+        font-weight: 600;
+      }
+
+      .mat-expansion-indicator {
+        &::after {
+          color: #10b981;
+        }
+      }
+
+      .mat-expansion-panel-body {
+        padding: 0;
+      }
+    }
+  }
+}

@@ -4,12 +4,18 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AuthGuard } from './shared/guards/auth.guard';
 import { GuestGuard } from './shared/guards/guest.guard';
 import { SearchComponent } from './search/search.component';
+import { FaqComponent } from './faq/faq.component';
+import { ContactComponent } from './contact/contact.component';
+import { AboutComponent } from './about/about.component';
 import { PayPalCallbackComponent } from './payments/paypal-callback/paypal-callback.component';
 import { StripeCallbackComponent } from './payments/stripe-callback/stripe-callback.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'search', component: SearchComponent },
+  { path: 'faq', component: FaqComponent },
+  { path: 'contact', component: ContactComponent },
+  { path: 'about', component: AboutComponent },
   { 
     path: 'auth', 
     loadChildren: () => import('./auth/auth.route').then(m => m.AUTH_ROUTES),

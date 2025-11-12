@@ -1,0 +1,64 @@
+<app-header [drawer]="drawer" [maxWidth]="'max-w-7xl'"></app-header>
+<mat-drawer-container class="content-body" [hasBackdrop]="true" autosize>
+    <mat-drawer #drawer [mode]="'over'" class="drawer">
+        @if (currentUser()) {
+        <app-user-sidenav />
+        } @else {
+        <app-guest-sidenav />
+        }
+    </mat-drawer>
+    <mat-drawer-content class="bg-[#F4F2EE]!" #drawerContent>
+        <div class="faq-page min-h-screen bg-gray-50">
+            <!-- Hero Section -->
+            <div class="bg-gradient-to-r from-green-600 to-green-700 text-white py-16">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center">
+                        <h1 class="text-4xl md:text-5xl font-bold mb-4">Frequently Asked Questions</h1>
+                        <p class="text-xl text-green-100 max-w-3xl mx-auto">
+                            Here are some of the most frequently asked questions to help you understand how VouchHer
+                            works.
+                            Whether you're a freelancer looking to showcase your skills or a client searching for
+                            trusted female professionals.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <mat-accordion class="faq-accordion">
+                    @for (faq of faqs; track faq.question) {
+                    <mat-expansion-panel class="mb-4 rounded-lg shadow-sm">
+                        <mat-expansion-panel-header class="py-4 md:py-6">
+                            <mat-panel-title
+                                class="text-sm sm:text-base md:text-lg font-semibold text-gray-900 leading-tight">
+                                {{ faq.question }}
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div
+                            class="px-4 sm:px-6 pb-4 sm:pb-6 text-sm sm:text-base text-gray-700 leading-snug sm:leading-relaxed">
+                            {{ faq.answer }}
+                        </div>
+                    </mat-expansion-panel>
+                    }
+                </mat-accordion>
+
+                <!-- Contact Section -->
+                <div class="mt-16 bg-white rounded-lg shadow-md p-8 text-center">
+                    <mat-icon class="text-green-600 !text-5xl !w-16 !h-16 mx-auto mb-4">help_outline</mat-icon>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Still have questions?</h2>
+                    <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+                        Can't find the answer you're looking for? Please feel free to reach out to our support team.
+                        We're here to help you get the most out of VouchHer.
+                    </p>
+                    <button mat-raised-button color="primary" class="!bg-green-600 !text-white !px-8 !py-3 !text-base" (click)="navigateToContact()">
+                        Contact Support
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer-component />
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

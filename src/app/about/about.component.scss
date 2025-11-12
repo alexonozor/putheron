@@ -1,0 +1,9 @@
+.drawer {
+    height: calc(100vh - 64px);
+    border-radius: 0px;
+}
+
+.content-body {
+    height: calc(100vh - 64px);
+    overflow-y: scroll;
+}

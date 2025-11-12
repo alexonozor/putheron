@@ -1,0 +1,150 @@
+<app-header [drawer]="drawer" [maxWidth]="'max-w-7xl'"></app-header>
+<mat-drawer-container class="content-body" [hasBackdrop]="true" autosize>
+    <mat-drawer #drawer [mode]="'over'" class="drawer">
+        @if (currentUser()) {
+        <app-user-sidenav />
+        } @else {
+        <app-guest-sidenav />
+        }
+    </mat-drawer>
+    <mat-drawer-content class="bg-[#F4F2EE]!" #drawerContent>
+        <div class="contact-page min-h-screen bg-gray-50 py-8 md:py-16">
+            <!-- Contact Section -->
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+                    <!-- Left Column - Contact Info -->
+                    <div class="space-y-6 lg:pr-8">
+                        <div>
+                            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                                Get in touch with<br>us today
+                            </h1>
+                            
+                            <div class="space-y-4 text-sm md:text-base text-gray-700">
+                                <p>
+                                    You can search for a business, apply for desired business and get paid when work is done.
+                                </p>
+                                <p>
+                                    You can create or list business(es), get offers or bids and pay when job is done.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Contact Details -->
+                        <div class="space-y-4 pt-6">
+                            <div class="flex items-start space-x-3">
+                                <mat-icon class="text-gray-600 !text-xl !w-5 !h-5 mt-0.5">email</mat-icon>
+                                <div class="text-sm md:text-base">
+                                    <p class="text-gray-900">info&#64;vouchher.biz</p>
+                                    <p class="text-gray-900">support&#64;vouchher.biz</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <mat-icon class="text-gray-600 !text-xl !w-5 !h-5 mt-0.5">phone</mat-icon>
+                                <div class="text-sm md:text-base">
+                                    <p class="text-gray-900">+1 (444) 123-4567</p>
+                                    <p class="text-gray-900">+1 (234) 567-8901</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <mat-icon class="text-gray-600 !text-xl !w-5 !h-5 mt-0.5">location_on</mat-icon>
+                                <div class="text-sm md:text-base">
+                                    <p class="text-gray-900">23 Jorch Estate, Ogolo, Yenagoa,</p>
+                                    <p class="text-gray-900">Bayelsa State, Nigeria.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Contact Form -->
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 md:p-8">
+                        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <!-- First Name -->
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>First Name</mat-label>
+                                    <input matInput formControlName="firstName" placeholder="enter first name">
+                                    <mat-icon matSuffix class="!text-gray-400">person</mat-icon>
+                                    @if (submitted && f['firstName'].errors) {
+                                        <mat-error>First name is required</mat-error>
+                                    }
+                                </mat-form-field>
+
+                                <!-- Last Name -->
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>Last Name</mat-label>
+                                    <input matInput formControlName="lastName" placeholder="enter last name">
+                                    <mat-icon matSuffix class="!text-gray-400">person</mat-icon>
+                                    @if (submitted && f['lastName'].errors) {
+                                        <mat-error>Last name is required</mat-error>
+                                    }
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Email -->
+                            <mat-form-field appearance="outline" class="w-full mb-4">
+                                <mat-label>Email Address</mat-label>
+                                <input matInput type="email" formControlName="email" placeholder="enter email address">
+                                <mat-icon matSuffix class="!text-gray-400">email</mat-icon>
+                                @if (submitted && f['email'].errors) {
+                                    <mat-error>
+                                        @if (f['email'].errors['required']) {
+                                            Email is required
+                                        } @else if (f['email'].errors['email']) {
+                                            Please enter a valid email
+                                        }
+                                    </mat-error>
+                                }
+                            </mat-form-field>
+
+                            <!-- Subject -->
+                            <mat-form-field appearance="outline" class="w-full mb-4">
+                                <mat-label>How can we help you?</mat-label>
+                                <input matInput formControlName="subject" placeholder="enter your subject here">
+                                @if (submitted && f['subject'].errors) {
+                                    <mat-error>Subject is required</mat-error>
+                                }
+                            </mat-form-field>
+
+                            <!-- Message -->
+                            <mat-form-field appearance="outline" class="w-full mb-6">
+                                <mat-label>Message</mat-label>
+                                <textarea 
+                                    matInput 
+                                    formControlName="message" 
+                                    placeholder="enter your message here..." 
+                                    rows="5">
+                                </textarea>
+                                @if (submitted && f['message'].errors) {
+                                    <mat-error>Message is required</mat-error>
+                                }
+                            </mat-form-field>
+
+                            <!-- Submit Button -->
+                            <button 
+                                type="submit" 
+                                mat-raised-button 
+                                [disabled]="loading()"
+                                class="!bg-green-600 hover:!bg-green-700 !text-white w-full !py-3 !text-base font-semibold !rounded-lg">
+                                @if (loading()) {
+                                    <span class="flex items-center justify-center gap-2">
+                                        <mat-icon class="animate-spin !w-5 !h-5 !text-base">refresh</mat-icon>
+                                        Sending...
+                                    </span>
+                                } @else {
+                                    Send Message
+                                }
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-16 md:mt-24">
+                <footer-component />
+            </div>
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>
