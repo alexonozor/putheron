@@ -1,0 +1,715 @@
+<app-header [drawer]="drawer" [maxWidth]="'max-w-7xl'"></app-header>
+<mat-drawer-container class="content-body" [hasBackdrop]="true" autosize>
+    <mat-drawer #drawer [mode]="'over'" class="drawer">
+        @if (currentUser()) {
+        <app-user-sidenav />
+        } @else {
+        <app-guest-sidenav />
+        }
+    </mat-drawer>
+    <mat-drawer-content class="bg-[#F4F2EE]!" #drawerContent>
+        <div class="terms-of-service-page min-h-screen">
+            <!-- Terms of Service Content -->
+            <div class="py-12 md:py-16 bg-white">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <!-- Title -->
+                    <div class="mb-12">
+                        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Terms of Service</h1>
+                        <p class="text-lg text-gray-700 font-semibold">Last Updated: November 24, 2025</p>
+                    </div>
+
+                    <!-- Introduction -->
+                    <section class="mb-12 space-y-4 text-gray-700 leading-relaxed">
+                        <p>
+                            These Terms of Service ("Terms") govern your access to and use of the VouchHer platform, website, and services (collectively, the "Services") provided by Women and Multicultural Directory LLC, doing business as VouchHer ("VouchHer," "we," "us," or "our"). "You" or "your" refers to you as a user of any of the Services.
+                        </p>
+                        <div class="bg-red-50 border-l-4 border-red-600 p-4 mt-4">
+                            <p class="font-bold text-gray-900">
+                                PLEASE READ THESE TERMS CAREFULLY. BY ACCESSING OR USING THE SERVICES, YOU AGREE TO BE BOUND BY THESE TERMS AND OUR PRIVACY POLICY. IF YOU DO NOT AGREE, DO NOT USE THE SERVICES.
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- Table of Contents -->
+                    <section class="mb-12 bg-gray-50 p-8 rounded-lg">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Table of Contents</h2>
+                        <ul class="space-y-2 text-gray-700">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">1.</span>
+                                <span>Overview of Services</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">2.</span>
+                                <span>Eligibility and Account Registration</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">3.</span>
+                                <span>User Accounts and Security</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">4.</span>
+                                <span>Business Listings and Verification</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">5.</span>
+                                <span>Service Contracts and Marketplace</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">6.</span>
+                                <span>Payments, Fees, and Escrow</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">7.</span>
+                                <span>Reviews and Ratings</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">8.</span>
+                                <span>User Content and Intellectual Property</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">9.</span>
+                                <span>Prohibited Conduct and Community Guidelines</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">10.</span>
+                                <span>Disputes Between Users</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">11.</span>
+                                <span>Disclaimers and Warranties</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">12.</span>
+                                <span>Limitation of Liability</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">13.</span>
+                                <span>Indemnification</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">14.</span>
+                                <span>Termination and Suspension</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">15.</span>
+                                <span>Modifications to Terms and Services</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">16.</span>
+                                <span>Dispute Resolution and Arbitration</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">17.</span>
+                                <span>General Legal Terms</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3 font-bold">18.</span>
+                                <span>Contact Information</span>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <!-- Section 1: Overview of Services -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">1. Overview of Services</h2>
+                        
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">1.1 Platform Description</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            VouchHer is a marketplace platform that connects women-owned businesses with customers and other business owners. Our Services include:
+                        </p>
+                        <ul class="ml-6 space-y-2 text-gray-700 mb-6">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Business listing and profile creation</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Search and discovery tools with filtering by location, industry, heritage, certifications and more.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Secure messaging between users</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Service request and booking system</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Escrow payment processing for transactions</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Review and rating system</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Business owner dashboard and analytics</span>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">1.2 Platform Role</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            VouchHer operates as a marketplace platform only. We facilitate connections between independent parties but are not a party to the actual service agreements between clients and business owners. Business owners on VouchHer are independent contractors, not employees, agents, or representatives of VouchHer.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">1.3 No Endorsement</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            VouchHer verifies business ownership through certifications, business registration documents, or community volunteer review before listings go live. However:
+                        </p>
+                        <ul class="ml-6 space-y-2 text-gray-700 mb-6">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Verification confirms ownership status only, not service quality, qualifications, or capabilities</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>We do not endorse or guarantee the performance of any business owner</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Listing on VouchHer does not constitute a recommendation of service quality</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Reviews and ratings from other users provide additional information but do not guarantee future results</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Users should conduct their own due diligence before engaging in transactions</span>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">1.4 Accessibility Compliance Statement</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">1.4.1 Commitment to Accessibility.</span> VouchHer is committed to ensuring our platform is accessible to all users, including those with disabilities, and we continuously work to improve accessibility features. We strive to comply with applicable accessibility laws and standards, including but not limited to the Americans with Disabilities Act (ADA), Section 508 of the Rehabilitation Act, and Web Content Accessibility Guidelines (WCAG).
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">1.4.2 Accessibility Features.</span> Our platform implements various accessibility features designed to enhance usability for all users, including screen reader compatibility, keyboard navigation support, text alternatives for non-text content, sufficient color contrast, resizable text without loss of functionality, and clear and consistent navigation.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">1.4.3 Ongoing Improvements.</span> We regularly review and assess our platform's accessibility through periodic accessibility audits, user feedback collection and implementation, staff training on accessibility best practices, and consultation with accessibility experts when necessary.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">1.4.4 Accessibility Feedback.</span> We welcome feedback regarding the accessibility of our Services. If you encounter any accessibility barriers or have suggestions for improvement, please contact us at support@vouchher.biz. We will make reasonable efforts to address accessibility concerns in a timely manner.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">1.4.5 Third-Party Content.</span> While we strive to ensure accessibility throughout our platform, certain content provided by third parties, including business owners who list their services on VouchHer, may not be fully accessible. We encourage all users of our platform to follow accessibility best practices when creating content.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed">
+                            <span class="font-semibold">1.4.6 Reasonable Accommodations.</span> VouchHer will make reasonable accommodations to ensure users with disabilities can access and use our Services. Please contact us to request specific accommodations, and we will work with you to address your needs while maintaining the essential functionality of our platform.
+                        </p>
+                    </section>
+
+                    <!-- Section 2: Eligibility and Account Registration -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">2. Eligibility and Account Registration</h2>
+                        
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">2.1 Age Requirement</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            You must be at least 18 years of age to use the Services. By using the Services, you represent and warrant that you are at least 18 years old.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">2.2 Account Registration</h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">To access certain features of the Services, you must register for an account. During registration, you agree to:</p>
+                        <ul class="ml-6 space-y-2 text-gray-700 mb-6">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Provide accurate, current, and complete information</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Maintain and promptly update your account information</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Maintain the security of your account credentials</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Notify us immediately of any unauthorized use of your account</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Accept responsibility for all activities that occur under your account</span>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">2.3 Account Types</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Users may have Client/Customer Accounts (for searching and hiring businesses - default account type) and Business Owner Accounts (for listing businesses and offering services). Users may switch between Client Mode and Business Owner Mode within a single account.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">2.4 One Account Per User</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">2.4.1 Policy.</span> You may only maintain one (1) account on the Services. The creation or maintenance of multiple accounts by the same individual is strictly prohibited and constitutes a violation of these Terms. Multiple accounts created to circumvent suspensions, restrictions, or these Terms will result in immediate termination of all associated accounts.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">2.4.2 Account Verification Methods.</span> To enforce the one account per user policy, VouchHer employs email verification, device recognition, and identity verification methods.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">2.4.3 Prohibited Circumvention Methods.</span> Users are expressly prohibited from attempting to circumvent the one account policy through VPNs, proxy servers, different devices, false information, or any other method intended to create multiple accounts.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">2.4.4 Detection and Enforcement.</span> VouchHer employs automated and manual review processes to detect potential violations of the one account per user policy.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">2.4.5 Consequences of Violation.</span> Violation of the one account per user policy may result in immediate suspension or termination of all associated accounts, forfeiture of benefits, prohibition from creating new accounts, and potential legal action.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed">
+                            <span class="font-semibold">2.4.6 Dispute Resolution.</span> Any disputes regarding account termination due to multiple account violations shall be resolved in accordance with Section 16 of these Terms.
+                        </p>
+                    </section>
+
+                    <!-- Section 3: User Account and Security -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">3. User Account and Security</h2>
+                        
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">3.1 Account Credentials</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            You are solely responsible for maintaining the confidentiality of your login credentials (username and password). You agree to use a strong, unique password, not share your credentials, not allow others to access your account, and immediately notify VouchHer of any suspected unauthorized access.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">3.2 Account Responsibility</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            You are responsible for all activities conducted through your account, whether or not authorized by you, except in cases of unauthorized access resulting from VouchHer's negligence.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">3.3 Account Information Accuracy</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            You represent and warrant that all information you provide in connection with your account is accurate, truthful, and complete. You agree to update any changes in your personal information as promptly as practicable.
+                        </p>
+                    </section>
+
+                    <!-- Section 4: Business Listing and Verification -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">4. Business Listing and Verification</h2>
+                        
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">4.1 Business Listing Eligibility</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            Business listings on VouchHer are intended for women-owned businesses. By submitting a business listing, you represent and warrant that you are 18 years or older, your business qualifies as women-owned (51% or more owned and controlled by one or more women), you are the owner or have authority to represent the business, all information provided is accurate, current, and complete, you have the legal right to offer the services described, and your business complies with all applicable laws and regulations.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">4.2 Verification Process</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            All business listings undergo a review process before becoming publicly visible on the platform. Our verification process may include WBE/MBE Certification Review, Business Registration Review, and Community Volunteer Review. Most business listings are reviewed within 7 business days of submission.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">4.3 Limitations of Verification</h3>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-600 p-4 mb-6">
+                            <p class="font-bold text-gray-900 mb-2">
+                                IMPORTANT: While we verify business ownership to the best of our ability using the information and documentation provided, we cannot guarantee the accuracy of all information.
+                            </p>
+                            <p class="text-gray-700">
+                                VouchHer is not liable for misrepresentations by business owners, falsified or fraudulent documents, inaccurate business information, failure to disclose material facts, or changes to business ownership after verification. Users rely on business listings at their own risk.
+                            </p>
+                        </div>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">4.4 Business Listing Content</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            You are solely responsible for all content in your business listing, including business name and description, services offered and pricing, photos, videos, and portfolio items, contact information and location, certifications and credentials claimed, heritage and identity designations, and hours of operation and availability.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">4.5 Multiple Business Listings</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Business owners may list multiple businesses under a single account. Each business is subject to separate verification and must meet eligibility requirements independently.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">4.6 Listing Maintenance</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            You agree to keep your business listing information current and accurate, update your listing promptly if services, pricing, or availability changes, remove services you no longer offer, and notify VouchHer if your business ownership changes.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">4.7 Listing Removal</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            VouchHer reserves the right to remove, suspend, or refuse any business listing at any time, with or without notice, for any reason, including violation of these Terms, inaccurate or misleading information, complaints from users, failure to respond to verification requests, or fraudulent or suspicious activity.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">4.8 Non-Discrimination Policy and Open Access Policy</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">4.8.1 Open Access to Directory.</span> While VouchHer is designed as a platform to promote and support women-owned businesses, the VouchHer directory is open and accessible to all users regardless of gender, race, ethnicity, national origin, religion, gender identity, sexual orientation, disability, age, or any other characteristic protected under applicable law.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">4.8.2 User Eligibility.</span> Any individual or entity may access, browse, and utilize the VouchHer directory services without restriction based on the user's gender, identity, or background.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">4.8.3 Business Listing Requirements.</span> Business listings on VouchHer are intended primarily for women-owned businesses as outlined in Section 4.1.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">4.8.4 Non-Discrimination Commitment.</span> VouchHer is committed to maintaining a platform that prohibits discrimination, promotes inclusive business practices, provides equal access, and fosters a respectful community environment.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">4.8.5 Prohibited Conduct.</span> Users may not engage in discriminatory behavior based on race, ethnicity, national origin, religion, gender, gender identity, sexual orientation, disability, age, or any other protected characteristic.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed">
+                            <span class="font-semibold">4.8.6 Reporting Violations.</span> Users who experience or witness discriminatory behavior on the platform are encouraged to report such incidents to VouchHer at support@vouchher.biz.
+                        </p>
+                    </section>
+
+                    <!-- Section 6: Payment, Fees and Escrow -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">6. Payment, Fees and Escrow</h2>
+                        
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">6.1 Payment Processing</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            All payments on the platform are processed through our third-party payment processor, Stripe, Inc. ("Stripe"). By using the Services, you agree to be bound by Stripe's Services Agreement and applicable terms available at https://stripe.com/legal.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">6.2 Platform Service Fee</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            VouchHer charges a 5% platform service fee on all completed transactions. This fee is calculated on the total transaction amount and is deducted from the payment to the business owner. Example: If a client pays $100 for a service, the business owner receives $95 and VouchHer retains $5 as the platform fee.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">6.3 Payment Authorization</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            When a business owner accepts a service request, the client authorizes VouchHer (via Stripe) to charge the agreed-upon amount to the client's payment method.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">6.4 Escrow Process</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">VouchHer operates an escrow system to protect both clients and business owners:</p>
+                        <ul class="ml-6 space-y-3 text-gray-700 mb-6">
+                            <li class="flex items-start">
+                                <span class="font-bold text-primary-600 mr-3">Step 1:</span>
+                                <span><span class="font-semibold">Payment Capture</span> - When a service request is accepted, the client's payment method is charged and funds are held in escrow by VouchHer (via Stripe).</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="font-bold text-primary-600 mr-3">Step 2:</span>
+                                <span><span class="font-semibold">Service Completion</span> - The business owner performs the agreed-upon services according to the contract terms.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="font-bold text-primary-600 mr-3">Step 3:</span>
+                                <span><span class="font-semibold">Completion Request</span> - When the business owner completes the work, they submit a "completion request" through the platform.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="font-bold text-primary-600 mr-3">Step 4:</span>
+                                <span><span class="font-semibold">Client Confirmation</span> - The client receives a notification and has the opportunity to confirm completion, request changes, or dispute.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="font-bold text-primary-600 mr-3">Step 5:</span>
+                                <span><span class="font-semibold">Automatic Release</span> - If the client does not respond within 14 business days of the completion request, funds are automatically released to the business owner.</span>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">6.5 Fund Disbursement to Business Owners</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Once funds are released from escrow, the business owner's VouchHer balance is credited (total amount minus 5% platform fee). Business owners may withdraw funds to their linked bank account with withdrawals typically processing within 2-5 business days. Minimum withdrawal amount: $10.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">6.6 Payment Method Requirements</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Clients must provide a valid payment method (credit cards, debit cards, ACH bank transfers). Business owners must provide valid bank account information to receive disbursements.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">6.7 Failed Payments</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            If a payment fails, the client will be notified and given the opportunity to update their payment method. The service request may be cancelled if payment cannot be processed. Business owners will be notified of payment failures.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">6.8 Taxes</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">Client Taxes:</span> Clients are responsible for determining and paying any applicable sales tax, VAT, or other taxes on services purchased.
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            <span class="font-semibold">Business Owner Taxes:</span> Business owners are solely responsible for reporting income from VouchHer services, paying self-employment taxes, filing appropriate tax returns, and obtaining any necessary tax identification numbers. VouchHer does not provide tax advice. VouchHer will provide annual earnings summaries (e.g., 1099 forms) as required by law.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">6.9 Refunds</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Refunds are handled on a case-by-case basis through our dispute resolution process (see Section 10). VouchHer is not obligated to provide refunds, but may do so at our sole discretion after reviewing the circumstances. Refunds, if issued, are returned to the client's original payment method.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">6.10 Fee Avoidance Prohibited</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            Users may not circumvent the platform to avoid paying the 5% service fee. Specifically, users may not exchange contact information for the purpose of contracting off-platform, request or make payments outside the VouchHer platform, or encourage other users to transact outside the platform.
+                        </p>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Consequences of violations may result in immediate account suspension or permanent termination, assessment of all unpaid platform fees, a penalty fee of up to $500 per violation, legal action to recover unpaid fees and penalties, and loss of access to funds held in escrow.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">6.11 Currency</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            All transactions on VouchHer are conducted in United States Dollars (USD).
+                        </p>
+                    </section>
+
+                    <!-- Section 9: Prohibited Conduct -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">9. Prohibited Conduct and Community Guidelines</h2>
+                        
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">9.1 General Prohibited Conduct</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">You shall not use the Services to:</p>
+                        
+                        <div class="mb-6">
+                            <p class="font-semibold text-gray-900 mb-2">Illegal Activity</p>
+                            <ul class="ml-6 space-y-2 text-gray-700">
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Engage in or promote illegal activity</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Violate any local, state, national, or international law</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Infringe on intellectual property rights</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Engage in fraud, deception, or misrepresentation</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-6">
+                            <p class="font-semibold text-gray-900 mb-2">Harmful Behavior</p>
+                            <ul class="ml-6 space-y-2 text-gray-700">
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Harass, threaten, stalk, or intimidate others</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Discriminate based on protected characteristics</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Post or transmit hateful, violent, or graphic content</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Impersonate any person or entity</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-6">
+                            <p class="font-semibold text-gray-900 mb-2">Platform Integrity</p>
+                            <ul class="ml-6 space-y-2 text-gray-700">
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Create multiple accounts or fake accounts</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Use automated tools, bots, or scripts to access the Services</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Attempt to gain unauthorized access to other users' accounts</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Interfere with or disrupt the Services or servers</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-6">
+                            <p class="font-semibold text-gray-900 mb-2">Spam and Abuse</p>
+                            <ul class="ml-6 space-y-2 text-gray-700">
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Send unsolicited messages or spam</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Engage in phishing or distribute malware</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3">•</span>
+                                    <span>Post repetitive or irrelevant content</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">9.2 Business Owner-Specific Prohibitions</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Business owners may not misrepresent ownership of a business, list businesses they do not own or have authority to represent, provide false certifications or credentials, falsify documentation during the verification process, offer services they are not qualified or licensed to perform, accept service requests they cannot fulfill, fail to deliver services as agreed without valid reason, or request additional payment not agreed upon in the original contract.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">9.3 Client-Specific Prohibitions</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Clients may not make false or fraudulent service requests, refuse to pay for services that were properly delivered, abuse the dispute process to obtain unwarranted refunds, demand services beyond the agreed-upon scope without additional payment, or harass business owners.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">9.4 Reporting Violations</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            If you become aware of conduct that violates these Terms, please report it through the platform's reporting feature or contact us at support@vouchher.biz. VouchHer will investigate reports and take appropriate action.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">9.5 Consequences of Violations</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Violations of these Terms may result in warnings, temporary suspension of account, permanent termination of account, removal of content or listings, withholding of funds pending investigation, and legal action.
+                        </p>
+                    </section>
+
+                    <!-- Section 11: Disclaimers and Warranties -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">11. Disclaimers and Warranties</h2>
+                        
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">11.1 "As Is" and "As Available"</h3>
+                        <div class="bg-red-50 border-l-4 border-red-600 p-4 mb-6">
+                            <p class="font-bold text-gray-900 mb-2">
+                                THE SERVICES ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+                            </p>
+                            <p class="text-gray-700">
+                                TO THE FULLEST EXTENT PERMITTED BY LAW, VOUCHHER DISCLAIMS ALL WARRANTIES, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY, IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, IMPLIED WARRANTIES OF NON-INFRINGEMENT, AND WARRANTIES ARISING FROM COURSE OF DEALING OR TRADE USAGE.
+                            </p>
+                        </div>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">11.2 No Guarantee of Service Quality</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            VOUCHHER DOES NOT WARRANT OR GUARANTEE the quality, safety, legality, or capability of any business owner or service, that business owners will perform services as agreed, that services will meet your expectations or requirements, that business listings are accurate, complete, or current, that certifications or credentials claimed by business owners are valid, or that business owners possess necessary licenses or insurance.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">11.3 No Guarantee of Platform Performance</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            VOUCHHER DOES NOT WARRANT THAT the Services will be uninterrupted, timely, secure, or error-free, any errors or defects will be corrected, the Services will be free from viruses or harmful components, results obtained from the Services will be accurate or reliable, or the platform will meet your requirements.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">11.4 Third-Party Services and User Content</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            We carefully select our service providers and moderate our platform, but VouchHer cannot guarantee the accuracy or quality of content posted by users, the performance of payment processors, content on external websites linked from our platform, or the complete accuracy of user-provided business information.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">11.5 No Financial, Legal, or Professional Advice</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            VouchHer does not provide financial, investment, accounting advice, legal advice or legal services, tax preparation or tax advice, or professional licensing or regulatory guidance. Content on the platform is for informational purposes only.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">11.6 Changes to Services</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            VouchHer reserves the right to modify, suspend, or discontinue any aspect of the Services at any time, change fees, features, or functionality, impose limits on Services or restrict access. WE MAY MAKE CHANGES TO SERVICES WITHOUT PRIOR NOTICE AND WITHOUT LIABILITY TO YOU.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">11.7 Assumption of Risk</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            BY USING THE SERVICES, YOU ACKNOWLEDGE AND AGREE THAT you use the Services at your own risk, you are solely responsible for your interactions with other users, you should conduct your own due diligence before engaging in transactions, and VouchHer is not liable for disputes between users.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">11.8 User Compliance and Authority</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Each user and business owner represents and warrants that they comply with all applicable federal, state, and local laws, regulations, and ordinances in connection with their use of VouchHer's services and platform.
+                        </p>
+                    </section>
+
+                    <!-- Section 12: Limitation of Liability -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">12. Limitation of Liability</h2>
+                        
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">12.1 Types of Damages Excluded</h3>
+                        <div class="bg-red-50 border-l-4 border-red-600 p-4 mb-6">
+                            <p class="font-bold text-gray-900 mb-2">
+                                TO THE MAXIMUM EXTENT PERMITTED BY LAW, VOUCHHER AND ITS OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, AFFILIATES, REPRESENTATIVES AND LICENSORS SHALL NOT BE LIABLE FOR ANY:
+                            </p>
+                            <ul class="ml-6 space-y-2 text-gray-700">
+                                <li>INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES</li>
+                                <li>LOSS OF PROFITS, REVENUE, OR INCOME</li>
+                                <li>LOSS OF DATA OR BUSINESS OPPORTUNITIES</li>
+                                <li>LOSS OF GOODWILL OR REPUTATION</li>
+                                <li>COSTS OF SUBSTITUTE GOODS OR SERVICES</li>
+                                <li>PERSONAL INJURY OR PROPERTY DAMAGE (EXCEPT AS REQUIRED BY LAW)</li>
+                            </ul>
+                        </div>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">12.3 Maximum Liability Cap</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            IN NO EVENT SHALL VOUCHHER'S TOTAL LIABILITY TO YOU FOR ALL CLAIMS ARISING FROM OR RELATED TO THE SERVICES EXCEED THE GREATER OF: THE AMOUNT YOU PAID TO VOUCHHER IN FEES IN THE SIX (6) MONTHS IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO LIABILITY, OR ONE THOUSAND DOLLARS ($1000).
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">12.5 Jurisdictions That Prohibit Limitations</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Some jurisdictions do not allow the exclusion or limitation of incidental or consequential damages. In such jurisdictions, the above limitations may not apply to you, and VouchHer's liability shall be limited to the fullest extent permitted by law.
+                        </p>
+                    </section>
+
+                    <!-- Section 16: Dispute Resolution -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">16. Dispute Resolution and Arbitration</h2>
+                        
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">16.1 Informal Dispute Resolution</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Before filing any legal claim against VouchHer, you agree to first contact us at support@vouchher.biz and attempt to resolve the dispute informally. Both parties agree to negotiate in good faith for at least 30 days from the date of initial contact.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">16.2 Binding Arbitration</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            Any dispute arising out of this Agreement, which cannot be resolved by negotiation, shall be settled by binding arbitration in accordance with the American Arbitration Association Commercial Arbitration Rules and Procedures amended by this Agreement. Arbitration shall take place in Providence County, Rhode Island or may be held remotely via video conference should all parties agree.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">16.3 Exceptions to Arbitration</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            The following Disputes are not subject to arbitration: Claims in small claims court, if they qualify, Claims seeking injunctive or equitable relief to protect intellectual property rights, and Claims related to data security or privacy breaches.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">16.4 Class Action Waiver</h3>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-600 p-4 mb-6">
+                            <p class="font-bold text-gray-900">
+                                YOU AND VOUCHHER AGREE THAT DISPUTES WILL BE RESOLVED ON AN INDIVIDUAL BASIS ONLY. You and VouchHer waive any right to participate in a class action lawsuit, participate in a class-wide arbitration, bring representative claims on behalf of others, or join or consolidate claims with claims of other users.
+                            </p>
+                        </div>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">16.5 Governing Law</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6">
+                            These Terms and any Disputes are governed by the laws of the State of Rhode Island and applicable federal law, without regard to conflict of law principles.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">16.8 Opt-Out of Arbitration</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            You may opt out of this arbitration agreement by sending written notice to VouchHer at support@vouchher.biz within 30 days of first accepting these Terms. Your notice must include your name, email address associated with your account, and statement that you opt out of the arbitration agreement.
+                        </p>
+                    </section>
+
+                    <!-- Section 18: Contact Us -->
+                    <section class="mb-12 bg-primary-50 p-8 rounded-lg">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">18. Contact Information</h2>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            For questions, concerns, or notices regarding these Terms of Service, please contact us:
+                        </p>
+                        <div class="text-gray-700 space-y-2 mb-6">
+                            <p class="font-semibold">Women and Multicultural Directory LLC (dba VouchHer)</p>
+                            <p><span class="font-semibold">Mailing Address:</span> P.O. Box 1141, Pawtucket, RI 02862</p>
+                            <div class="mt-4 space-y-2">
+                                <p><span class="font-semibold">Email Addresses:</span></p>
+                                <p class="ml-4">General inquiries: info@vouchher.biz</p>
+                                <p class="ml-4">Legal matters: support@vouchher.biz</p>
+                                <p class="ml-4">Privacy concerns: support@vouchher.biz</p>
+                                <p class="ml-4">Copyright complaints: support@vouchher.biz</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-700">
+                            <p class="font-semibold mb-2">Business Hours:</p>
+                            <p>Monday - Friday; 8am-5pm. We will respond to inquiries as promptly as possible, typically within 5 business days.</p>
+                        </div>
+                    </section>
+
+                    <!-- Final Acceptance -->
+                    <section class="bg-gray-100 p-6 rounded-lg text-center border-l-4 border-primary-600">
+                        <p class="text-gray-900 font-bold">
+                            BY USING VOUCHHER, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THESE TERMS OF SERVICE.
+                        </p>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer-component />
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>

@@ -7,6 +7,8 @@ import { SearchComponent } from './search/search.component';
 import { FaqComponent } from './faq/faq.component';
 import { ContactComponent } from './contact/contact.component';
 import { AboutComponent } from './about/about.component';
+import { PrivacyPolicyComponent } from './privacy-policy/privacy-policy.component';
+import { TermsOfServiceComponent } from './terms-of-service/terms-of-service.component';
 import { PayPalCallbackComponent } from './payments/paypal-callback/paypal-callback.component';
 import { StripeCallbackComponent } from './payments/stripe-callback/stripe-callback.component';
 
@@ -16,6 +18,8 @@ export const routes: Routes = [
   { path: 'faq', component: FaqComponent },
   { path: 'contact', component: ContactComponent },
   { path: 'about', component: AboutComponent },
+  { path: 'privacy-policy', component: PrivacyPolicyComponent },
+  { path: 'terms-of-service', component: TermsOfServiceComponent },
   { 
     path: 'auth', 
     loadChildren: () => import('./auth/auth.route').then(m => m.AUTH_ROUTES),

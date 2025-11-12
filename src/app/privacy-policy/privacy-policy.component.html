@@ -1,0 +1,664 @@
+<app-header [drawer]="drawer" [maxWidth]="'max-w-7xl'"></app-header>
+<mat-drawer-container class="content-body" [hasBackdrop]="true" autosize>
+    <mat-drawer #drawer [mode]="'over'" class="drawer">
+        @if (currentUser()) {
+        <app-user-sidenav />
+        } @else {
+        <app-guest-sidenav />
+        }
+    </mat-drawer>
+    <mat-drawer-content class="bg-[#F4F2EE]!" #drawerContent>
+        <div class="privacy-policy-page min-h-screen">
+            <!-- Privacy Policy Content -->
+            <div class="py-12 md:py-16 bg-white">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <!-- Title -->
+                    <div class="mb-12">
+                        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
+                        <p class="text-lg text-gray-700 font-semibold">Last update: November 2025 (Effective Date)</p>
+                    </div>
+
+                    <!-- Introduction -->
+                    <section class="mb-12 space-y-4 text-gray-700 leading-relaxed">
+                        <p>
+                            Welcome to Women and Multicultural Directory LLC, d/b/a VouchHer ("VouchHer," "we," "our," or "us"). We, and our affiliated companies, are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner. This Privacy Policy outlines how we collect, use, store, and protect your information when you use our provider matching services and/or related products through our website https://www.vouchher.biz (the "Site"). Entering the Site constitutes your acceptance and agreement to the terms contained in this Privacy Policy. If you do not agree with the terms and policies set forth herein, please do not enter the Site. "You" or "Your" means the visitor/user of this Site.
+                        </p>
+                    </section>
+
+                    <!-- Personal Information Section -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Personal Information We Collect</h2>
+                        <div class="space-y-4 text-gray-700 leading-relaxed">
+                            <p>
+                                When you visit the Site, we automatically collect certain information about your device, including information about your web browser, IP address, time zone, and some of the cookies that are installed on your device. This information is used to help manage security and protect users of our platform. Additionally, as you browse the Site, we collect information including the specific web pages or products viewed, what websites or search terms referred you to the Site, and information about how you interact with the Site. We refer to this automatically-collected information as "Device Information".
+                            </p>
+
+                            <p class="font-semibold mt-4">We collect Device Information using the following technologies:</p>
+                            <ul class="ml-6 space-y-2">
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3 mt-1">•</span>
+                                    <span><span class="font-semibold">"Cookies"</span> are data files that are placed on your device or computer and often include an anonymous unique identifier. For more information about cookies, and how to disable cookies, visit https://www.allaboutcookies.org.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3 mt-1">•</span>
+                                    <span><span class="font-semibold">"Log files"</span> track actions occurring on the Site, and collect data including your IP address, browser type, Internet service provider, referring/exit pages, and date/time stamps.</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-primary-600 mr-3 mt-1">•</span>
+                                    <span><span class="font-semibold">"Web beacons", "tags", and "pixels"</span> are electronic files used to record information about how you browse the Site.</span>
+                                </li>
+                            </ul>
+
+                            <p class="mt-4">
+                                Additionally, when you make a purchase or attempt to make a purchase through the Site, we collect certain information from you, including your name, billing address, shipping address, payment information (including credit card numbers, account information, etc.), email address, and phone number. We refer to this information as "Order Information". We use this for internal purposes to understand our audience and who is seeking our community. For more information on payment and billing, please see our Terms of Service (section 6).
+                            </p>
+
+                            <p>
+                                When we talk about "Personal Information" in this Privacy Policy, we are talking both about Device Information and Order Information, as well as the information included below.
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- Notice of Other Information Collected -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Notice of Other Information Collected</h2>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            We collect the following categories of personal information from users of the VouchHer platform:
+                        </p>
+
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-3">A. Identifiers</h3>
+                                <ul class="ml-6 space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Full name</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Email address</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Phone number</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>IP address</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Account username and user ID</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Device identifiers</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-3">B. Personal Records (as defined under California law)</h3>
+                                <ul class="ml-6 space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Billing address</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Bank account information (for business owner payouts)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Payment card information (processed and stored by Stripe; we do not store full card numbers)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Customer account details and transaction history</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-3">C. Commercial Information</h3>
+                                <ul class="ml-6 space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Service requests submitted or received</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Transaction history (services booked, amounts paid)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Purchase records and payment history</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Business listings and service offerings</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-3">D. Internet or Other Electronic Network Activity</h3>
+                                <ul class="ml-6 space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Browsing history on our Site</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Search queries and filters used</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Pages viewed and time spent on pages</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Click patterns and navigation paths</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Device data (browser type, operating system)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Interactions with emails and notifications</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Chat messages between users on the platform</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-3">E. Geolocation Data</h3>
+                                <ul class="ml-6 space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Approximate location based on IP address (city, state, region)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Location information you provide when creating business listings or searching for services</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-3">F. Inferences Drawn from Personal Information</h3>
+                                <ul class="ml-6 space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Profile reflecting preferences (e.g., preferred service categories, location preferences)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Interests based on browsing behavior</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Business performance metrics and analytics</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-3">G. Business-Related Information (for Business Owners)</h3>
+                                <ul class="ml-6 space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Business name and type (LLC, sole proprietor, etc.)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Business registration documents</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>WBE/M/WBE certifications (if provided)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Services offered and pricing</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Business photos, logos, and portfolio items</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Heritage and identity designations (optional)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Business hours and availability</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span>Reviews and ratings received</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 mb-3">H. Sensitive Personal Information (Limited Collection and Use)</h3>
+                                <p class="text-gray-700 mb-3">
+                                    We collect the following categories of Sensitive Personal Information only to the extent necessary to provide our services:
+                                </p>
+                                <ul class="ml-6 space-y-2 text-gray-700">
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span><span class="font-semibold">Government identification numbers:</span> Driver's license or state ID numbers (only if voluntarily provided for enhanced verification)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span><span class="font-semibold">Financial account information:</span> Bank account numbers and routing numbers (for business owner payouts; securely stored by our payment processor)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span><span class="font-semibold">Account login credentials:</span> Username and password (encrypted and hashed)</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span><span class="font-semibold">Precise geolocation:</span> Only when you explicitly share your exact business address in your listing</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <span class="text-primary-600 mr-3">•</span>
+                                        <span><span class="font-semibold">Contents of communications:</span> Messages exchanged between users through our platform messaging system</span>
+                                    </li>
+                                </ul>
+                                <div class="bg-primary-50 border-l-4 border-primary-600 p-4 mt-4">
+                                    <p class="text-gray-700 font-semibold">
+                                        Important Note on Sensitive Personal Information: We use Sensitive Personal Information only for the specific purposes described in the "Use of Sensitive Personal Information (California Residents)" section below. We do not use this information for profiling, targeted advertising, or to infer characteristics about you beyond what is necessary to provide our services.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Sources of Information -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Sources of Information</h2>
+                        <p class="text-gray-700 leading-relaxed mb-4">We collect this information:</p>
+                        <ul class="ml-6 space-y-2 text-gray-700">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Directly from you when you create an account, list a business, or use our services</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Automatically through cookies and tracking technologies when you browse our Site</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>From third-party payment processors (Stripe) for transaction processing</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>From other users (e.g., reviews and ratings)</span>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <!-- Why We Collect This Information -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Why We Collect This Information</h2>
+                        <p class="text-gray-700 leading-relaxed">
+                            We collect this information for the business and commercial purposes described in the "How We Use Your Personal Information" section of this Privacy Policy and retain it as described in the "Data Retention" section. This collection applies to all users. Additional rights for specific states (California, Rhode Island) and international jurisdictions (EU/EEA, Israel) are described in dedicated sections below.
+                        </p>
+                    </section>
+
+                    <!-- Sharing Your Personal Information -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Sharing Your Personal Information</h2>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            We share your Personal Information with third parties to help us use your Personal Information, as described above. For example, we use:
+                        </p>
+                        <ul class="ml-6 space-y-3 text-gray-700">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Stripe</span> to power our payments. you can read more about how Stripe uses your Personal Information here: https://stripe.com/privacy</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Google Analytics</span> to help us understand how our customers use the Site -- you can read more about how Google uses your Personal Information here: https://www.google.com/intl/en/policies/privacy/. You can also opt-out of Google Analytics here: https://tools.google.com/dlpage/gaoptout.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Porkbun</span> to send promotional and marketing emails. You can view their privacy policy here.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Heroku</span> to ensure secure cloud storage and hosting. Their privacy policy is available here.</span>
+                            </li>
+                        </ul>
+                        <p class="text-gray-700 leading-relaxed mt-4">
+                            Finally, we may also share your Personal Information to comply with applicable laws and regulations, to respond to a subpoena, search warrant or other lawful requests for information we receive, or to otherwise protect our rights.
+                        </p>
+                    </section>
+
+                    <!-- Data Breach Notification -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Data Breach Notification Procedure</h2>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            We take the protection of your personal information seriously. In the unlikely event that a data breach occurs involving your personal data, we will take prompt action to assess, contain, and mitigate the incident, and to notify affected individuals and regulators as required by applicable law.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">Definition of a Data Breach</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            A data breach means any unauthorized access to, disclosure of, loss of, alteration of, or destruction of personal information that could result in harm to individuals, including but not limited to identity theft, fraud, reputational damage, or loss of confidentiality.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">Internal Response and Assessment</h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">Upon discovery or suspicion of a breach, we shall:</p>
+                        <ul class="ml-6 space-y-2 text-gray-700 mb-6">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Immediately secure our systems to prevent further unauthorized access.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Conduct an internal investigation to determine the scope, cause, and impact of the incident.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Document all findings and corrective actions.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Notify relevant management and, where appropriate, our data protection officer or designated privacy representative.</span>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">Notification Timeframes</h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">We shall provide notification without undue delay and in accordance with applicable law:</p>
+                        <ul class="ml-6 space-y-3 text-gray-700 mb-6">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">European Union / EEA (GDPR):</span> We shall notify the relevant supervisory authority within 72 hours of becoming aware of a personal data breach, unless it is unlikely to result in a risk to the rights and freedoms of individuals. Affected individuals will also be notified without undue delay if the breach is likely to result in a high risk to their rights and freedoms.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">United States (including Rhode Island):</span> We shall notify affected individuals as soon as practicable, and no later than 45 days after confirmation of the breach, in compliance with R.I. Gen. Laws § 11-49.3 and applicable state laws.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">California (CCPA/CPRA):</span> Where applicable, we shall provide notice consistent with the California Civil Code §§ 1798.29 and 1798.82, including notice to the California Attorney General if more than 500 residents are affected.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Other jurisdictions (including Israel):</span> We shall comply with all mandatory reporting and notification requirements as defined by local data protection laws.</span>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">Method of Notification</h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">We shall notify affected individuals using one or more of the following methods:</p>
+                        <ul class="ml-6 space-y-2 text-gray-700 mb-6">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Email to the address associated with the user's account;</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Prominent notice on our website or platform (where direct contact details are unavailable);</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Written notice by postal mail if required by law;</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Direct communication through account alerts or other electronic means.</span>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">Information Included in the Notification</h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">Each breach notification shall include, to the extent known and legally permissible:</p>
+                        <ul class="ml-6 space-y-2 text-gray-700 mb-6">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>A summary of the nature of the breach;</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>The categories and approximate number of individuals affected;</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>The types of personal data involved;</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>The steps we have taken or will take to address and mitigate the breach;</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Recommendations for steps affected individuals can take to protect themselves; and</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Contact information for our privacy or data protection representative for further inquiries.</span>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">Regulatory and Law Enforcement Cooperation</h3>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            We shall cooperate with relevant data protection authorities, law enforcement, and other regulators as required by law. Where appropriate, we may delay individual notifications if requested by law enforcement to avoid impeding an active investigation.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">Recordkeeping</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            All breaches, whether or not they require notification, shall be recorded and maintained for compliance and audit purposes. These records shall include details of the incident, its effects, and the remedial actions taken.
+                        </p>
+                    </section>
+
+                    <!-- Children's Privacy -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Children's Privacy</h2>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            Our services are not directed to individuals under the age of 18. We do not knowingly collect personal information from children under 18. If we become aware that we have inadvertently collected such information, we shall take steps to delete it.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">California-Specific Protections (CPRA)</h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">
+                            Under the California Privacy Rights Act (CPRA), additional protections apply to the personal information of minors:
+                        </p>
+                        <ul class="ml-6 space-y-2 text-gray-700 mb-4">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Children Under 13:</span> We do not knowingly sell or share the personal information of children under 13 years of age.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Minors Ages 13-15:</span> We do not sell or share the personal information of minors ages 13 to 15 without affirmative authorization from the minor.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Minors Ages 16-17:</span> We do not sell or share the personal information of minors ages 16 to 17 without affirmative authorization from the minor or their parent/guardian.</span>
+                            </li>
+                        </ul>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            However, as stated above, our platform is designed for users 18 and older, and we rely on users to provide truthful information about their age.
+                        </p>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">If You Are Under 18</h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">If you are under 18 years of age, you may not:</p>
+                        <ul class="ml-6 space-y-2 text-gray-700 mb-4">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Create an account on VouchHer</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>List a business</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Request or provide services</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Make or receive payments through the platform</span>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">Enforcement</h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">If we discover or are notified that a user is under 18, we will immediately:</p>
+                        <ul class="ml-6 space-y-2 text-gray-700 mb-4">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Suspend or terminate the account</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Delete all personal information associated with the account</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Cancel any pending transactions</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>Notify the account holder of the termination</span>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-lg font-bold text-gray-900 mb-3">Reporting Underage Users</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            If you become aware of any user who is under 18 years of age, please report it immediately to support@vouchher.biz. We will investigate all reports promptly.
+                        </p>
+                    </section>
+
+                    <!-- Your Rights -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Your Rights</h2>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            If you are a European resident, you have the right to access personal information we hold about you and to ask that your personal information is corrected, updated, or deleted. If you would like to exercise this right, please contact us through the contact information included in this Policy below.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            Additionally, if you are a European resident we note that we are processing your information in order to assist fulfilling contracts business owners might have with you (for example if you make a service order through the Site), or otherwise to pursue our legitimate business interests listed above. Additionally, please note that your information may be transferred outside of Europe, including to Canada and the United States.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-3">You have the right to:</p>
+                        <ul class="ml-6 space-y-2 text-gray-700 mb-6">
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>know what personal information we collect, use, disclose, and sell;</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>request access to and deletion of your personal information;</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>correct inaccurate personal information;</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>opt-out of the sale or sharing of personal information;</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>limit use and disclosure of sensitive personal information; and</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span>not be discriminated or retaliated against for exercising any of these rights.</span>
+                            </li>
+                        </ul>
+
+                        <p class="text-gray-700 leading-relaxed">
+                            To exercise these rights, please contact us at support@vouchher.biz. We shall verify your identity prior to processing any request. You may also designate an authorized agent to make these requests on your behalf.
+                        </p>
+                    </section>
+
+                    <!-- Data Security and Retention -->
+                    <section class="mb-12">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Data Security and Retention</h2>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            We take commercially reasonable steps to protect your information from loss, misuse, and unauthorized access, disclosure, alteration, or destruction. Please understand, however, that no security system is impenetrable. We cannot guarantee the security of our databases or the databases of the third parties with which we may share such information, nor can we guarantee that the information you supply is not going to be intercepted while being transmitted over the internet. In particular, email sent to us may not be secure, and you should therefore take special care in deciding what information you send to us via email.
+                        </p>
+
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            We retain your personal information only for as long as is reasonably necessary to fulfill the purposes for which it was collected, as outlined in this Privacy Policy, or as required by applicable law. The retention period may vary depending on the category of personal information and the nature of our relationship with you. Below is a summary of our standard retention periods:
+                        </p>
+
+                        <div class="space-y-3 text-gray-700 mb-6">
+                            <div class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Identifiers</span> (e.g., name, email address, phone number): Retained for up to 7 years after your last interaction with us, or until your request for deletion, whichever comes first.</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Commercial Information</span> (e.g., purchase history, transaction records): Retained for 7 years for accounting, warranty, and business reporting purposes.</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Internet or Electronic Network Activity</span> (e.g., browsing history, IP address, device data): Retained for up to 2 years, unless retained longer for fraud prevention or security investigations.</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Geolocation Data</span> (approximate location): Retained for up to 1 year to optimize user experience and ensure regional compliance.</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Payment Information</span> (e.g., credit card details): Not stored by us directly; securely processed and retained by our payment processor in accordance with PCI DSS standards. Transactional metadata may be retained for 7 years.</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">User Account Information</span> (e.g., login credentials, preferences): Retained for the duration of your active account and for up to 2 years following account closure or inactivity.</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Customer Service Records</span> (e.g., support messages, complaints): Retained for 5 years to resolve disputes and ensure service quality.</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-primary-600 mr-3">•</span>
+                                <span><span class="font-semibold">Sensitive Personal Information</span> (e.g., financial account credentials, government IDs, health data): Retained only as necessary to complete transactions or fulfill legal or regulatory obligations, and generally for no longer than 1 year, unless otherwise required by law.</span>
+                            </div>
+                        </div>
+
+                        <p class="text-gray-700 leading-relaxed">
+                            After the applicable retention period expires, your data shall be securely deleted, anonymized, or aggregated for statistical purposes. You may request deletion of your personal information at any time, subject to our need to retain certain data to comply with legal obligations or resolve disputes.
+                        </p>
+                    </section>
+
+                    <!-- Contact Us -->
+                    <section class="mb-12 bg-primary-50 p-8 rounded-lg">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Contact Us</h2>
+                        <p class="text-gray-700 leading-relaxed mb-4">
+                            For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us at:
+                        </p>
+                        <div class="text-gray-700 space-y-2 mb-6">
+                            <p class="font-semibold">VouchHer</p>
+                            <p>P.O. Box 1141</p>
+                            <p>Pawtucket, RI 02862</p>
+                            <p>info@vouchher.biz</p>
+                        </div>
+                        <div class="text-gray-700">
+                            <p class="font-semibold mb-2">Business Hours:</p>
+                            <p>Monday - Friday; 8am-5pm.</p>
+                            <p>We will respond to inquiries as promptly as practicable.</p>
+                        </div>
+                    </section>
+
+                    <!-- Acceptance -->
+                    <section class="bg-gray-100 p-6 rounded-lg text-center border-l-4 border-primary-600">
+                        <p class="text-gray-900 font-bold">
+                            BY USING VOUCHHER, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THESE TERMS OF SERVICE.
+                        </p>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer-component />
+        </div>
+    </mat-drawer-content>
+</mat-drawer-container>
