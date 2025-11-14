@@ -7,8 +7,19 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { MatMenuModule } from '@angular/material/menu';
+import { ReactiveFormsModule } from '@angular/forms';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService } from '../../shared/services/auth.service';
 import { ProjectService, Project } from '../../shared/services/project.service';
+import { DashboardSubheaderComponent } from '../../shared/components/dashboard-subheader/dashboard-subheader.component';
+import { BusinessSearchFilterComponent } from '../../shared/components/business-search-filter/business-search-filter.component';
+import { ProjectCardComponent } from './components/project-card/project-card.component';
+import { ProjectListCardComponent } from './components/project-list-card/project-list-card.component';
+import { EmptyStateComponent, EmptyStateButton } from '../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-projects',
@@ -22,6 +33,16 @@ import { ProjectService, Project } from '../../shared/services/project.service';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatTableModule,
+    MatMenuModule,
+    ReactiveFormsModule,
+    DashboardSubheaderComponent,
+    BusinessSearchFilterComponent,
+    ProjectCardComponent,
+    ProjectListCardComponent,
+    EmptyStateComponent,
   ],
   templateUrl: './projects.component.html',
   styleUrl: './projects.component.scss'
@@ -30,52 +51,63 @@ export class ProjectsComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly projectService = inject(ProjectService);
   private readonly router = inject(Router);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   // Signals
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly myProjects = signal<Project[]>([]);
   readonly businessProjects = signal<Project[]>([]);
-  readonly activeTab = signal(0);
+  readonly viewMode = signal<'grid' | 'list'>('list'); // Default to list view for projects
+  readonly projectType = signal<'all' | 'my_requests' | 'business_inquiries'>('all');
+  readonly selectedStatus = signal<string>('all');
+  readonly searchTerm = signal<string>('');
+  readonly isMobile = signal(false);
+  readonly displayedColumns = signal<string[]>(['title', 'client', 'budget', 'status', 'date', 'actions']);
 
   // Computed signals
   readonly user = this.authService.user;
-  readonly pendingMyProjects = computed(() => 
-    this.myProjects().filter(p => ['requested', 'under_review'].includes(p.status))
-  );
-  readonly activeMyProjects = computed(() => 
-    this.myProjects().filter(p => ['accepted', 'started', 'payment_requested', 'payment_pending', 'payment_completed', 'in_progress'].includes(p.status))
-  );
-  readonly completedMyProjects = computed(() => 
-    this.myProjects().filter(p => ['completed', 'settled'].includes(p.status))
-  );
-  readonly rejectedMyProjects = computed(() => 
-    this.myProjects().filter(p => p.status === 'rejected')
-  );
-  readonly cancelledMyProjects = computed(() => 
-    this.myProjects().filter(p => p.status === 'cancelled')
-  );
-  readonly pendingBusinessProjects = computed(() => 
-    this.businessProjects().filter(p => ['requested', 'under_review'].includes(p.status))
-  );
-  readonly activeBusinessProjects = computed(() => 
-    this.businessProjects().filter(p => ['accepted', 'started', 'payment_requested', 'payment_pending', 'payment_completed', 'in_progress'].includes(p.status))
-  );
-  readonly completedBusinessProjects = computed(() => 
-    this.businessProjects().filter(p => ['completed', 'settled'].includes(p.status))
-  );
-  readonly rejectedBusinessProjects = computed(() => 
-    this.businessProjects().filter(p => p.status === 'rejected')
-  );
-  readonly cancelledBusinessProjects = computed(() => 
-    this.businessProjects().filter(p => p.status === 'cancelled')
-  );
+  readonly filteredProjects = computed(() => {
+    let projects: Project[] = [];
+    
+    // Get projects based on type
+    if (this.projectType() === 'my_requests') {
+      projects = this.myProjects();
+    } else if (this.projectType() === 'business_inquiries') {
+      projects = this.businessProjects();
+    } else {
+      // 'all' - combine both
+      projects = [...this.myProjects(), ...this.businessProjects()];
+    }
+    
+    // Filter by status
+    const statusFilter = this.selectedStatus();
+    if (statusFilter !== 'all') {
+      projects = projects.filter(p => p.status === statusFilter);
+    }
+    
+    // Filter by search term
+    const search = this.searchTerm().toLowerCase().trim();
+    if (search) {
+      projects = projects.filter(p =>
+        p.title.toLowerCase().includes(search) ||
+        p.description?.toLowerCase().includes(search)
+      );
+    }
+    
+    return projects;
+  });
 
   ngOnInit() {
     if (!this.user()) {
       this.router.navigate(['/auth']);
       return;
     }
+
+    // Setup mobile detection
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
+      this.isMobile.set(result.matches);
+    });
     
     this.loadProjects();
   }
@@ -101,8 +133,12 @@ export class ProjectsComponent implements OnInit {
     }
   }
 
-  onTabChange(index: number) {
-    this.activeTab.set(index);
+  setViewMode(mode: 'grid' | 'list') {
+    this.viewMode.set(mode);
+  }
+
+  clearSearch() {
+    this.searchTerm.set('');
   }
 
   getStatusColor(status: string): string {
@@ -211,4 +247,10 @@ export class ProjectsComponent implements OnInit {
   navigateToHome() {
     this.router.navigate(['/']);
   }
+
+  // Empty state callback
+  handleClearFilters = () => {
+    this.clearSearch();
+    this.selectedStatus.set('all');
+  };
 }

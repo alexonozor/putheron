@@ -1,0 +1,38 @@
+<mat-card class="bg-white!">
+    <mtx-grid
+      [data]="projects"
+      [columns]="columns()"
+      [trackBy]="trackByFn"
+      class="w-full">
+
+      <!-- Actions cell template with badge on the options icon when Accept/Reject are available -->
+      <ng-template matColumnDef="actions" let-element>
+        <button
+          mat-icon-button
+          [matBadge]="''"
+          matBadgeOverlap="false"
+          matBadgeColor="accent"
+          [matBadgeHidden]="!(element.status === 'requested' || element.status === 'under_review')"
+          [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="onView(element)">
+            <mat-icon>visibility</mat-icon>
+            <span>View</span>
+          </button>
+          <button mat-menu-item (click)="onAccept(element)" [disabled]="element.status !== 'requested' && element.status !== 'under_review'">
+            <mat-icon>check</mat-icon>
+            <span>Accept</span>
+          </button>
+          <button mat-menu-item (click)="onReject(element)" [disabled]="element.status !== 'requested' && element.status !== 'under_review'">
+            <mat-icon>close</mat-icon>
+            <span>Reject</span>
+          </button>
+        </mat-menu>
+
+      </ng-template>
+
+    </mtx-grid>
+</mat-card>

@@ -1,356 +1,142 @@
-<div class="min-h-screen bg-gray-50 p-6">
-  <div class="max-w-7xl mx-auto">
-    <!-- Header Section -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900">My Services</h1>
-          <p class="text-gray-600">Manage services across all your businesses</p>
-        </div>
-        <button 
-          (click)="navigateToCreateService()"
-          [disabled]="userBusinesses().length === 0"
-          [class]="userBusinesses().length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800'"
-          class="inline-flex items-center px-4 py-2 bg-gray-900 text-white rounded-lg transition-colors font-medium">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-          </svg>
-          New Service
-        </button>
+<div class="min-h-screen bg-gray-50">
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="lg:max-w-7xl max-w-12xl">
+      <div class="px-6 pt-6">
+        <app-dashboard-subheader title="My Services" subtitle="Manage services across all your businesses"
+          (backClicked)="navigateToCreateService()">
+          <button matButton="filled" color="primary" (click)="navigateToCreateService()" [disabled]="userBusinesses().length === 0" class="flex items-center">
+            <mat-icon class="mr-2">add</mat-icon>
+            New Service
+          </button>
+        </app-dashboard-subheader>
       </div>
 
-      @if (userBusinesses().length === 0) {
-        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg mb-6">
-          <div class="flex">
-            <svg class="w-5 h-5 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-            </svg>
-            <div>
-              <h3 class="text-sm font-medium text-yellow-800">No businesses found</h3>
-              <p class="mt-1 text-sm text-yellow-700">You need to create a business before you can add services.</p>
-            </div>
-          </div>
-        </div>
-      }
-
       <!-- Search and Filter Controls -->
-      <div class="bg-white rounded-lg border border-gray-200 p-4">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <!-- Search Input -->
-          <div class="relative flex-1 max-w-md">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </div>
-            <input
-              type="text"
-              [value]="searchTerm()"
-              (input)="onSearchChange($event)"
-              placeholder="Search services..."
-              class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent">
-            @if (searchTerm()) {
-              <button
-                (click)="clearSearch()"
-                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              </button>
-            }
+      <div class="px-0 sm:px-6 pt-4">
+        <app-business-search-filter [searchTerm]="searchTerm()" [viewMode]="viewMode()"
+          (searchChange)="searchTerm.set($event)" (viewModeChange)="setViewMode($event)" (clearSearch)="clearSearch()">
+          <!-- Business Filter via Content Projection -->
+          <div class="w-full sm:w-48">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+              <mat-label>Business</mat-label>
+              <mat-select [value]="selectedBusiness()" (selectionChange)="selectedBusiness.set($event.value)">
+                <mat-option value="all">All Businesses</mat-option>
+                @for (business of userBusinesses(); track business._id) {
+                <mat-option [value]="business._id">{{ business.name }}</mat-option>
+                }
+              </mat-select>
+              <mat-icon matPrefix>business</mat-icon>
+            </mat-form-field>
           </div>
+        </app-business-search-filter>
+      </div>
 
-          <!-- Business Filter -->
-          <div class="flex items-center space-x-2">
-            <label for="business-filter" class="text-sm text-gray-600">Business:</label>
-            <select
-              id="business-filter"
-              [value]="selectedBusiness()"
-              (change)="onBusinessFilterChange($event)"
-              class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent">
-              <option value="all">All Businesses</option>
-              @for (business of userBusinesses(); track business._id) {
-                <option [value]="business._id">{{ business.name }}</option>
-              }
-            </select>
-          </div>
+    </div>
 
-          <!-- View Mode Toggle -->
-          <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-600">View:</span>
-            <div class="flex bg-gray-100 rounded-lg p-1">
-              <button
-                (click)="setViewMode('grid')"
-                [class]="viewMode() === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                class="p-2 rounded-md transition-all duration-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                </svg>
-              </button>
-              <button
-                (click)="setViewMode('list')"
-                [class]="viewMode() === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
-                class="p-2 rounded-md transition-all duration-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Results Count -->
-          <div class="text-sm text-gray-600">
-            {{ filteredServices().length }} of {{ userServices().length }} services
-          </div>
+    <!-- Warning: No Businesses -->
+    @if (userBusinesses().length === 0) {
+    <div class="mx-6 mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
+      <div class="flex">
+        <svg class="w-5 h-5 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+        </svg>
+        <div>
+          <h3 class="text-sm font-medium text-yellow-800">No businesses found</h3>
+          <p class="mt-1 text-sm text-yellow-700">You need to create a business before you can add services.</p>
         </div>
       </div>
     </div>
+    }
 
     <!-- Error Display -->
     @if (error()) {
-      <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
-        <div class="flex">
-          <svg class="w-5 h-5 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-          </svg>
-          <div>
-            <h3 class="text-sm font-medium text-red-800">Error</h3>
-            <p class="mt-1 text-sm text-red-700">{{ error() }}</p>
-          </div>
+    <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+      <div class="flex">
+        <svg class="w-5 h-5 text-red-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+            clip-rule="evenodd"></path>
+        </svg>
+        <div>
+          <h3 class="text-sm font-medium text-red-800">Error</h3>
+          <p class="mt-1 text-sm text-red-700">{{ error() }}</p>
         </div>
       </div>
+    </div>
     }
 
     <!-- Loading State -->
+
     @if (loading()) {
-      <div class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-        <span class="ml-3 text-gray-600">Loading services...</span>
-      </div>
+    <div class="flex items-center justify-center min-h-screen">
+      <mat-spinner [diameter]="isMobile() ? 40 : 60" [strokeWidth]="4"></mat-spinner>
+    </div>
     } @else {
       <!-- Content -->
       @if (filteredServices().length === 0) {
-        <!-- Empty State -->
-        <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
-          @if (searchTerm() || selectedBusiness() !== 'all') {
-            <!-- No Search Results -->
-            <div class="p-4 bg-gray-50 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-              <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-medium text-gray-900 mb-2">No services found</h3>
-            <p class="text-gray-500 mb-6">Try adjusting your search term or filter to find what you're looking for.</p>
-            <button 
-              (click)="clearSearch(); selectedBusiness.set('all')"
-              class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-              Clear Filters
-            </button>
-          } @else if (userBusinesses().length === 0) {
-            <!-- No Businesses -->
-            <div class="p-4 bg-gray-50 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-              <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-medium text-gray-900 mb-2">Create a business first</h3>
-            <p class="text-gray-500 mb-6">You need to have at least one business before you can create services.</p>
-            <button 
-              (click)="navigateToCreateBusiness()"
-              class="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-              </svg>
-              Create Business
-            </button>
-          } @else {
-            <!-- No Services Yet -->
-            <div class="p-4 bg-gray-50 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-              <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-medium text-gray-900 mb-2">No services yet</h3>
-            <p class="text-gray-500 mb-6">Get started by creating your first service for your business.</p>
-            <button 
-              (click)="navigateToCreateService()"
-              class="inline-flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium">
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-              </svg>
-              Create Your First Service
-            </button>
-          }
-        </div>
+      <!-- Empty State -->
+      <div class="lg:max-w-7xl max-w-12xl px-6 pb-12">
+        @if (searchTerm() || selectedBusiness() !== 'all') {
+        <app-empty-state 
+          icon="search_off"
+          title="No services found"
+          description="Try adjusting your search term or filter to find what you're looking for."
+          [buttons]="[{ label: 'Clear Filters', callback: handleClearFilters }]">
+        </app-empty-state>
+        } @else if (userBusinesses().length === 0) {
+        <app-empty-state 
+          icon="business"
+          title="Create a business first"
+          description="You need to have at least one business before you can create services."
+          [buttons]="[{ label: 'Create Business', callback: handleCreateBusiness, icon: 'add' }]">
+        </app-empty-state>
+        } @else {
+        <app-empty-state 
+          icon="handshake"
+          title="No services yet"
+          description="Get started by creating your first service for your business."
+          [buttons]="[{ label: 'Create Your First Service', callback: handleCreateService, icon: 'add' }]">
+        </app-empty-state>
+        }
+      </div>
       } @else {
+      
         <!-- Grid View -->
         @if (viewMode() === 'grid') {
+          <div class="lg:max-w-7xl max-w-12xl px-6 pb-12">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @for (service of filteredServices(); track service._id) {
-              <div class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
-                <!-- Service Image -->
-                <div class="aspect-video bg-gray-100 relative overflow-hidden">
-                  @if (service.images && service.images.length > 0) {
-                    <img 
-                      [src]="service.images[0]" 
-                      [alt]="service.name"
-                      class="w-full h-full object-cover">
-                  } @else {
-                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                      <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      </svg>
-                    </div>
-                  }
-                  <!-- Status Badge -->
-                  <div class="absolute top-3 right-3">
-                    <span [class]="getStatusColor(service.is_active!)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-                      {{ getStatusText(service.is_active!) }}
-                    </span>
-                  </div>
-                  @if (service.is_featured) {
-                    <div class="absolute top-3 left-3">
-                      <span class="bg-yellow-100 text-yellow-800 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-                        Featured
-                      </span>
-                    </div>
-                  }
-                </div>
-
-                <!-- Service Info -->
-                <div class="p-6">
-                  <div class="mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900 truncate">{{ service.name }}</h3>
-                    <p class="text-sm text-gray-600">{{ getBusinessName(service) }}</p>
-                  </div>
-
-                  <p class="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {{ service.short_description || service.description || 'No description available' }}
-                  </p>
-
-                  <div class="flex items-center justify-between text-sm mb-4">
-                    <span class="font-semibold text-lg text-gray-900">{{ formatPrice(service) }}</span>
-                    @if (service.duration) {
-                      <span class="text-gray-500">{{ service.duration }}</span>
-                    }
-                  </div>
-
-                  @if (service.features && service.features.length > 0) {
-                    <div class="mb-4">
-                      <div class="flex flex-wrap gap-1">
-                        @for (feature of service.features.slice(0, 3); track feature) {
-                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
-                            {{ feature }}
-                          </span>
-                        }
-                        @if (service.features.length > 3) {
-                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
-                            +{{ service.features.length - 3 }} more
-                          </span>
-                        }
-                      </div>
-                    </div>
-                  }
-
-                  <!-- Action Buttons -->
-                  <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                    <div class="flex space-x-2">
-                      <button 
-                        (click)="editService(service._id)"
-                        title="Edit Service"
-                        class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                      </button>
-                    </div>
-                    <button 
-                      (click)="deleteService(service._id)"
-                      title="Delete Service"
-                      class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <app-service-card
+                [service]="service"
+                [businessName]="getBusinessName(service)"
+                [statusColorClass]="getStatusColor(service.is_active!)"
+                [statusText]="getStatusText(service.is_active!)"
+                (view)="viewService($event)"
+                (edit)="editService($event)"
+                (delete)="deleteService($event)">
+              </app-service-card>
             }
           </div>
+          </div>
         }
+      
 
+     
         <!-- List View -->
         @if (viewMode() === 'list') {
-          <div class="space-y-4">
-            @for (service of filteredServices(); track service._id) {
-              <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-all duration-200">
-                <div class="flex items-center space-x-6">
-                  <!-- Service Image -->
-                  <div class="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    @if (service.images && service.images.length > 0) {
-                      <img [src]="service.images[0]" [alt]="service.name" class="h-full w-full object-cover">
-                    } @else {
-                      <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      </svg>
-                    }
-                  </div>
-
-                  <!-- Service Info -->
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center space-x-3 mb-2">
-                      <h3 class="text-xl font-semibold text-gray-900 truncate">{{ service.name }}</h3>
-                      <span [class]="getStatusColor(service.is_active!)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-                        {{ getStatusText(service.is_active!) }}
-                      </span>
-                      @if (service.is_featured) {
-                        <span class="bg-yellow-100 text-yellow-800 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
-                          Featured
-                        </span>
-                      }
-                    </div>
-                    <p class="text-sm text-gray-600 mb-2">{{ getBusinessName(service) }}</p>
-                    <p class="text-sm text-gray-700 line-clamp-2 mb-2">
-                      {{ service.short_description || service.description || 'No description available' }}
-                    </p>
-                    <div class="flex items-center space-x-4 text-sm text-gray-500">
-                      <span class="font-semibold text-lg text-gray-900">{{ formatPrice(service) }}</span>
-                      @if (service.duration) {
-                        <span>•</span>
-                        <span>{{ service.duration }}</span>
-                      }
-                      <span>•</span>
-                      <span>Created {{ formatDate(service.createdAt) }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Actions -->
-                  <div class="flex items-center space-x-3 flex-shrink-0">
-                    <button 
-                      (click)="editService(service._id)"
-                      title="Edit Service"
-                      class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                      </svg>
-                    </button>
-                    <button 
-                      (click)="deleteService(service._id)"
-                      title="Delete Service"
-                      class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            }
+           <div class="lg:max-w-7xl max-w-12xl lg:px-6 px-0 pb-12">
+          <app-service-list-card
+            [services]="filteredServices()"
+            [businessNameMap]="getBusinessNameMap()"
+            [displayedColumns]="['image', 'name', 'business', 'description', 'status', 'price', 'date', 'actions']"
+            (view)="viewService($event)"
+            (edit)="editService($event)"
+            (delete)="deleteService($event)">
+          </app-service-list-card>
           </div>
         }
+      
       }
     }
   </div>

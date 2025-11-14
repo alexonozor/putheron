@@ -2,13 +2,25 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService } from '../../../shared/services/auth.service';
 import { BusinessService, Business } from '../../../shared/services/business.service';
+import { DashboardSubheaderComponent } from '../../../shared/components/dashboard-subheader/dashboard-subheader.component';
+import { BusinessSearchFilterComponent } from '../../../shared/components/business-search-filter/business-search-filter.component';
+import { BusinessCardComponent } from '../components/business-card/business-card.component';
+import { BusinessListCardComponent } from '../components/business-list-card/business-list-card.component';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-list-businesses',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatSelectModule, MatCardModule, MatProgressSpinnerModule, DashboardSubheaderComponent, BusinessSearchFilterComponent, BusinessCardComponent, BusinessListCardComponent, EmptyStateComponent],
   templateUrl: './list-businesses.component.html',
   styleUrl: './list-businesses.component.scss'
 })
@@ -17,14 +29,17 @@ export class ListBusinessesComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly businessService = inject(BusinessService);
   private readonly route = inject(ActivatedRoute);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   // Signals for component state
   readonly userBusinesses = signal<Business[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly searchTerm = signal<string>('');
-  readonly viewMode = signal<'grid' | 'list'>('grid');
+  readonly viewMode = signal<'grid' | 'list'>('list');
   readonly selectedCategory = signal<string>('all');
+  readonly selectedStatus = signal<string>('all');
+  readonly isMobile = signal(false);
 
   // Computed signals
   readonly user = this.authService.user;
@@ -32,6 +47,7 @@ export class ListBusinessesComponent implements OnInit {
     let businesses = this.userBusinesses();
     const search = this.searchTerm().toLowerCase().trim();
     const categoryFilter = this.selectedCategory();
+    const statusFilter = this.selectedStatus();
     
     // Filter by category
     if (categoryFilter !== 'all') {
@@ -42,6 +58,11 @@ export class ListBusinessesComponent implements OnInit {
         return (business.category_id as any)?._id === categoryFilter || 
                (business.category_id as any)?.name?.toLowerCase() === categoryFilter.toLowerCase();
       });
+    }
+    
+    // Filter by status
+    if (statusFilter !== 'all') {
+      businesses = businesses.filter(business => business.status === statusFilter);
     }
     
     // Filter by search term
@@ -65,6 +86,16 @@ export class ListBusinessesComponent implements OnInit {
       return;
     }
     
+    // Set view mode based on screen size
+    this.breakpointObserver.observe([Breakpoints.Tablet]).subscribe(result => {
+      this.viewMode.set(result.matches ? 'list' : 'grid');
+    });
+
+    // Setup mobile detection
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
+      this.isMobile.set(result.matches);
+    });
+    
     this.loadData();
   }
 
@@ -84,19 +115,18 @@ export class ListBusinessesComponent implements OnInit {
   }
 
   // Search and filter methods
-  onSearchChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    this.searchTerm.set(target.value);
-  }
-
   clearSearch() {
     this.searchTerm.set('');
   }
 
-  onCategoryFilterChange(event: Event) {
-    const target = event.target as HTMLSelectElement;
-    this.selectedCategory.set(target.value);
-  }
+  handleClearFilters = () => {
+    this.clearSearch();
+    this.selectedCategory.set('all');
+  };
+
+  handleCreateBusiness = () => {
+    this.navigateToCreateBusiness();
+  };
 
   setViewMode(mode: 'grid' | 'list') {
     this.viewMode.set(mode);

@@ -9,8 +9,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService } from '../../../shared/services/auth.service';
 import { BusinessService, Business, CreateServiceDto, UpdateServiceDto, Service, PricingType } from '../../../shared/services/business.service';
+import { DashboardSubheaderComponent } from '../../../shared/components/dashboard-subheader/dashboard-subheader.component';
 
 @Component({
   selector: 'app-create-service',
@@ -25,7 +29,10 @@ import { BusinessService, Business, CreateServiceDto, UpdateServiceDto, Service,
     MatIconModule,
     MatCardModule,
     MatCheckboxModule,
-    MatStepperModule
+    MatStepperModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    DashboardSubheaderComponent
   ],
   templateUrl: './create-service.component.html',
   styleUrl: './create-service.component.scss'
@@ -36,6 +43,7 @@ export class CreateServiceComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly businessService = inject(BusinessService);
   private readonly fb = inject(FormBuilder);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   // Signals for component state
   readonly userBusinesses = signal<Business[]>([]);
@@ -49,6 +57,7 @@ export class CreateServiceComponent implements OnInit {
   readonly selectedImages = signal<File[]>([]);
   readonly imagePreviewUrls = signal<string[]>([]);
   readonly existingImages = signal<string[]>([]);
+  public isMobile = signal<boolean>(false);
 
   // Forms
   serviceInfoForm: FormGroup;
@@ -86,6 +95,11 @@ export class CreateServiceComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    // Observe mobile breakpoint
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
+      this.isMobile.set(result.matches);
+    });
+
     // Check if we're in edit mode
     const serviceId = this.route.snapshot.paramMap.get('id');
     if (serviceId) {

@@ -17,6 +17,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatDividerModule } from '@angular/material/divider';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { StripeConnectService } from '../../shared/services/stripe-connect.service';
@@ -29,6 +32,12 @@ import {
   CreateWithdrawalRequest 
 } from '../../shared/models/withdrawal.model';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../../shared/components/confirmation-dialog/confirmation-dialog.component';
+import { DashboardSubheaderComponent } from '../../shared/components/dashboard-subheader/dashboard-subheader.component';
+import { EmptyStateComponent, EmptyStateButton } from '../../shared/components/empty-state/empty-state.component';
+import { BusinessSearchFilterComponent } from '../../shared/components/business-search-filter/business-search-filter.component';
+import { EarningsSummaryCardsComponent } from './components/earnings-summary-cards/earnings-summary-cards.component';
+import { EarningsTransactionHistoryComponent } from './components/earnings-transaction-history/earnings-transaction-history.component';
+import { EarningsWithdrawalsHistoryComponent } from './components/earnings-withdrawals-history/earnings-withdrawals-history.component';
 
 interface WalletSummary {
   active_orders: number;        // Computed from accepted/in_progress projects
@@ -86,12 +95,24 @@ interface TransactionData {
     MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatMenuModule,
+    MatBadgeModule,
+    MatDividerModule,
+    DashboardSubheaderComponent,
+    EmptyStateComponent,
+    BusinessSearchFilterComponent,
+    EarningsSummaryCardsComponent,
+    EarningsTransactionHistoryComponent,
+    EarningsWithdrawalsHistoryComponent
   ],
   templateUrl: './earnings.component.html',
   styleUrl: './earnings.component.scss'
 })
 export class EarningsComponent implements OnInit {
+  // Allow Math functions in template
+  readonly Math = Math;
+
   private readonly http = inject(HttpClient);
   private readonly stripeConnectService = inject(StripeConnectService);
   private readonly withdrawalService = inject(WithdrawalService);
@@ -577,19 +598,28 @@ export class EarningsComponent implements OnInit {
     }
   }
 
-  // Debug method (remove in production)
-  debugFilters() {
-    console.log('=== FILTER DEBUG ===');
-    console.log('Form value:', this.filterForm.value);
-    console.log('Total transactions:', this.transactions().length);
-    console.log('Filtered transactions:', this.filteredTransactions().length);
-    console.log('Has active filters:', this.hasActiveFilters());
-    
-    // Show available transaction types
-    const types = [...new Set(this.transactions().map(t => t.transaction_type))];
-    console.log('Available transaction types:', types);
-    
-    // Test filter manually
-    this.applyFilters();
+  // Stripe menu actions
+  async handleStripeAction(action: 'dashboard' | 'disconnect' | 'connect') {
+    switch (action) {
+      case 'dashboard':
+        await this.openStripeDashboard();
+        break;
+      case 'disconnect':
+        await this.disconnectStripe();
+        break;
+      case 'connect':
+        await this.connectStripe();
+        break;
+    }
   }
+
+  // Empty state button handlers
+  handleClearFilters = () => {
+    this.clearFilters();
+  };
+
+  handleStartEarning = () => {
+    // Navigate to create business or appropriate page
+    window.location.href = '/dashboard/businesses/create';
+  };
 }

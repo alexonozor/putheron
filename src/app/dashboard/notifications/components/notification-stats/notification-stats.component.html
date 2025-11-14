@@ -1,0 +1,43 @@
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+  <!-- Total Notifications Card -->
+  <mat-card class="overflow-hidden hover:shadow-lg transition-shadow bg-white!">
+    <mat-card-content class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Notifications</h3>
+        <mat-icon class="text-blue-600 text-2xl">notifications_outline</mat-icon>
+      </div>
+      <div class="space-y-2">
+        <p class="text-3xl font-bold text-gray-900">{{ totalCount }}</p>
+        <p class="text-sm text-gray-600">All notifications received</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Unread Notifications Card -->
+  <mat-card class="overflow-hidden hover:shadow-lg transition-shadow bg-white!">
+    <mat-card-content class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Unread</h3>
+        <mat-icon class="text-purple-600 text-2xl">mark_email_unread_outline</mat-icon>
+      </div>
+      <div class="space-y-2">
+        <p class="text-3xl font-bold text-purple-600">{{ unreadCount }}</p>
+        <p class="text-sm text-gray-600">Notifications awaiting action</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Read Notifications Card -->
+  <mat-card class="overflow-hidden hover:shadow-lg transition-shadow bg-white!">
+    <mat-card-content class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Read</h3>
+        <mat-icon class="text-green-600 text-2xl">mark_email_read_outline</mat-icon>
+      </div>
+      <div class="space-y-2">
+        <p class="text-3xl font-bold text-green-600">{{ readCount }}</p>
+        <p class="text-sm text-gray-600">Already reviewed</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,451 @@
+<div class="earnings-container min-h-screen bg-gray-50">
+  <!-- Header with Subheader Component -->
+  <div class="mb-8">
+    <div class="lg:max-w-7xl max-w-12xl mx-auto">
+      <div class="px-6 pt-6">
+        <app-dashboard-subheader 
+          title="Earnings & Payments" 
+          subtitle="Manage your earnings, track payments, and request withdrawals">
+          <!-- Stripe Actions Button with Dropdown Menu -->
+          @if (canWithdraw()) {
+            <button 
+              [matMenuTriggerFor]="stripeMenu"
+              mat-raised-button 
+              color="primary"
+              [disabled]="stripeLoading()"
+              class="flex items-center gap-2">
+              @if (stripeLoading()) {
+                <mat-spinner diameter="16" class="mr-1"></mat-spinner>
+              } @else {
+                <mat-icon>payments</mat-icon>
+              }
+              Stripe Account
+              <mat-icon>arrow_drop_down</mat-icon>
+            </button>
+
+            <mat-menu #stripeMenu="matMenu">
+              @if (hasStripeAccount()) {
+                <button 
+                  mat-menu-item 
+                  (click)="handleStripeAction('dashboard')"
+                  [disabled]="stripeLoading()">
+                  <mat-icon>dashboard</mat-icon>
+                  <span>Stripe Dashboard</span>
+                </button>
+                <button 
+                  mat-menu-item 
+                  (click)="handleStripeAction('disconnect')"
+                  [disabled]="stripeLoading()">
+                  <mat-icon>link_off</mat-icon>
+                  <span>Disconnect Account</span>
+                </button>
+              } @else {
+                <button 
+                  mat-menu-item 
+                  (click)="handleStripeAction('connect')"
+                  [disabled]="stripeLoading()">
+                  <mat-icon>link</mat-icon>
+                  <span>Connect Stripe</span>
+                </button>
+              }
+              @if (canWithdrawToStripe()) {
+                <mat-divider></mat-divider>
+                <button 
+                  mat-menu-item 
+                  (click)="withdrawToStripe()"
+                  [disabled]="stripeLoading()">
+                  <mat-icon>account_balance_wallet</mat-icon>
+                  <span>Withdraw Funds</span>
+                </button>
+              }
+            </mat-menu>
+          }
+        </app-dashboard-subheader>
+      </div>
+
+      <!-- Loading State -->
+      @if (loading()) {
+        <div class="px-6 flex items-center justify-center py-12">
+          <mat-spinner diameter="40"></mat-spinner>
+          <span class="ml-3 text-gray-600">Loading earnings data...</span>
+        </div>
+      }
+
+      <!-- Error State -->
+      @else if (error()) {
+        <div class="px-6">
+          <mat-card class="bg-red-50 border-l-4 border-red-400">
+            <mat-card-content class="p-6">
+              <div class="flex items-start gap-4">
+                <mat-icon class="text-red-600 text-4xl mt-1">error</mat-icon>
+                <div class="flex-1">
+                  <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Data</h3>
+                  <p class="text-red-700 mb-4">{{ error() }}</p>
+                  <button 
+                    (click)="retryLoad()"
+                    mat-raised-button 
+                    color="warn">
+                    <mat-icon class="mr-2">refresh</mat-icon>
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+
+      <!-- Main Content -->
+      @else if (earningsSummary()) {
+        <div class="px-6 space-y-6 pb-12">
+          <!-- Summary Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Available Funds Card -->
+            <mat-card class="overflow-hidden hover:shadow-lg transition-shadow">
+              <mat-card-content class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Available Funds</h3>
+                  <mat-icon class="text-green-600 text-2xl">account_balance_wallet</mat-icon>
+                </div>
+                <div class="space-y-2">
+                  <p class="text-sm text-gray-600">Balance available for withdrawal</p>
+                  <p class="text-3xl font-bold text-gray-900">{{ earningsSummary()!.available | currency }}</p>
+                </div>
+                
+                <!-- Stripe Connection Status Badge -->
+                <div class="mt-4 p-3 rounded-lg border" 
+                     [ngClass]="{
+                       'bg-green-50 border-green-200': stripeConnectionStatus() === 'connected',
+                       'bg-yellow-50 border-yellow-200': stripeConnectionStatus() === 'pending',
+                       'bg-red-50 border-red-200': stripeConnectionStatus() === 'failed',
+                       'bg-gray-50 border-gray-200': stripeConnectionStatus() === 'not-connected'
+                     }">
+                  <div class="flex items-center space-x-2">
+                    <mat-icon class="text-lg" 
+                              [ngClass]="{
+                                'text-green-600': stripeConnectionStatus() === 'connected',
+                                'text-yellow-600': stripeConnectionStatus() === 'pending',
+                                'text-red-600': stripeConnectionStatus() === 'failed',
+                                'text-gray-600': stripeConnectionStatus() === 'not-connected'
+                              }">
+                      @switch (stripeConnectionStatus()) {
+                        @case ('connected') { check_circle }
+                        @case ('pending') { schedule }
+                        @case ('failed') { error }
+                        @default { payment }
+                      }
+                    </mat-icon>
+                    <span class="text-sm font-medium"
+                          [ngClass]="{
+                            'text-green-700': stripeConnectionStatus() === 'connected',
+                            'text-yellow-700': stripeConnectionStatus() === 'pending',
+                            'text-red-700': stripeConnectionStatus() === 'failed',
+                            'text-gray-700': stripeConnectionStatus() === 'not-connected'
+                          }">
+                      @switch (stripeConnectionStatus()) {
+                        @case ('connected') { Stripe Connected }
+                        @case ('pending') { Stripe Setup Pending }
+                        @case ('failed') { Stripe Connection Failed }
+                        @default { Stripe Not Connected }
+                      }
+                    </span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Payments Being Cleared Card -->
+            <mat-card class="overflow-hidden hover:shadow-lg transition-shadow">
+              <mat-card-content class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Future Payments</h3>
+                  <mat-icon class="text-blue-600 text-2xl">schedule</mat-icon>
+                </div>
+                
+                <div class="space-y-4">
+                  <div>
+                    <p class="text-sm text-gray-600">Payments being cleared</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ earningsSummary()!.payments_clearing | currency }}</p>
+                  </div>
+                  
+                  <div>
+                    <p class="text-sm text-gray-600">Active project earnings</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ earningsSummary()!.active_orders | currency }}</p>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Total Earnings Card -->
+            <mat-card class="overflow-hidden hover:shadow-lg transition-shadow">
+              <mat-card-content class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Earnings to Date</h3>
+                  <mat-icon class="text-purple-600 text-2xl">trending_up</mat-icon>
+                </div>
+                <p class="text-3xl font-bold text-gray-900">{{ earningsSummary()!.total_earnings | currency }}</p>
+                <p class="text-sm text-gray-600 mt-2">Your total earnings since joining.</p>
+              </mat-card-content>
+            </mat-card>
+          </div>
+
+          <!-- Filters Section with Search Component -->
+          <mat-card class="overflow-hidden">
+            <mat-card-content class="p-0">
+              <app-business-search-filter 
+                [searchTerm]="filterForm.get('search')?.value || ''"
+                [viewMode]="viewMode()"
+                [hideViewModeToggle]="false"
+                (searchChange)="filterForm.patchValue({ search: $event })"
+                (viewModeChange)="setViewMode($event)"
+                (clearSearch)="filterForm.patchValue({ search: '' })">
+                
+                <!-- Date Range Filter -->
+                <div class="w-full sm:w-56">
+                  <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                    <mat-label>Date Range</mat-label>
+                    <mat-date-range-input [rangePicker]="picker" [formGroup]="filterForm">
+                      <input matStartDate formControlName="startDate" placeholder="Start date">
+                      <input matEndDate formControlName="endDate" placeholder="End date">
+                    </mat-date-range-input>
+                    <mat-icon matPrefix>date_range</mat-icon>
+                    <mat-date-range-picker #picker></mat-date-range-picker>
+                  </mat-form-field>
+                </div>
+
+                <!-- Activity Type Filter -->
+                <div class="w-full sm:w-56">
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                    <mat-label>Activity Type</mat-label>
+                    <mat-select formControlName="activityFilter" (selectionChange)="onActivityFilterChange($event)">
+                      <mat-option value="">All Activities</mat-option>
+                      <mat-option value="project_started">Project Started</mat-option>
+                      <mat-option value="project_completed">Project Completed</mat-option>
+                      <mat-option value="additional_payment">Additional Payment</mat-option>
+                      <mat-option value="payment_cleared">Payment Cleared</mat-option>
+                      <mat-option value="withdrawal">Withdrawal</mat-option>
+                      <mat-option value="refund">Refund</mat-option>
+                      <mat-option value="platform_fee">Platform Fee</mat-option>
+                    </mat-select>
+                    <mat-icon matPrefix>filter_list</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <!-- Clear Filters Button -->
+                @if (hasActiveFilters()) {
+                  <button 
+                    mat-stroked-button
+                    (click)="clearFilters()">
+                    <mat-icon>clear</mat-icon>
+                    Clear Filters
+                  </button>
+                }
+              </app-business-search-filter>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Transaction & Withdrawal History -->
+          <mat-card class="overflow-hidden">
+            <mat-card-header class="p-6 border-b border-gray-200">
+              <mat-card-title>Transaction History</mat-card-title>
+              <mat-card-subtitle>View your earnings and withdrawal history</mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-tab-group class="transaction-tabs">
+              <!-- Earnings Tab -->
+              <mat-tab label="Earnings">
+                @if (loadingTransactions()) {
+                  <div class="p-6 text-center">
+                    <mat-spinner diameter="30"></mat-spinner>
+                    <p class="mt-2 text-gray-600">Loading transactions...</p>
+                  </div>
+                } @else if (filteredTransactions().length === 0 && hasActiveFilters()) {
+                  <app-empty-state 
+                    icon="filter_list_off"
+                    title="No Transactions Match Your Filters"
+                    description="Try adjusting your date range or activity type filters."
+                    [buttons]="[{ label: 'Clear Filters', callback: handleClearFilters }]">
+                  </app-empty-state>
+                } @else if (transactions().length === 0) {
+                  <app-empty-state 
+                    icon="receipt_long"
+                    title="No Transactions Yet"
+                    description="Your transaction history will appear here once you start earning.">
+                  </app-empty-state>
+                } @else {
+                  <!-- List View -->
+                  @if (viewMode() === 'list') {
+                    <div class="overflow-x-auto">
+                      <table mat-table [dataSource]="filteredTransactions()" class="w-full">
+                        <!-- Date Column -->
+                        <ng-container matColumnDef="date">
+                          <th mat-header-cell *matHeaderCellDef>Date</th>
+                          <td mat-cell *matCellDef="let element">
+                            {{ formatDate(element.createdAt) }}
+                          </td>
+                        </ng-container>
+
+                        <!-- Type Column -->
+                        <ng-container matColumnDef="type">
+                          <th mat-header-cell *matHeaderCellDef>Activity</th>
+                          <td mat-cell *matCellDef="let element">
+                            <span [ngClass]="getTransactionTypeColor(element.transaction_type)" class="font-medium">
+                              {{ getTransactionTypeLabel(element.transaction_type) }}
+                            </span>
+                          </td>
+                        </ng-container>
+
+                        <!-- Description Column -->
+                        <ng-container matColumnDef="description">
+                          <th mat-header-cell *matHeaderCellDef>Description</th>
+                          <td mat-cell *matCellDef="let element" class="text-gray-600">
+                            {{ element.description || getTransactionTypeLabel(element.transaction_type) }}
+                          </td>
+                        </ng-container>
+
+                        <!-- Amount Column -->
+                        <ng-container matColumnDef="amount">
+                          <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+                          <td mat-cell *matCellDef="let element" class="text-right font-semibold">
+                            <span [ngClass]="element.amount >= 0 ? 'text-green-600' : 'text-red-600'">
+                              {{ (element.transaction_type === 'withdrawal' || element.transaction_type === 'refund' || element.transaction_type === 'platform_fee' ? '-' : '+') }}{{ formatCurrency(Math.abs(element.amount)) }}
+                            </span>
+                          </td>
+                        </ng-container>
+
+                        <!-- Status Column -->
+                        <ng-container matColumnDef="status">
+                          <th mat-header-cell *matHeaderCellDef>Status</th>
+                          <td mat-cell *matCellDef="let element">
+                            <span [ngClass]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + (element.status === 'completed' ? 'bg-green-100 text-green-800' : element.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : element.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')">
+                              {{ element.status | titlecase }}
+                            </span>
+                          </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="['date', 'type', 'description', 'amount', 'status']"></tr>
+                        <tr mat-row *matRowDef="let row; columns: ['date', 'type', 'description', 'amount', 'status'];" class="hover:bg-gray-50"></tr>
+                      </table>
+                    </div>
+                  }
+
+                  <!-- Grid View -->
+                  @else {
+                    <div class="p-6">
+                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @for (transaction of filteredTransactions(); track transaction._id) {
+                          <mat-card class="overflow-hidden hover:shadow-lg transition-shadow">
+                            <mat-card-content class="p-4">
+                              <div class="flex items-start justify-between mb-2">
+                                <h4 class="font-semibold text-gray-900">{{ getTransactionTypeLabel(transaction.transaction_type) }}</h4>
+                                <mat-icon [ngClass]="getTransactionTypeColor(transaction.transaction_type)">
+                                  @switch (transaction.transaction_type) {
+                                    @case ('project_started') { play_circle }
+                                    @case ('project_completed') { check_circle }
+                                    @case ('additional_payment') { add_circle }
+                                    @case ('payment_cleared') { verified }
+                                    @case ('withdrawal') { send }
+                                    @case ('refund') { money_off }
+                                    @case ('platform_fee') { toll }
+                                    @default { help }
+                                  }
+                                </mat-icon>
+                              </div>
+                              
+                              <p class="text-sm text-gray-600 mb-3">{{ transaction.description || '-' }}</p>
+                              
+                              <div class="flex items-center justify-between mb-3">
+                                <span class="text-2xl font-bold" [ngClass]="transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'">
+                                  {{ (transaction.transaction_type === 'withdrawal' || transaction.transaction_type === 'refund' || transaction.transaction_type === 'platform_fee' ? '-' : '+') }}{{ formatCurrency(Math.abs(transaction.amount)) }}
+                                </span>
+                              </div>
+                              
+                              <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">{{ formatDate(transaction.createdAt) }}</span>
+                                <span [ngClass]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + (transaction.status === 'completed' ? 'bg-green-100 text-green-800' : transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : transaction.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')">
+                                  {{ transaction.status | titlecase }}
+                                </span>
+                              </div>
+                            </mat-card-content>
+                          </mat-card>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+              </mat-tab>
+
+              <!-- Withdrawals Tab -->
+              <mat-tab label="Withdrawals">
+                @if (stripeLoading()) {
+                  <div class="p-6 text-center">
+                    <mat-spinner diameter="30"></mat-spinner>
+                    <p class="mt-2 text-gray-600">Loading withdrawals...</p>
+                  </div>
+                } @else if (withdrawals().length === 0) {
+                  <app-empty-state 
+                    icon="account_balance_wallet"
+                    title="No Withdrawals Yet"
+                    description="Your withdrawal history will appear here once you make your first withdrawal.">
+                  </app-empty-state>
+                } @else {
+                  <div class="overflow-x-auto">
+                    <table mat-table [dataSource]="withdrawals()" class="w-full">
+                      <!-- Date Column -->
+                      <ng-container matColumnDef="date">
+                        <th mat-header-cell *matHeaderCellDef>Date</th>
+                        <td mat-cell *matCellDef="let element">
+                          {{ formatDate(element.createdAt) }}
+                        </td>
+                      </ng-container>
+
+                      <!-- Method Column -->
+                      <ng-container matColumnDef="method">
+                        <th mat-header-cell *matHeaderCellDef>Method</th>
+                        <td mat-cell *matCellDef="let element">
+                          <div class="flex items-center gap-2">
+                            <mat-icon class="text-blue-600">payment</mat-icon>
+                            <span class="font-medium">{{ element.method | titlecase }}</span>
+                          </div>
+                        </td>
+                      </ng-container>
+
+                      <!-- Description Column -->
+                      <ng-container matColumnDef="description">
+                        <th mat-header-cell *matHeaderCellDef>Description</th>
+                        <td mat-cell *matCellDef="let element" class="text-gray-600">
+                          Withdrawal to {{ element.method | titlecase }}
+                        </td>
+                      </ng-container>
+
+                      <!-- Amount Column -->
+                      <ng-container matColumnDef="amount">
+                        <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+                        <td mat-cell *matCellDef="let element" class="text-right font-semibold text-red-600">
+                          -{{ formatCurrency(element.amount) }}
+                        </td>
+                      </ng-container>
+
+                      <!-- Status Column -->
+                      <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <td mat-cell *matCellDef="let element">
+                          <span [ngClass]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + (element.status === 'completed' ? 'bg-green-100 text-green-800' : element.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : element.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')">
+                            {{ element.status | titlecase }}
+                          </span>
+                        </td>
+                      </ng-container>
+
+                      <tr mat-header-row *matHeaderRowDef="['date', 'method', 'description', 'amount', 'status']"></tr>
+                      <tr mat-row *matRowDef="let row; columns: ['date', 'method', 'description', 'amount', 'status'];" class="hover:bg-gray-50"></tr>
+                    </table>
+                  </div>
+                }
+              </mat-tab>
+            </mat-tab-group>
+          </mat-card>
+        </div>
+      }
+    </div>
+  </div>
+</div>

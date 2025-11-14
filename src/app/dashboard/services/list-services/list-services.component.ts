@@ -1,9 +1,21 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService } from '../../../shared/services/auth.service';
 import { BusinessService, Business } from '../../../shared/services/business.service';
+import { DashboardSubheaderComponent } from '../../../shared/components/dashboard-subheader/dashboard-subheader.component';
+import { BusinessSearchFilterComponent } from '../../../shared/components/business-search-filter/business-search-filter.component';
+import { ServiceCardComponent } from '../components/service-card/service-card.component';
+import { ServiceListCardComponent } from '../components/service-list-card/service-list-card.component';
+import { EmptyStateComponent, EmptyStateButton } from '../../../shared/components/empty-state/empty-state.component';
 
 interface Service {
   _id: string;
@@ -29,7 +41,23 @@ interface Service {
 @Component({
   selector: 'app-list-services',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    DashboardSubheaderComponent,
+    BusinessSearchFilterComponent,
+    ServiceCardComponent,
+    ServiceListCardComponent,
+    EmptyStateComponent
+  ],
   templateUrl: './list-services.component.html',
   styleUrl: './list-services.component.scss'
 })
@@ -37,6 +65,7 @@ export class ListServicesComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly businessService = inject(BusinessService);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   // Signals for component state
   readonly userServices = signal<Service[]>([]);
@@ -46,6 +75,7 @@ export class ListServicesComponent implements OnInit {
   readonly searchTerm = signal<string>('');
   readonly viewMode = signal<'grid' | 'list'>('grid');
   readonly selectedBusiness = signal<string>('all');
+  readonly isMobile = signal(false);
 
   // Computed signals
   readonly user = this.authService.user;
@@ -82,6 +112,11 @@ export class ListServicesComponent implements OnInit {
       this.router.navigate(['/auth']);
       return;
     }
+
+    // Setup mobile detection
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
+      this.isMobile.set(result.matches);
+    });
     
     this.loadData();
   }
@@ -150,6 +185,11 @@ export class ListServicesComponent implements OnInit {
     this.router.navigate(['/dashboard/businesses/create-business']);
   }
 
+  viewService(serviceId: string) {
+    // Navigate to service detail or edit page
+    this.editService(serviceId);
+  }
+
   editService(serviceId: string) {
     this.router.navigate(['/dashboard/services/edit-service', serviceId]);
   }
@@ -183,6 +223,14 @@ export class ListServicesComponent implements OnInit {
     return 'Unknown Business';
   }
 
+  getBusinessNameMap(): { [key: string]: string } {
+    const map: { [key: string]: string } = {};
+    this.userServices().forEach(service => {
+      map[service._id] = this.getBusinessName(service);
+    });
+    return map;
+  }
+
   formatPrice(service: Service): string {
     if (!service.price) return 'Price not set';
     
@@ -209,4 +257,18 @@ export class ListServicesComponent implements OnInit {
   getStatusText(isActive: boolean): string {
     return isActive ? 'Active' : 'Inactive';
   }
+
+  // Empty state callbacks
+  handleClearFilters = () => {
+    this.clearSearch();
+    this.selectedBusiness.set('all');
+  };
+
+  handleCreateBusiness = () => {
+    this.navigateToCreateBusiness();
+  };
+
+  handleCreateService = () => {
+    this.navigateToCreateService();
+  };
 }

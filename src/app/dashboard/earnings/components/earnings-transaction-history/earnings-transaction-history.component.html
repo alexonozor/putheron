@@ -1,0 +1,114 @@
+<mat-card class="overflow-hidden">
+  
+
+  @if (loadingTransactions) {
+    <div class="p-6 text-center">
+      <mat-spinner diameter="30"></mat-spinner>
+      <p class="mt-2 text-gray-600">Loading transactions...</p>
+    </div>
+  } @else if (filteredTransactions.length === 0 && hasActiveFilters) {
+    <app-empty-state 
+      icon="filter_list_off"
+      title="No Transactions Match Your Filters"
+      description="Try adjusting your date range or activity type filters."
+      [buttons]="[{ label: 'Clear Filters', callback: onClearFilters.bind(this) }]">
+    </app-empty-state>
+  } @else if (transactions.length === 0) {
+    <app-empty-state 
+      icon="receipt_long"
+      title="No Transactions Yet"
+      description="Your transaction history will appear here once you start earning.">
+    </app-empty-state>
+  } @else {
+    <!-- List View -->
+    @if (viewMode === 'list') {
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="filteredTransactions" class="w-full">
+          <!-- Date Column -->
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let element">
+              {{ formatDate(element.createdAt) }}
+            </td>
+          </ng-container>
+
+          <!-- Type Column -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Activity</th>
+            <td mat-cell *matCellDef="let element">
+              <span [ngClass]="getTransactionTypeColor(element.transaction_type)" class="font-medium">
+                {{ getTransactionTypeLabel(element.transaction_type) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Description Column -->
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let element" class="text-gray-600">
+              {{ element.description || getTransactionTypeLabel(element.transaction_type) }}
+            </td>
+          </ng-container>
+
+          <!-- Amount Column -->
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+            <td mat-cell *matCellDef="let element" class="text-right font-semibold">
+              <span [ngClass]="element.amount >= 0 ? 'text-green-600' : 'text-red-600'">
+                {{ (element.transaction_type === 'withdrawal' || element.transaction_type === 'refund' || element.transaction_type === 'platform_fee' ? '-' : '+') }}{{ formatCurrency(Math.abs(element.amount)) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let element">
+              <span [ngClass]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + (element.status === 'completed' ? 'bg-green-100 text-green-800' : element.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : element.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')">
+                {{ element.status | titlecase }}
+              </span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
+        </table>
+      </div>
+    }
+
+    <!-- Grid View -->
+    @else {
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (transaction of filteredTransactions; track transaction._id) {
+            <mat-card class="overflow-hidden hover:shadow-lg transition-shadow">
+              <mat-card-content class="p-4">
+                <div class="flex items-start justify-between mb-2">
+                  <h4 class="font-semibold text-gray-900">{{ getTransactionTypeLabel(transaction.transaction_type) }}</h4>
+                  <mat-icon [ngClass]="getTransactionTypeColor(transaction.transaction_type)">
+                    {{ getTransactionIcon(transaction.transaction_type) }}
+                  </mat-icon>
+                </div>
+                
+                <p class="text-sm text-gray-600 mb-3">{{ transaction.description || '-' }}</p>
+                
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-2xl font-bold" [ngClass]="transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'">
+                    {{ (transaction.transaction_type === 'withdrawal' || transaction.transaction_type === 'refund' || transaction.transaction_type === 'platform_fee' ? '-' : '+') }}{{ formatCurrency(Math.abs(transaction.amount)) }}
+                  </span>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                  <span class="text-xs text-gray-500">{{ formatDate(transaction.createdAt) }}</span>
+                  <span [ngClass]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + (transaction.status === 'completed' ? 'bg-green-100 text-green-800' : transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : transaction.status === 'failed' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')">
+                    {{ transaction.status | titlecase }}
+                  </span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </div>
+    }
+  }
+</mat-card>

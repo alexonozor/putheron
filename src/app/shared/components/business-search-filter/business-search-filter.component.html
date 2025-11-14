@@ -1,0 +1,59 @@
+<mat-card class="mb-6 bg-white!">
+  <mat-card-content class="p-4">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <!-- Search Input -->
+      <div class="w-full sm:w-64">
+        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+          <mat-label>Search businesses</mat-label>
+          <input 
+            matInput 
+            [value]="searchTerm"
+            (input)="onSearchChange($event.target.value)"
+            placeholder="Search by name or description...">
+          <mat-icon matPrefix>search</mat-icon>
+          @if (searchTerm) {
+            <button 
+              mat-icon-button 
+              matSuffix 
+              (click)="onClearSearch()"
+              type="button">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Projected Content (filters will be added here) -->
+      <div class="flex flex-col sm:flex-row gap-4 flex-1">
+        <ng-content></ng-content>
+      </div>
+
+      <!-- View Mode Toggle (conditionally hidden) -->
+      @if (!hideViewModeToggle) {
+      <div class="flex items-center justify-end w-full lg:w-auto lg:h-14">
+        <mat-button-toggle-group 
+          [value]="viewMode"
+          (change)="onViewModeChange($event.value)">
+          <mat-button-toggle value="grid" title="Grid View">
+            <mat-icon>dashboard</mat-icon>
+            <span class="ml-2 hidden sm:inline">Grid</span>
+          </mat-button-toggle>
+          <mat-button-toggle value="list" title="List View">
+            <mat-icon>list</mat-icon>
+            <span class="ml-2 hidden sm:inline">List</span>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<style>
+  ::ng-deep .business-search-filter {
+    mat-form-field {
+      margin-top: 0 !important;
+      margin-bottom: 0 !important;
+    }
+  }
+</style>

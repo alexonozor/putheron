@@ -1,639 +1,190 @@
-<div class="earnings-container p-6 space-y-6 bg-gray-50 min-h-screen">
-  <!-- Header -->
-  <div class="flex justify-between items-center">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900">Earnings & Payments</h1>
-      <p class="text-gray-600 mt-1">Manage your earnings, track payments, and request withdrawals</p>
-    </div>
-    
-    <div class="flex gap-3">
-      @if (canWithdrawToStripe()) {
-        <button 
-          (click)="withdrawToStripe()"
-          [disabled]="stripeLoading()"
-          class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50">
-          @if (stripeLoading()) {
-            <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
-          } @else {
-            <mat-icon class="mr-2">account_balance_wallet</mat-icon>
-          }
-          Withdraw to Stripe
-        </button>
-      } @else if (canWithdraw() && !hasStripeAccount()) {
-        <button 
-          (click)="connectStripe()"
-          [disabled]="stripeLoading()"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50">
-          @if (stripeLoading()) {
-            <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
-          } @else {
-            <mat-icon class="mr-2">payment</mat-icon>
-          }
-          Connect Stripe
-        </button>
-      }
-
-      <!-- Stripe Account Management (when connected) -->
-      @if (hasStripeAccount()) {
-        <div class="flex gap-2">
+<div class=" min-h-screen bg-gray-50">
+  <!-- Header with Subheader Component -->
+  
+    <div class="lg:max-w-7xl max-w-12xl">
+      <div class="px-6 pt-6">
+        <app-dashboard-subheader 
+          title="Earnings & Payments" 
+          subtitle="Manage your earnings, track payments, and request withdrawals">
+          <!-- Stripe Actions Button with Dropdown Menu -->
           <button 
-            (click)="openStripeDashboard()"
+            [matMenuTriggerFor]="stripeMenu"
+            mat-raised-button 
+            matButton="filled"
+            [color]="hasStripeAccount() ? 'primary' : 'accent'"
             [disabled]="stripeLoading()"
-            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
-            matTooltip="Open Stripe Dashboard">
-            @if (stripeLoading()) {
-              <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+            class="flex items-center gap-2">
+            <span>{{ stripeLoading() ? 'Loading...' : 'Stripe Account' }}</span>
+            <mat-icon class="ml-1">arrow_drop_down</mat-icon>
+          </button>
+
+          <mat-menu #stripeMenu="matMenu">
+            @if (hasStripeAccount()) {
+              <button 
+                mat-menu-item 
+                (click)="handleStripeAction('dashboard')"
+                [disabled]="stripeLoading()">
+                <mat-icon>dashboard</mat-icon>
+                <span>View Stripe Dashboard</span>
+              </button>
+              <button 
+                mat-menu-item 
+                (click)="handleStripeAction('disconnect')"
+                [disabled]="stripeLoading()">
+                <mat-icon>link_off</mat-icon>
+                <span>Disconnect Account</span>
+              </button>
             } @else {
-              <mat-icon class="mr-2">dashboard</mat-icon>
-            }
-            Stripe Dashboard
-          </button>
-          <button 
-            (click)="disconnectStripe()"
-            [disabled]="stripeLoading()"
-            class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
-            matTooltip="Disconnect Stripe Account">
-            @if (stripeLoading()) {
-              <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
-            } @else {
-              <mat-icon class="mr-2">link_off</mat-icon>
-            }
-            Disconnect
-          </button>
-        </div>
-      }
-    </div>
-  </div>
-
-  <!-- Loading State -->
-  @if (loading()) {
-    <div class="flex items-center justify-center py-12">
-      <mat-spinner diameter="40"></mat-spinner>
-      <span class="ml-3 text-gray-600">Loading earnings data...</span>
-    </div>
-  }
-
-  <!-- Error State -->
-  @else if (error()) {
-    <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-      <mat-icon class="text-red-600 mb-2" style="font-size: 48px; width: 48px; height: 48px;">error</mat-icon>
-      <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Data</h3>
-      <p class="text-red-700 mb-4">{{ error() }}</p>
-      <button 
-        (click)="retryLoad()"
-        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-        <mat-icon class="mr-2">refresh</mat-icon>
-        Try Again
-      </button>
-    </div>
-  }
-
-  <!-- Main Content -->
-  @else if (earningsSummary()) {
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- Available Funds -->
-      <mat-card class="p-6 hover:shadow-lg transition-shadow">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Available funds</h3>
-          <mat-icon class="text-green-600">account_balance_wallet</mat-icon>
-        </div>
-        <div class="space-y-2">
-          <p class="text-sm text-gray-600">Balance available for withdrawal</p>
-          <p class="text-4xl font-bold text-gray-900">{{ earningsSummary()!.available | currency}}</p>
-        </div>
-        
-        <!-- Stripe Connection Status -->
-        <div class="mt-4 p-3 rounded-lg border" 
-             [ngClass]="{
-               'bg-green-50 border-green-200': stripeConnectionStatus() === 'connected',
-               'bg-yellow-50 border-yellow-200': stripeConnectionStatus() === 'pending',
-               'bg-red-50 border-red-200': stripeConnectionStatus() === 'failed',
-               'bg-gray-50 border-gray-200': stripeConnectionStatus() === 'not-connected'
-             }">
-          <div class="flex items-center space-x-2">
-            <mat-icon class="text-lg" 
-                      [ngClass]="{
-                        'text-green-600': stripeConnectionStatus() === 'connected',
-                        'text-yellow-600': stripeConnectionStatus() === 'pending',
-                        'text-red-600': stripeConnectionStatus() === 'failed',
-                        'text-gray-600': stripeConnectionStatus() === 'not-connected'
-                      }">
-              @switch (stripeConnectionStatus()) {
-                @case ('connected') { check_circle }
-                @case ('pending') { schedule }
-                @case ('failed') { error }
-                @default { payment }
-              }
-            </mat-icon>
-            <span class="text-sm font-medium"
-                  [ngClass]="{
-                    'text-green-700': stripeConnectionStatus() === 'connected',
-                    'text-yellow-700': stripeConnectionStatus() === 'pending',
-                    'text-red-700': stripeConnectionStatus() === 'failed',
-                    'text-gray-700': stripeConnectionStatus() === 'not-connected'
-                  }">
-              @switch (stripeConnectionStatus()) {
-                @case ('connected') { Stripe Connected }
-                @case ('pending') { Stripe Setup Pending }
-                @case ('failed') { Stripe Connection Failed }
-                @default { Stripe Not Connected }
-              }
-            </span>
-            @if (stripeConnectionStatus() === 'failed' || stripeConnectionStatus() === 'pending') {
               <button 
-                (click)="refreshStripeAccountStatus()"
-                [disabled]="stripeLoading()"
-                class="ml-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-1 rounded transition-colors disabled:opacity-50">
-                @if (stripeLoading()) {
-                  <mat-spinner diameter="12" class="inline-block"></mat-spinner>
-                } @else {
-                  <mat-icon class="text-xs">refresh</mat-icon>
-                }
+                mat-menu-item 
+                (click)="handleStripeAction('connect')"
+                [disabled]="stripeLoading()">
+                <mat-icon>link</mat-icon>
+                <span>Connect Stripe Account</span>
               </button>
             }
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="mt-4 space-y-2">
-          @if (stripeConnectionStatus() === 'connected' && earningsSummary()!.available > 0) {
-            <button 
-              (click)="withdrawToStripe()"
-              [disabled]="stripeLoading()"
-              class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50">
-              @if (stripeLoading()) {
-                <mat-spinner diameter="16" class="inline-block mr-2"></mat-spinner>
-              }
-              Withdraw to Stripe
-            </button>
-          } @else if (stripeConnectionStatus() === 'not-connected') {
-            <button 
-              (click)="connectStripe()"
-              [disabled]="stripeLoading()"
-              class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
-              @if (stripeLoading()) {
-                <mat-spinner diameter="16" class="inline-block mr-2"></mat-spinner>
-              }
-              Connect Stripe
-            </button>
-          } @else if (earningsSummary()!.available <= 0) {
-            <button 
-              disabled
-              class="w-full bg-gray-300 text-gray-500 px-4 py-2 rounded-lg cursor-not-allowed">
-              No funds available
-            </button>
-          } @else {
-            <button 
-              (click)="connectStripe()"
-              [disabled]="stripeLoading()"
-              class="w-full bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50">
-              @if (stripeLoading()) {
-                <mat-spinner diameter="16" class="inline-block mr-2"></mat-spinner>
-              }
-              Complete Stripe Setup
-            </button>
-          }
-
-          <!-- Stripe Management Options (when connected) -->
-          @if (stripeConnectionStatus() === 'connected') {
-            <div class="flex gap-2">
+            @if (canWithdrawToStripe()) {
+              <mat-divider></mat-divider>
               <button 
-                (click)="openStripeDashboard()"
-                [disabled]="stripeLoading()"
-                class="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 text-sm">
-                @if (stripeLoading()) {
-                  <mat-spinner diameter="14" class="inline-block mr-2"></mat-spinner>
-                } @else {
-                  <mat-icon class="mr-1 text-sm">dashboard</mat-icon>
-                }
-                Dashboard
+                mat-menu-item 
+                (click)="withdrawToStripe()"
+                [disabled]="stripeLoading()">
+                <mat-icon>account_balance_wallet</mat-icon>
+                <span>Withdraw Funds</span>
               </button>
-              <button 
-                (click)="disconnectStripe()"
-                [disabled]="stripeLoading()"
-                class="flex-1 bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50 text-sm">
-                @if (stripeLoading()) {
-                  <mat-spinner diameter="14" class="inline-block mr-2"></mat-spinner>
-                } @else {
-                  <mat-icon class="mr-1 text-sm">link_off</mat-icon>
-                }
-                Disconnect
-              </button>
-            </div>
-          }
-        </div>
-        
-        <p class="mt-3 text-xs text-gray-500">
-          @if (hasStripeAccount()) {
-            Connected to Stripe Express account. You can access your dashboard or disconnect anytime.
-          } @else {
-            Connect Stripe to withdraw funds
-          }
-        </p>
-      </mat-card>
-
-      <!-- Future Payments -->
-      <mat-card class="p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Future payments</h3>
-          <mat-icon class="text-blue-600">schedule</mat-icon>
-        </div>
-        
-        <!-- Payments Being Cleared -->
-        <div class="space-y-4">
-          <div>
-            <p class="text-sm text-gray-600">Payments being cleared</p>
-            <p class="text-2xl font-bold text-gray-900">{{earningsSummary()!.payments_clearing | currency}}</p>
-            <p class="text-xs text-gray-500">Funds from completed projects awaiting clearance.</p>
-          </div>
-          
-          <!-- Payments for Active Orders -->
-          <div>
-            <p class="text-sm text-gray-600">Active project earnings</p>
-            <p class="text-2xl font-bold text-gray-900">{{ earningsSummary()!.active_orders | currency}}</p>
-            <p class="text-xs text-gray-500">Earnings from ongoing projects.</p>
-          </div>
-        </div>
-      </mat-card>
-
-      <!-- Earnings to Date -->
-      <mat-card class="p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Earnings to date</h3>
-          <mat-icon class="text-purple-600">trending_up</mat-icon>
-        </div>
-        <p class="text-4xl font-bold text-gray-900">{{ earningsSummary()!.total_earnings | currency }}</p>
-        <p class="text-sm text-gray-600 mt-2">Your total earnings since joining.</p>
-      </mat-card>
-    </div>
-
-    <!-- Filters Section -->
-    <div class="bg-white rounded-lg border border-gray-200 p-6">
-      <div class="flex flex-wrap gap-4 items-center">
-        <div class="flex gap-4 flex-wrap">
-          <!-- Date Range Filter -->
-          <mat-form-field appearance="outline" class="min-w-[250px]">
-            <mat-label>Date Range</mat-label>
-            <mat-date-range-input [rangePicker]="picker" [formGroup]="filterForm">
-              <input matStartDate formControlName="startDate" placeholder="Start date" (dateChange)="onDateFilterChange()">
-              <input matEndDate formControlName="endDate" placeholder="End date" (dateChange)="onDateFilterChange()">
-            </mat-date-range-input>
-            <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-date-range-picker #picker></mat-date-range-picker>
-          </mat-form-field>
-
-          <!-- Activity Filter -->
-          <mat-form-field appearance="outline" class="min-w-[200px]">
-            <mat-label>Activity Type</mat-label>
-            <mat-select formControlName="activityFilter" (selectionChange)="onActivityFilterChange($event)">
-              <mat-option value="">All Activities</mat-option>
-              <mat-option value="project_started">Project Started</mat-option>
-              <mat-option value="project_completed">Project Completed</mat-option>
-              <mat-option value="additional_payment">Additional Payment</mat-option>
-              <mat-option value="payment_cleared">Payment Cleared</mat-option>
-              <mat-option value="withdrawal">Withdrawal</mat-option>
-              <mat-option value="refund">Refund</mat-option>
-              <mat-option value="platform_fee">Platform Fee</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <!-- Clear Filters Button -->
-          @if (hasActiveFilters()) {
-            <button 
-              mat-stroked-button
-              (click)="clearFilters()"
-              class="self-start mt-2">
-              <mat-icon>clear</mat-icon>
-              Clear Filters
-            </button>
-          }
-        </div>
-        
-        <div class="ml-auto flex gap-2">
-          <!-- View Toggle Buttons -->
-          <button 
-            mat-icon-button
-            [class.bg-gray-200]="viewMode() === 'grid'"
-            (click)="setViewMode('grid')"
-            class="hover:bg-gray-100 transition-colors"
-            matTooltip="Grid View">
-            <mat-icon>grid_view</mat-icon>
-          </button>
-          <button 
-            mat-icon-button
-            [class.bg-gray-200]="viewMode() === 'list'"
-            (click)="setViewMode('list')"
-            class="hover:bg-gray-100 transition-colors"
-            matTooltip="List View">
-            <mat-icon>view_list</mat-icon>
-          </button>
-          
-          <!-- Email Report Button -->
-          <button 
-            mat-raised-button
-            color="primary"
-            (click)="emailActivityReport()"
-            [disabled]="loading()"
-            class="ml-2">
-            <mat-icon class="mr-2">email</mat-icon>
-            Email Report
-          </button>
-          
-          <!-- Debug Button (remove in production) -->
-          <button 
-            mat-stroked-button
-            (click)="debugFilters()"
-            class="ml-2 text-xs">
-            Debug
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Transaction & Withdrawal History -->
-    <mat-card class="overflow-hidden">
-      <div class="p-6 border-b border-gray-200">
-        <h2 class="text-xl font-semibold text-gray-900">Transaction History</h2>
-        <p class="text-gray-600 mt-1">View your earnings and withdrawal history</p>
+            }
+          </mat-menu>
+        </app-dashboard-subheader>
       </div>
 
-      <mat-tab-group class="transaction-tabs">
-        <!-- Earnings Tab -->
-        <mat-tab label="Earnings">
-          @if (loadingTransactions()) {
-            <div class="p-6 text-center">
-              <mat-spinner diameter="30"></mat-spinner>
-              <p class="mt-2 text-gray-600">Loading transactions...</p>
-            </div>
-          } @else if (filteredTransactions().length === 0 && hasActiveFilters()) {
-            <div class="p-12 text-center">
-              <mat-icon class="text-gray-400 mb-4" style="font-size: 64px; width: 64px; height: 64px;">filter_list_off</mat-icon>
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">No Transactions Match Your Filters</h3>
-              <p class="text-gray-600 mb-4">Try adjusting your date range or activity type filters.</p>
-              <button 
-                mat-raised-button 
-                color="primary"
-                (click)="clearFilters()">
-                Clear Filters
-              </button>
-            </div>
-          } @else if (transactions().length === 0) {
-            <div class="p-12 text-center">
-              <mat-icon class="text-gray-400 mb-4" style="font-size: 64px; width: 64px; height: 64px;">receipt_long</mat-icon>
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">No Transactions Yet</h3>
-              <p class="text-gray-600">Your transaction history will appear here once you start earning.</p>
-            </div>
-          } @else {
-            <!-- List View -->
-            @if (viewMode() === 'list') {
-              <div class="overflow-x-auto">
-                <table mat-table [dataSource]="filteredTransactions()" class="w-full">
-                  <!-- Date Column -->
-                  <ng-container matColumnDef="date">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Date</th>
-                    <td mat-cell *matCellDef="let transaction" class="text-gray-600">
-                      {{ formatDate(transaction.createdAt) }}
-                    </td>
-                  </ng-container>
+      <!-- Loading State -->
+      @if (loading()) {
+        <div class="px-6 flex items-center justify-center py-12">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      }
 
-                  <!-- Type Column -->
-                  <ng-container matColumnDef="type">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Activity</th>
-                    <td mat-cell *matCellDef="let transaction">
-                      <span [class]="getTransactionTypeColor(transaction.transaction_type)" class="font-medium">
-                        {{ getTransactionTypeLabel(transaction.transaction_type) }}
-                      </span>
-                    </td>
-                  </ng-container>
-
-                  <!-- Description Column -->
-                  <ng-container matColumnDef="description">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Description</th>
-                    <td mat-cell *matCellDef="let transaction" class="text-gray-600">
-                      <div>
-                        <p class="font-medium">{{ transaction.description || 'No description' }}</p>
-                        @if (transaction.project_id) {
-                          <p class="text-sm text-gray-500">Project: {{ transaction.project_id.title }}</p>
-                        }
-                        @if (transaction.business_id) {
-                          <p class="text-sm text-gray-500">From: {{ transaction.business_id.name }}</p>
-                        }
-                      </div>
-                    </td>
-                  </ng-container>
-
-                  <!-- Amount Column -->
-                  <ng-container matColumnDef="amount">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900 text-right">Amount</th>
-                    <td mat-cell *matCellDef="let transaction" class="text-right">
-                      <span [class]="transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'" class="font-semibold">
-                        {{ formatCurrency(transaction.amount) }}
-                      </span>
-                    </td>
-                  </ng-container>
-
-                  <!-- Status Column -->
-                  <ng-container matColumnDef="status">
-                    <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Status</th>
-                    <td mat-cell *matCellDef="let transaction">
-                      <span [class]="getStatusColor(transaction.status)" class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100">
-                        {{ transaction.status | titlecase }}
-                      </span>
-                    </td>
-                  </ng-container>
-
-                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                  <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50"></tr>
-                </table>
-              </div>
-            }
-
-            <!-- Grid View -->
-            @else {
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
-                @for (transaction of filteredTransactions(); track transaction._id) {
-                  <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-lg transition-shadow">
-                    <div class="flex items-start justify-between mb-3">
-                      <div class="flex-1">
-                        <h4 class="font-medium text-gray-900 mb-1">
-                          {{ getTransactionTypeLabel(transaction.transaction_type) }}
-                        </h4>
-                        <p class="text-sm text-gray-600">{{ formatDate(transaction.createdAt) }}</p>
-                      </div>
-                      <span [class]="transaction.amount >= 0 ? 'text-green-600' : 'text-red-600'" class="font-bold text-lg">
-                        {{ formatCurrency(transaction.amount) }}
-                      </span>
-                    </div>
-                    
-                    <div class="mb-3">
-                      <p class="text-sm text-gray-700">{{ transaction.description || 'No description' }}</p>
-                      @if (transaction.project_id) {
-                        <p class="text-xs text-gray-500 mt-1">Project: {{ transaction.project_id.title }}</p>
-                      }
-                      @if (transaction.business_id) {
-                        <p class="text-xs text-gray-500">From: {{ transaction.business_id.name }}</p>
-                      }
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                      <span [class]="getTransactionTypeColor(transaction.transaction_type)" class="text-xs font-medium">
-                        {{ getTransactionTypeLabel(transaction.transaction_type) }}
-                      </span>
-                      <span [class]="getStatusColor(transaction.status)" class="px-2 py-1 rounded-full text-xs font-medium bg-gray-100">
-                        {{ transaction.status | titlecase }}
-                      </span>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          }
-        </mat-tab>
-
-        <!-- Withdrawals Tab -->
-        <mat-tab label="Withdrawals">
-          @if (stripeLoading()) {
-            <div class="p-6 text-center">
-              <mat-spinner diameter="30"></mat-spinner>
-              <p class="mt-2 text-gray-600">Loading withdrawals...</p>
-            </div>
-          } @else if (withdrawals().length === 0) {
-            <div class="p-12 text-center">
-              <mat-icon class="text-gray-400 mb-4" style="font-size: 64px; width: 64px; height: 64px;">account_balance_wallet</mat-icon>
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">No Withdrawals Yet</h3>
-              <p class="text-gray-600 mb-4">Your withdrawal history will appear here once you make your first withdrawal.</p>
-              @if (!hasStripeAccount()) {
-                <button 
-                  (click)="connectStripe()"
-                  class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                  Connect Stripe to Start
-                </button>
-              } @else {
-                <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div class="flex items-center mb-2">
-                    <mat-icon class="text-blue-600 mr-2">info</mat-icon>
-                    <span class="font-medium text-blue-900">Stripe Account Connected</span>
-                  </div>
-                  <p class="text-blue-700 text-sm mb-3">
-                    Your withdrawals will appear here. You can manage your Stripe account using the buttons above.
-                  </p>
-                  <div class="flex gap-2">
-                    <button 
-                      (click)="openStripeDashboard()"
-                      [disabled]="stripeLoading()"
-                      class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
-                      View Dashboard
-                    </button>
-                    <button 
-                      (click)="disconnectStripe()"
-                      [disabled]="stripeLoading()"
-                      class="bg-white border border-blue-300 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors disabled:opacity-50">
-                      Disconnect
-                    </button>
-                  </div>
+      <!-- Error State -->
+      @else if (error()) {
+        <div class="px-6">
+          <mat-card class="bg-red-50 border-l-4 border-red-400">
+            <mat-card-content class="p-6">
+              <div class="flex items-start gap-4">
+                <mat-icon class="text-red-600 text-4xl mt-1">error</mat-icon>
+                <div class="flex-1">
+                  <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Data</h3>
+                  <p class="text-red-700 mb-4">{{ error() }}</p>
+                  <button 
+                    (click)="retryLoad()"
+                    mat-raised-button 
+                    color="warn">
+                    <mat-icon class="mr-2">refresh</mat-icon>
+                    Try Again
+                  </button>
                 </div>
-              }
-            </div>
-          } @else {
-            <div class="overflow-x-auto">
-              <table mat-table [dataSource]="withdrawals()" class="w-full">
-                <!-- Date Column -->
-                <ng-container matColumnDef="date">
-                  <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Date</th>
-                  <td mat-cell *matCellDef="let withdrawal" class="text-gray-600">
-                    {{ formatDate(withdrawal.createdAt) }}
-                  </td>
-                </ng-container>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
 
-                <!-- Method Column -->
-                <ng-container matColumnDef="method">
-                  <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Method</th>
-                  <td mat-cell *matCellDef="let withdrawal">
-                    <div class="flex items-center space-x-2">
-                      <mat-icon class="text-blue-600">payment</mat-icon>
-                      <span class="font-medium">{{ withdrawal.method | titlecase }}</span>
-                    </div>
-                  </td>
-                </ng-container>
+      <!-- Main Content -->
+      @else if (earningsSummary()) {
+        <div class="px-6 space-y-6 pb-12">
+          <!-- Summary Cards Component -->
+           <div>
+            <app-earnings-summary-cards 
+            [summary]="earningsSummary()"
+            [stripeConnectionStatus]="stripeConnectionStatus()">
+            </app-earnings-summary-cards>
+           </div>
+          
 
-                <!-- Description Column -->
-                <ng-container matColumnDef="description">
-                  <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Description</th>
-                  <td mat-cell *matCellDef="let withdrawal" class="text-gray-600">
-                    <div>
-                      <p class="font-medium">{{ withdrawal.description || 'Withdrawal via Stripe' }}</p>
-                      @if (withdrawal.stripe_account_id) {
-                        <p class="text-sm text-gray-500">Stripe Account: {{ withdrawal.stripe_account_id }}</p>
-                      }
-                      @if (withdrawal.stripe_transfer_id) {
-                        <p class="text-xs text-gray-400">Transfer ID: {{ withdrawal.stripe_transfer_id }}</p>
-                      }
-                      @if (withdrawal.paypal_account?.email) {
-                        <p class="text-sm text-gray-500">To: {{ withdrawal.paypal_account.email }}</p>
-                      }
-                      @if (withdrawal.paypal_transaction_id) {
-                        <p class="text-xs text-gray-400">PayPal ID: {{ withdrawal.paypal_transaction_id }}</p>
-                      }
-                    </div>
-                  </td>
-                </ng-container>
+      <!-- Filters Section with Search Component -->
+       <div>
+        <app-business-search-filter 
+                [searchTerm]="filterForm.get('search')?.value || ''"
+                [viewMode]="viewMode()"
+                [hideViewModeToggle]="false"
+                (searchChange)="filterForm.patchValue({ search: $event })"
+                (viewModeChange)="setViewMode($event)"
+                (clearSearch)="filterForm.patchValue({ search: '' })">
+                
+                <!-- Date Range Filter -->
+                <div class="w-full sm:w-56">
+                  <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                    <mat-label>Date Range</mat-label>
+                    <mat-date-range-input [rangePicker]="picker" [formGroup]="filterForm">
+                      <input matStartDate formControlName="startDate" placeholder="Start date">
+                      <input matEndDate formControlName="endDate" placeholder="End date">
+                    </mat-date-range-input>
+                    <mat-icon matPrefix>date_range</mat-icon>
+                    <mat-date-range-picker #picker></mat-date-range-picker>
+                  </mat-form-field>
+                </div>
 
-                <!-- Amount Column -->
-                <ng-container matColumnDef="amount">
-                  <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900 text-right">Amount</th>
-                  <td mat-cell *matCellDef="let withdrawal" class="text-right">
-                    <div>
-                      <span class="font-semibold text-red-600">-{{ withdrawal.amount | currency }}</span>
-                      @if (withdrawal.fee > 0) {
-                        <p class="text-xs text-gray-500">Fee: {{ withdrawal.fee | currency }}</p>
-                        <p class="text-xs text-gray-600 font-medium">Net: {{ withdrawal.net_amount | currency }}</p>
-                      }
-                    </div>
-                  </td>
-                </ng-container>
+                <!-- Activity Type Filter -->
+                <div class="w-full sm:w-56">
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+                    <mat-label>Activity Type</mat-label>
+                    <mat-select formControlName="activityFilter" (selectionChange)="onActivityFilterChange($event)">
+                      <mat-option value="">All Activities</mat-option>
+                      <mat-option value="project_started">Project Started</mat-option>
+                      <mat-option value="project_completed">Project Completed</mat-option>
+                      <mat-option value="additional_payment">Additional Payment</mat-option>
+                      <mat-option value="payment_cleared">Payment Cleared</mat-option>
+                      <mat-option value="withdrawal">Withdrawal</mat-option>
+                      <mat-option value="refund">Refund</mat-option>
+                      <mat-option value="platform_fee">Platform Fee</mat-option>
+                    </mat-select>
+                    <mat-icon matPrefix>filter_list</mat-icon>
+                  </mat-form-field>
+                </div>
 
-                <!-- Status Column -->
-                <ng-container matColumnDef="status">
-                  <th mat-header-cell *matHeaderCellDef class="font-semibold text-gray-900">Status</th>
-                  <td mat-cell *matCellDef="let withdrawal">
-                    <span 
-                      class="px-2 py-1 rounded-full text-xs font-medium"
-                      [ngClass]="{
-                        'bg-yellow-100 text-yellow-800': withdrawal.status === 'pending',
-                        'bg-blue-100 text-blue-800': withdrawal.status === 'processing',
-                        'bg-green-100 text-green-800': withdrawal.status === 'completed',
-                        'bg-red-100 text-red-800': withdrawal.status === 'failed',
-                        'bg-gray-100 text-gray-800': withdrawal.status === 'cancelled'
-                      }">
-                      {{ withdrawal.status | titlecase }}
-                    </span>
-                  </td>
-                </ng-container>
+                <!-- Clear Filters Button -->
+                @if (hasActiveFilters()) {
+                  <button 
+                    mat-stroked-button
+                    (click)="clearFilters()">
+                    <mat-icon>clear</mat-icon>
+                    Clear Filters
+                  </button>
+                }
+        </app-business-search-filter> 
+       </div>
+              
 
-                <tr mat-header-row *matHeaderRowDef="['date', 'method', 'description', 'amount', 'status']"></tr>
-                <tr mat-row *matRowDef="let row; columns: ['date', 'method', 'description', 'amount', 'status'];" class="hover:bg-gray-50"></tr>
-              </table>
-            </div>
-          }
-        </mat-tab>
-      </mat-tab-group>
-    </mat-card>
+          <!-- Transaction & Withdrawal History -->
+          <mat-card class="overflow-hidden bg-white!">
+            <mat-card-header class="p-6! border-b border-gray-200">
+              <mat-card-title>Transaction History</mat-card-title>
+              <mat-card-subtitle>View your earnings and withdrawal history</mat-card-subtitle>
+            </mat-card-header>
 
-    <!-- Empty State - only show if user has no transactions -->
-    @if (showEmptyState()) {
-      <div class="bg-white rounded-lg border border-gray-200 p-12 text-center">
-        <mat-icon class="text-gray-400 mb-4" style="font-size: 64px; width: 64px; height: 64px;">account_balance_wallet</mat-icon>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Start Earning Today</h3>
-        <p class="text-gray-600 mb-6">Complete projects and build your portfolio to start earning money.</p>
-        <button 
-          routerLink="../businesses"
-          class="bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors">
-          <mat-icon class="mr-2">business</mat-icon>
-          Create Your Business Profile
-        </button>
-      </div>
-    }
-  }
+            <mat-tab-group>
+              <!-- Earnings Tab -->
+              <mat-tab label="Earnings">
+                <app-earnings-transaction-history
+                  [transactions]="transactions()"
+                  [filteredTransactions]="filteredTransactions()"
+                  [loadingTransactions]="loadingTransactions()"
+                  [viewMode]="viewMode()"
+                  [hasActiveFilters]="hasActiveFilters()"
+                  (clearFilters)="handleClearFilters()">
+                </app-earnings-transaction-history>
+              </mat-tab>
+
+              <!-- Withdrawals Tab -->
+              <mat-tab label="Withdrawals">
+                <app-earnings-withdrawals-history
+                  [withdrawals]="withdrawals()"
+                  [loading]="stripeLoading()">
+                </app-earnings-withdrawals-history>
+              </mat-tab>
+            </mat-tab-group>
+          </mat-card>
+        </div>
+      }
+    </div>
+  
 </div>

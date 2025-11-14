@@ -1,25 +1,58 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { NotificationService, Notification, NotificationType, NotificationPriority } from '../../../shared/services/notification.service';
+import { DashboardSubheaderComponent } from '../../../shared/components/dashboard-subheader/dashboard-subheader.component';
+import { BusinessSearchFilterComponent } from '../../../shared/components/business-search-filter/business-search-filter.component';
+import { NotificationStatsComponent } from '../components/notification-stats/notification-stats.component';
+import { NotificationItemComponent } from '../components/notification-item/notification-item.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, MatPaginator, PageEvent } from '@angular/material/paginator';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-list-notifications',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [
+    CommonModule, 
+    RouterModule, 
+    FormsModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    MatPaginatorModule,
+    MatCardModule,
+    DashboardSubheaderComponent,
+    BusinessSearchFilterComponent,
+    NotificationStatsComponent,
+    NotificationItemComponent,
+    EmptyStateComponent
+  ],
   templateUrl: './list-notifications.component.html',
 })
 export class ListNotificationsComponent implements OnInit {
   private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   // Component state
-  selectedType = '';
-  selectedStatus = '';
-  currentPage = signal(1);
-  itemsPerPage = 10;
-  isMarkingAllRead = false;
+  selectedType = signal('');
+  selectedStatus = signal('');
+  pageIndex = signal(0);
+  pageSize = signal(10);
 
   // Expose Math for template
   Math = Math;
@@ -29,6 +62,12 @@ export class ListNotificationsComponent implements OnInit {
   readonly unreadCount = this.notificationService.unreadCount;
   readonly isLoading = this.notificationService.isLoading;
 
+  // Filter form
+  readonly filterForm: FormGroup = this.fb.group({
+    type: [''],
+    status: ['']
+  });
+
   // Computed values
   readonly totalCount = computed(() => this.notifications().length);
   readonly readCount = computed(() => this.notifications().filter(n => n.is_read).length);
@@ -37,58 +76,30 @@ export class ListNotificationsComponent implements OnInit {
     let filtered = this.notifications();
 
     // Filter by type
-    if (this.selectedType) {
-      filtered = filtered.filter(n => n.type === this.selectedType);
+    const selectedType = this.selectedType();
+    if (selectedType) {
+      filtered = filtered.filter(n => n.type === selectedType);
     }
 
     // Filter by status
-    if (this.selectedStatus === 'read') {
+    const selectedStatus = this.selectedStatus();
+    if (selectedStatus === 'read') {
       filtered = filtered.filter(n => n.is_read);
-    } else if (this.selectedStatus === 'unread') {
+    } else if (selectedStatus === 'unread') {
       filtered = filtered.filter(n => !n.is_read);
     }
 
     return filtered;
   });
 
-  readonly totalPages = computed(() => 
-    Math.ceil(this.filteredNotifications().length / this.itemsPerPage)
-  );
-
   readonly paginatedNotifications = computed(() => {
-    const start = (this.currentPage() - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
+    const start = this.pageIndex() * this.pageSize();
+    const end = start + this.pageSize();
     return this.filteredNotifications().slice(start, end);
   });
 
-  readonly visiblePages = computed(() => {
-    const total = this.totalPages();
-    const current = this.currentPage();
-    const pages: number[] = [];
-
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (current <= 4) {
-        for (let i = 1; i <= 5; i++) pages.push(i);
-        pages.push(-1); // Ellipsis
-        pages.push(total);
-      } else if (current >= total - 3) {
-        pages.push(1);
-        pages.push(-1); // Ellipsis
-        for (let i = total - 4; i <= total; i++) pages.push(i);
-      } else {
-        pages.push(1);
-        pages.push(-1); // Ellipsis
-        for (let i = current - 1; i <= current + 1; i++) pages.push(i);
-        pages.push(-1); // Ellipsis
-        pages.push(total);
-      }
-    }
-
-    return pages;
+  readonly hasActiveFilters = computed(() => {
+    return !!(this.selectedType() || this.selectedStatus());
   });
 
   ngOnInit() {
@@ -111,51 +122,36 @@ export class ListNotificationsComponent implements OnInit {
   }
 
   applyFilters() {
-    this.currentPage.set(1); // Reset to first page when filtering
-  }
-
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.totalPages()) {
-      this.currentPage.set(page);
+    this.pageIndex.set(0); // Reset to first page when filtering
+    if (this.paginator) {
+      this.paginator.firstPage();
     }
   }
 
+  onPageChange(event: PageEvent) {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
+  }
+
   async markAllAsRead() {
-    this.isMarkingAllRead = true;
     try {
       await this.notificationService.markAllAsRead();
     } catch (error) {
       console.error('Error marking all as read:', error);
-    } finally {
-      this.isMarkingAllRead = false;
     }
   }
 
-  async markAsRead(notification: Notification, event: Event) {
-    event.stopPropagation();
-    
-    if (!notification.is_read) {
-      try {
-        await this.notificationService.markAsRead(notification._id);
-      } catch (error) {
-        console.error('Error marking notification as read:', error);
-      }
-    }
+  onTypeChange(type: string) {
+    this.selectedType.set(type);
+    this.applyFilters();
   }
 
-  async deleteNotification(notification: Notification, event: Event) {
-    event.stopPropagation();
-    
-    if (confirm('Are you sure you want to delete this notification?')) {
-      try {
-        await this.notificationService.deleteNotification(notification._id);
-      } catch (error) {
-        console.error('Error deleting notification:', error);
-      }
-    }
+  onStatusChange(status: string) {
+    this.selectedStatus.set(status);
+    this.applyFilters();
   }
 
-  handleNotificationClick(notification: Notification) {
+  onNotificationClick(notification: Notification) {
     // Mark as read if not already read
     if (!notification.is_read) {
       this.notificationService.markAsRead(notification._id).catch(error => {
@@ -165,6 +161,26 @@ export class ListNotificationsComponent implements OnInit {
 
     // Navigate based on notification content
     this.navigateFromNotification(notification);
+  }
+
+  async onMarkAsRead(notification: Notification) {
+    if (!notification.is_read) {
+      try {
+        await this.notificationService.markAsRead(notification._id);
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
+    }
+  }
+
+  async onDeleteNotification(notification: Notification) {
+    if (confirm('Are you sure you want to delete this notification?')) {
+      try {
+        await this.notificationService.deleteNotification(notification._id);
+      } catch (error) {
+        console.error('Error deleting notification:', error);
+      }
+    }
   }
 
   private navigateFromNotification(notification: Notification) {
@@ -236,78 +252,22 @@ export class ListNotificationsComponent implements OnInit {
     }
   }
 
-  getNotificationIcon(type: NotificationType): string {
-    return this.notificationService.getNotificationIcon(type);
-  }
-
-  getNotificationStyles(notification: Notification): string {
-    let styles = '';
-    
-    if (notification.priority === NotificationPriority.URGENT) {
-      styles += 'border-l-4 border-red-400 bg-red-50 ';
-    } else if (notification.priority === NotificationPriority.HIGH) {
-      styles += 'border-l-4 border-orange-400 bg-orange-50 ';
-    } else if (!notification.is_read) {
-      styles += 'bg-blue-50 ';
+  handleClearFilters = () => {
+    this.selectedType.set('');
+    this.selectedStatus.set('');
+    this.pageIndex.set(0);
+    if (this.paginator) {
+      this.paginator.firstPage();
     }
-    
-    return styles;
-  }
-
-  getPriorityBadgeClass(priority: NotificationPriority): string {
-    const classes = {
-      [NotificationPriority.LOW]: 'bg-gray-100 text-gray-800',
-      [NotificationPriority.MEDIUM]: 'bg-blue-100 text-blue-800',
-      [NotificationPriority.HIGH]: 'bg-orange-100 text-orange-800',
-      [NotificationPriority.URGENT]: 'bg-red-100 text-red-800',
-    };
-    return classes[priority] || classes[NotificationPriority.MEDIUM];
-  }
-
-  getTypeLabel(type: NotificationType): string {
-    const labels:any = {
-      [NotificationType.PROJECT_CREATED]: 'Project Created',
-      [NotificationType.PROJECT_ACCEPTED]: 'Project Accepted',
-      [NotificationType.PROJECT_REJECTED]: 'Project Rejected',
-      [NotificationType.PROJECT_STARTED]: 'Project Started',
-      [NotificationType.PROJECT_COMPLETED]: 'Project Completed',
-      [NotificationType.PROJECT_COMPLETED_BY_BUSINESS]: 'Project Completed - Awaiting Approval',
-      [NotificationType.PROJECT_COMPLETION_APPROVED]: 'Project Completion Approved',
-      [NotificationType.PROJECT_COMPLETION_REJECTED]: 'Project Completion Rejected',
-      [NotificationType.ADDITIONAL_PAYMENT_REQUESTED]: 'Payment Requested',
-      [NotificationType.ADDITIONAL_PAYMENT_APPROVED]: 'Payment Approved',
-      [NotificationType.ADDITIONAL_PAYMENT_REJECTED]: 'Payment Rejected',
-      [NotificationType.ADDITIONAL_PAYMENT_COMPLETED]: 'Payment Received',
-      [NotificationType.BUSINESS_APPROVED]: 'Business Approved',
-      [NotificationType.BUSINESS_REJECTED]: 'Business Rejected',
-      [NotificationType.BUSINESS_SUSPENDED]: 'Business Suspended',
-      [NotificationType.BUSINESS_REACTIVATED]: 'Business Reactivated',
-      [NotificationType.REVIEW_RECEIVED]: 'Review Received',
-      [NotificationType.REVIEW_REPLIED]: 'Review Replied',
-      [NotificationType.PAYMENT_REQUEST]: 'Payment Request',
-      [NotificationType.PAYMENT_APPROVED]: 'Payment Approved',
-      [NotificationType.PAYMENT_REJECTED]: 'Payment Rejected',
-      [NotificationType.COMPLETION_REQUEST]: 'Completion Request',
-      [NotificationType.COMPLETION_APPROVED]: 'Completion Approved',
-      [NotificationType.COMPLETION_REJECTED]: 'Completion Rejected',
-      [NotificationType.PROMOTION]: 'Promotion',
-      [NotificationType.SYSTEM_ANNOUNCEMENT]: 'Announcement',
-      [NotificationType.MESSAGE_RECEIVED]: 'Message',
-    };
-    return labels[type] || 'Notification';
-  }
-
-  formatTimeAgo(date: Date | string): string {
-    return this.notificationService.formatTimeAgo(date);
-  }
+  };
 
   getEmptyMessage(): string {
-    if (this.selectedType && this.selectedStatus) {
-      return `No ${this.selectedStatus} notifications of type "${this.getTypeLabel(this.selectedType as NotificationType)}" found.`;
-    } else if (this.selectedType) {
-      return `No notifications of type "${this.getTypeLabel(this.selectedType as NotificationType)}" found.`;
-    } else if (this.selectedStatus) {
-      return `No ${this.selectedStatus} notifications found.`;
+    if (this.selectedType() && this.selectedStatus()) {
+      return `No ${this.selectedStatus()} notifications of this type found.`;
+    } else if (this.selectedType()) {
+      return `No notifications of this type found.`;
+    } else if (this.selectedStatus()) {
+      return `No ${this.selectedStatus()} notifications found.`;
     }
     return 'You don\'t have any notifications yet.';
   }

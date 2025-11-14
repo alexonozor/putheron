@@ -139,8 +139,13 @@ export class SignupComponent implements OnInit {
           verticalPosition: 'top',
           panelClass: ['snackbar-success']
         });
-        // Show verification message and disable form
-        this.showVerificationMessage(formData.email);
+        
+        // Redirect to login page after successful signup (user needs to verify email first)
+        setTimeout(() => {
+          this.router.navigate(['/auth/login'], { 
+            queryParams: { message: 'Please verify your email and then login' } 
+          });
+        }, 1500);
       } else {
         this.snackBar.open(response.error?.message || 'Registration failed. Please try again.', 'Close', {
           duration: 5000,

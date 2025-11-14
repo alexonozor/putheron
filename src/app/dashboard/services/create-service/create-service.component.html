@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gray-50">
   @if (loading()) {
-    <div class="flex justify-center items-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <div class="flex justify-center items-center min-h-screen">
+      <mat-spinner [diameter]="isMobile() ? 40 : 60" [strokeWidth]="4"></mat-spinner>
     </div>
   } @else if (error()) {
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -42,37 +42,23 @@
       </div>
     </div>
   } @else {
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="lg:max-w-6xl max-w-12xl  px-0 lg:px-8 py-8">
       <!-- Header -->
-      <div class="mb-8">
-        <button 
-          (click)="goBack()"
-          class="mb-4 flex items-center text-gray-600 hover:text-gray-800 transition-colors">
-          <mat-icon class="mr-2">arrow_back</mat-icon>
-          Back to Services
-        </button>
-        
-        <div class="text-center">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">
-            {{ pageTitle() }}
-          </h1>
-          <p class="text-gray-600">
-            @if (isEditMode()) {
-              Update your service information and settings
-            } @else {
-              Create a new service for your business
-            }
-          </p>
-        </div>
+        <div class="px-6">
+      <app-dashboard-subheader
+        [title]="isEditMode() ? 'Edit Your Service' : 'Create Your Service'"
+        [subtitle]="isEditMode() ? 'Update your service information and settings' : 'Create a new service for your business'"
+        (backClicked)="goBack()">
+      </app-dashboard-subheader>
       </div>
 
       <!-- Service Creation/Edit Form -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-        <mat-stepper #stepper [linear]="true" class="service-stepper">
+      <mat-card class="w-full">
+        <mat-stepper #stepper [linear]="true" [orientation]="isMobile() ? 'vertical' : 'horizontal'" class="service-stepper">
           
           <!-- Step 1: Service Information -->
           <mat-step [stepControl]="serviceInfoForm" label="Service Information">
-            <form [formGroup]="serviceInfoForm" class="p-6 space-y-6">
+            <form [formGroup]="serviceInfoForm" class="lg:p-6 space-y-6">
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
                   Service Details
@@ -135,7 +121,10 @@
                   type="button"
                   (click)="nextStep(stepper)"
                   [disabled]="!isServiceInfoValid()"
-                  class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
+                  matButton="filled"
+                  color="primary"
+                  mat-raised-button
+                  class="flex items-center">
                   Next
                   <mat-icon class="ml-2">arrow_forward</mat-icon>
                 </button>
@@ -145,7 +134,7 @@
 
           <!-- Step 2: Pricing & Features -->
           <mat-step [stepControl]="servicePricingForm" label="Pricing & Features">
-            <form [formGroup]="servicePricingForm" class="p-6 space-y-6">
+            <form [formGroup]="servicePricingForm" class="lg:p-6 space-y-6">
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
                   Pricing & Service Features
@@ -243,7 +232,9 @@
                 <button 
                   type="button"
                   (click)="previousStep(stepper)"
-                  class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
+                  mat-stroked-button
+                  color="accent"
+                  class="flex items-center">
                   <mat-icon class="mr-2">arrow_back</mat-icon>
                   Previous
                 </button>
@@ -251,7 +242,10 @@
                   type="button"
                   (click)="nextStep(stepper)"
                   [disabled]="!isServicePricingValid()"
-                  class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
+                  matButton="filled"
+                  color="primary"
+                  mat-raised-button
+                  class="flex items-center">
                   Next
                   <mat-icon class="ml-2">arrow_forward</mat-icon>
                 </button>
@@ -261,7 +255,7 @@
 
           <!-- Step 3: Service Images & Finish -->
           <mat-step label="Images & Finish">
-            <div class="p-6 space-y-6">
+            <div class="lg:p-6 space-y-6">
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
                   Service Images
@@ -314,7 +308,10 @@
                       type="button"
                       (click)="fileInput.click()"
                       [disabled]="selectedImages().length + existingImages().length >= 5"
-                      class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
+                      matButton="filled"
+                      color="primary"
+                      mat-raised-button
+                      class="flex items-center">
                       <mat-icon class="mr-2">add_photo_alternate</mat-icon>
                       Select Images
                     </button>
@@ -362,7 +359,9 @@
                 <button 
                   type="button"
                   (click)="previousStep(stepper)"
-                  class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
+                  mat-stroked-button
+                  color="accent"
+                  class="flex items-center">
                   <mat-icon class="mr-2">arrow_back</mat-icon>
                   Back
                 </button>
@@ -370,15 +369,17 @@
                   type="button"
                   (click)="onSubmit()"
                   [disabled]="!canSubmitService()"
-                  class="bg-gray-900 hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center">
+                  matButton="filled"
+                  color="primary"
+                 
+                  >
                   @if (submitting()) {
                     <ng-container>
-                      <mat-icon class="animate-spin mr-2">hourglass_empty</mat-icon>
                       {{ isEditMode() ? 'Updating...' : 'Creating...' }}
                     </ng-container>
                   } @else {
                     <ng-container>
-                      <mat-icon class="mr-2">{{ isEditMode() ? 'save' : 'add' }}</mat-icon>
+                      <!-- <mat-icon class="mr-2">{{ isEditMode() ? 'save' : 'add' }}</mat-icon> -->
                       {{ submitButtonText() }}
                     </ng-container>
                   }
@@ -388,7 +389,7 @@
           </mat-step>
 
         </mat-stepper>
-      </div>
+      </mat-card>
     </div>
   }
 </div>

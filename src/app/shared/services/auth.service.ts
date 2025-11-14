@@ -160,8 +160,9 @@ export class AuthService {
       ).toPromise();
 
       if (response?.success && response.data) {
-        await this.setAuthData(response.data.access_token, response.data.user);
-        this.config.logIfEnabled('User registered successfully:', response.data.user.email);
+        // DO NOT set auth data here - user needs to verify email first
+        // await this.setAuthData(response.data.access_token, response.data.user);
+        this.config.logIfEnabled('User registered successfully. Please verify email:', response.data.user.email);
         return { data: response.data, error: null };
       }
 

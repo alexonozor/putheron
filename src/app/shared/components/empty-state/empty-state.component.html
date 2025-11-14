@@ -1,0 +1,37 @@
+<mat-card class="bg-white! w-full sm:w-auto">
+  <mat-card-content class="px-6 py-12 text-center">
+    <div class="flex flex-col items-center gap-6">
+      <!-- Icon -->
+      <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+        <mat-icon class="text-gray-300 text-4xl">
+          {{ icon }}
+        </mat-icon>
+      </div>
+
+      <!-- Title -->
+      <h3 class="text-xl font-medium text-gray-900 m-0">{{ title }}</h3>
+
+      <!-- Description -->
+      <p class="text-sm text-gray-600 m-0 max-w-md">{{ description }}</p>
+
+      <!-- Buttons -->
+      @if (buttons.length > 0) {
+      <div class="flex gap-4 justify-center flex-wrap mt-4">
+        @for (button of buttons; track $index) {
+        <button 
+          mat-button
+          [color]="button.color || 'primary'"
+          (click)="button.callback()"
+          class="flex items-center gap-2">
+          @if (button.icon) {
+          <mat-icon>{{ button.icon }}</mat-icon>
+          }
+          {{ button.label }}
+        </button>
+        }
+      </div>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>
+

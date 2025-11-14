@@ -1,0 +1,89 @@
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <!-- Available Funds Card -->
+  <mat-card class="overflow-hidden hover:shadow-lg transition-shadow bg-white!">
+    <mat-card-content class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Available Funds</h3>
+        <mat-icon class="text-green-600 text-2xl">account_balance_wallet</mat-icon>
+      </div>
+      <div class="space-y-2">
+        <p class="text-sm text-gray-600">Balance available for withdrawal</p>
+        <p class="text-3xl font-bold text-gray-900">{{ summary?.available | currency }}</p>
+      </div>
+      
+      <!-- Stripe Connection Status Badge -->
+      <div class="mt-4 p-3 rounded-lg border" 
+           [ngClass]="{
+             'bg-green-50 border-green-200': stripeConnectionStatus === 'connected',
+             'bg-yellow-50 border-yellow-200': stripeConnectionStatus === 'pending',
+             'bg-red-50 border-red-200': stripeConnectionStatus === 'failed',
+             'bg-gray-50 border-gray-200': stripeConnectionStatus === 'not-connected'
+           }">
+        <div class="flex items-center space-x-2">
+          <mat-icon class="text-lg" 
+                    [ngClass]="{
+                      'text-green-600': stripeConnectionStatus === 'connected',
+                      'text-yellow-600': stripeConnectionStatus === 'pending',
+                      'text-red-600': stripeConnectionStatus === 'failed',
+                      'text-gray-600': stripeConnectionStatus === 'not-connected'
+                    }">
+            @switch (stripeConnectionStatus) {
+              @case ('connected') { check_circle }
+              @case ('pending') { schedule }
+              @case ('failed') { error }
+              @default { payment }
+            }
+          </mat-icon>
+          <span class="text-sm font-medium"
+                [ngClass]="{
+                  'text-green-700': stripeConnectionStatus === 'connected',
+                  'text-yellow-700': stripeConnectionStatus === 'pending',
+                  'text-red-700': stripeConnectionStatus === 'failed',
+                  'text-gray-700': stripeConnectionStatus === 'not-connected'
+                }">
+            @switch (stripeConnectionStatus) {
+              @case ('connected') { Stripe Connected }
+              @case ('pending') { Stripe Setup Pending }
+              @case ('failed') { Stripe Connection Failed }
+              @default { Stripe Not Connected }
+            }
+          </span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Payments Being Cleared Card -->
+  <mat-card class="overflow-hidden hover:shadow-lg transition-shadow bg-white!">
+    <mat-card-content class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Future Payments</h3>
+        <mat-icon class="text-blue-600 text-2xl">schedule</mat-icon>
+      </div>
+      
+      <div class="space-y-4">
+        <div>
+          <p class="text-sm text-gray-600">Payments being cleared</p>
+          <p class="text-2xl font-bold text-gray-900">{{ summary?.payments_clearing | currency }}</p>
+        </div>
+        
+        <div>
+          <p class="text-sm text-gray-600">Active project earnings</p>
+          <p class="text-2xl font-bold text-gray-900">{{ summary?.active_orders | currency }}</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Total Earnings Card -->
+  <mat-card class="overflow-hidden hover:shadow-lg transition-shadow bg-white!">
+    <mat-card-content class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Earnings to Date</h3>
+        <mat-icon class="text-purple-600 text-2xl">trending_up</mat-icon>
+      </div>
+      <p class="text-3xl font-bold text-gray-900">{{ summary?.total_earnings | currency }}</p>
+      <p class="text-sm text-gray-600 mt-2">Your total earnings since joining.</p>
+    </mat-card-content>
+  </mat-card>
+</div>

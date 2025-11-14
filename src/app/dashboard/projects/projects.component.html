@@ -1,14 +1,20 @@
-<div class="min-h-screen bg-gray-50 p-6">
-  <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Projects</h1>
-      <p class="text-gray-600">Manage your project requests and business inquiries</p>
+<div class="min-h-screen bg-gray-50">
+  <!-- Header Section -->
+  <div class="mb-8 lg:max-w-7xl max-w-12xl">
+    <div class="lg:max-w-7xl max-w-12xl">
+      <div class="px-6 pt-6">
+        <app-dashboard-subheader 
+          title="Projects" 
+          subtitle="Manage your project requests and business inquiries"
+          (backClicked)="navigateToHome()">
+        </app-dashboard-subheader>
+      </div>
     </div>
 
     <!-- Error Display -->
     @if (error()) {
-      <div class="mb-6 bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+    <div class="px-0 sm:px-6 mb-6">
+      <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
         <div class="flex">
           <mat-icon class="text-red-400 mr-3">error</mat-icon>
           <div>
@@ -17,725 +23,82 @@
           </div>
         </div>
       </div>
+    </div>
     }
 
     <!-- Loading State -->
     @if (loading()) {
-      <div class="flex items-center justify-center py-12">
-        <mat-spinner diameter="40"></mat-spinner>
-        <span class="ml-3 text-gray-600">Loading projects...</span>
-      </div>
+    <div class="flex items-center justify-center ">
+      <mat-spinner [diameter]="isMobile() ? 40 : 60" [strokeWidth]="4"></mat-spinner>
+    </div>
     } @else {
-      <!-- Tabs -->
-      <mat-tab-group (selectedTabChange)="onTabChange($event.index)" class="projects-tabs">
-        <!-- My Projects Tab -->
-        <mat-tab label="My Project Requests">
-          <div class="py-6">
-            @if (myProjects().length === 0) {
-              <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
-                <div class="p-4 bg-gray-50 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                  <mat-icon class="text-gray-400 text-4xl">assignment</mat-icon>
-                </div>
-                <h3 class="text-xl font-medium text-gray-900 mb-2">No project requests yet</h3>
-                <p class="text-gray-500 mb-6">Start by browsing businesses and creating your first project request.</p>
-                <button 
-                  mat-raised-button 
-                  color="primary"
-                  (click)="navigateToHome()">
-                  Browse Businesses
-                </button>
-              </div>
-            } @else {
-              <!-- Project Status Sections -->
-              
-              <!-- Pending Projects -->
-              @if (pendingMyProjects().length > 0) {
-                <div class="mb-8">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <mat-icon class="mr-2 text-yellow-600">schedule</mat-icon>
-                    Pending Approval ({{ pendingMyProjects().length }})
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @for (project of pendingMyProjects(); track project._id) {
-                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                        <!-- Project Header -->
-                        <div class="p-6 pb-4">
-                          <div class="flex items-start justify-between mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ project.title }}</h3>
-                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">
-                              <mat-icon class="w-3 h-3 mr-1 text-xs">schedule</mat-icon>
-                              {{ getStatusText(project.status) }}
-                            </span>
-                          </div>
-                          <p class="text-sm text-gray-600 mb-4">{{ getBusinessName(project) }}</p>
-                          
-                          @if (project.description) {
-                            <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ project.description }}</p>
-                          }
-                          
-                          <!-- Project Details -->
-                          <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">attach_money</mat-icon>
-                                Budget
-                              </span>
-                              <span class="text-sm font-semibold text-gray-900">{{ formatPrice(project.offered_price) }}</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">event</mat-icon>
-                                Submitted
-                              </span>
-                              <span class="text-sm text-gray-700">{{ formatDate(project.createdAt) }}</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <!-- Project Actions -->
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                          <button 
-                            mat-stroked-button 
-                            (click)="viewProject(project)"
-                            class="w-full">
-                            <mat-icon>visibility</mat-icon>
-                            View Details
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
 
-              <!-- Active Projects -->
-              @if (activeMyProjects().length > 0) {
-                <div class="mb-8">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <mat-icon class="mr-2 text-blue-600">work</mat-icon>
-                    Active Projects ({{ activeMyProjects().length }})
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @for (project of activeMyProjects(); track project._id) {
-                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                        <!-- Project Header -->
-                        <div class="p-6 pb-4">
-                          <div class="flex items-start justify-between mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ project.title }}</h3>
-                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">
-                              <mat-icon class="w-3 h-3 mr-1 text-xs">
-                                {{ project.status === 'accepted' ? 'check_circle' : 'work' }}
-                              </mat-icon>
-                              {{ getStatusText(project.status) }}
-                            </span>
-                          </div>
-                          <p class="text-sm text-gray-600 mb-4">{{ getBusinessName(project) }}</p>
-                          
-                          @if (project.description) {
-                            <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ project.description }}</p>
-                          }
-                          
-                          <!-- Project Details -->
-                          <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">attach_money</mat-icon>
-                                Budget
-                              </span>
-                              <span class="text-sm font-semibold text-gray-900">{{ formatPrice(project.offered_price) }}</span>
-                            </div>
-                            @if (project.accepted_at) {
-                              <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500 flex items-center">
-                                  <mat-icon class="w-4 h-4 mr-1">check_circle</mat-icon>
-                                  Accepted
-                                </span>
-                                <span class="text-sm text-gray-700">{{ formatDate(project.accepted_at) }}</span>
-                              </div>
-                            }
-                          </div>
-                        </div>
-                        
-                        <!-- Project Actions -->
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                          <button 
-                            mat-stroked-button 
-                            (click)="viewProject(project)"
-                            class="w-full">
-                            <mat-icon>visibility</mat-icon>
-                            View Details
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
+    <!-- Search and Filter Controls -->
+    <div class="px-0 sm:px-6 pt-4 ">
+      <app-business-search-filter 
+        [searchTerm]="searchTerm()" 
+        [viewMode]="viewMode()"
+        [hideViewModeToggle]="true"
+        (searchChange)="searchTerm.set($event)" 
+        (viewModeChange)="setViewMode($event)"
+        (clearSearch)="clearSearch()">
 
-              <!-- Completed Projects -->
-              @if (completedMyProjects().length > 0) {
-                <div class="mb-8">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <mat-icon class="mr-2 text-green-600">check_circle</mat-icon>
-                    Completed Projects ({{ completedMyProjects().length }})
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @for (project of completedMyProjects(); track project._id) {
-                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                        <!-- Project Header -->
-                        <div class="p-6 pb-4">
-                          <div class="flex items-start justify-between mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ project.title }}</h3>
-                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">
-                              <mat-icon class="w-3 h-3 mr-1 text-xs">check_circle</mat-icon>
-                              {{ getStatusText(project.status) }}
-                            </span>
-                          </div>
-                          <p class="text-sm text-gray-600 mb-4">{{ getBusinessName(project) }}</p>
-                          
-                          @if (project.description) {
-                            <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ project.description }}</p>
-                          }
-                          
-                          <!-- Project Details -->
-                          <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">attach_money</mat-icon>
-                                Final Amount
-                              </span>
-                              <span class="text-sm font-semibold text-gray-900">{{ formatPrice(project.offered_price) }}</span>
-                            </div>
-                            @if (project.completed_at) {
-                              <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500 flex items-center">
-                                  <mat-icon class="w-4 h-4 mr-1">event_available</mat-icon>
-                                  Completed
-                                </span>
-                                <span class="text-sm text-gray-700">{{ formatDate(project.completed_at) }}</span>
-                              </div>
-                            }
-                          </div>
-                        </div>
-                        
-                        <!-- Project Actions -->
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                          <button 
-                            mat-stroked-button 
-                            (click)="viewProject(project)"
-                            class="w-full">
-                            <mat-icon>visibility</mat-icon>
-                            View Details
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
+        <!-- Project Type Filter -->
+        <div class="w-full sm:w-48">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+            <mat-label>Project Type</mat-label>
+            <mat-select [value]="projectType()" (selectionChange)="projectType.set($event.value)">
+              <mat-option value="my_requests">My Requests</mat-option>
+              <mat-option value="business_inquiries">Business Inquiries</mat-option>
+            </mat-select>
+            <mat-icon matPrefix>folder_outline</mat-icon>
+          </mat-form-field>
+        </div>
 
-              <!-- Rejected Projects -->
-              @if (rejectedMyProjects().length > 0) {
-                <div class="mb-8">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <mat-icon class="mr-2 text-red-600">cancel</mat-icon>
-                    Rejected Projects ({{ rejectedMyProjects().length }})
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @for (project of rejectedMyProjects(); track project._id) {
-                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                        <!-- Project Header -->
-                        <div class="p-6 pb-4">
-                          <div class="flex items-start justify-between mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ project.title }}</h3>
-                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">
-                              <mat-icon class="w-3 h-3 mr-1 text-xs">cancel</mat-icon>
-                              {{ getStatusText(project.status) }}
-                            </span>
-                          </div>
-                          <p class="text-sm text-gray-600 mb-4">{{ getBusinessName(project) }}</p>
-                          
-                          @if (project.description) {
-                            <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ project.description }}</p>
-                          }
-                          
-                          <!-- Rejection Reason -->
-                          @if (project.rejection_reason) {
-                            <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                              <p class="text-sm text-red-800 font-medium mb-1">Rejection Reason:</p>
-                              <p class="text-sm text-red-700">{{ project.rejection_reason }}</p>
-                            </div>
-                          }
-                          
-                          <!-- Project Details -->
-                          <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">attach_money</mat-icon>
-                                Proposed Budget
-                              </span>
-                              <span class="text-sm font-semibold text-gray-900">{{ formatPrice(project.offered_price) }}</span>
-                            </div>
-                            @if (project.rejected_at) {
-                              <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500 flex items-center">
-                                  <mat-icon class="w-4 h-4 mr-1">event</mat-icon>
-                                  Rejected
-                                </span>
-                                <span class="text-sm text-gray-700">{{ formatDate(project.rejected_at) }}</span>
-                              </div>
-                            }
-                          </div>
-                        </div>
-                        
-                        <!-- Project Actions -->
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                          <button 
-                            mat-stroked-button 
-                            (click)="viewProject(project)"
-                            class="w-full">
-                            <mat-icon>visibility</mat-icon>
-                            View Details
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
+        <!-- Status Filter -->
+        <div class="w-full sm:w-48">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+            <mat-label>Status</mat-label>
+            <mat-select [value]="selectedStatus()" (selectionChange)="selectedStatus.set($event.value)">
+              <mat-option value="all">All Status</mat-option>
+              <mat-option value="requested">Requested</mat-option>
+              <mat-option value="under_review">Under Review</mat-option>
+              <mat-option value="accepted">Accepted</mat-option>
+              <mat-option value="started">Started</mat-option>
+              <mat-option value="completed">Completed</mat-option>
+              <mat-option value="rejected">Rejected</mat-option>
+              <mat-option value="cancelled">Cancelled</mat-option>
+            </mat-select>
+            <mat-icon matPrefix>info_outline</mat-icon>
+          </mat-form-field>
+        </div>
 
-              <!-- Cancelled Projects -->
-              @if (cancelledMyProjects().length > 0) {
-                <div class="mb-8">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <mat-icon class="mr-2 text-orange-600">block</mat-icon>
-                    Cancelled Projects ({{ cancelledMyProjects().length }})
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @for (project of cancelledMyProjects(); track project._id) {
-                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                        <!-- Project Header -->
-                        <div class="p-6 pb-4">
-                          <div class="flex items-start justify-between mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ project.title }}</h3>
-                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">
-                              <mat-icon class="w-3 h-3 mr-1 text-xs">block</mat-icon>
-                              {{ getStatusText(project.status) }}
-                            </span>
-                          </div>
-                          <p class="text-sm text-gray-600 mb-4">{{ getBusinessName(project) }}</p>
-                          
-                          @if (project.description) {
-                            <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ project.description }}</p>
-                          }
-                          
-                          <!-- Cancellation Reason -->
-                          @if (project.cancellation_reason) {
-                            <div class="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                              <p class="text-sm text-orange-800 font-medium mb-1">Cancellation Reason:</p>
-                              <p class="text-sm text-orange-700">{{ project.cancellation_reason }}</p>
-                            </div>
-                          }
-                          
-                          <!-- Project Details -->
-                          <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">attach_money</mat-icon>
-                                Budget
-                              </span>
-                              <span class="text-sm font-semibold text-gray-900">{{ formatPrice(project.offered_price) }}</span>
-                            </div>
-                            @if (project.cancelled_at) {
-                              <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500 flex items-center">
-                                  <mat-icon class="w-4 h-4 mr-1">event</mat-icon>
-                                  Cancelled
-                                </span>
-                                <span class="text-sm text-gray-700">{{ formatDate(project.cancelled_at) }}</span>
-                              </div>
-                            }
-                          </div>
-                        </div>
-                        
-                        <!-- Project Actions -->
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                          <button 
-                            mat-stroked-button 
-                            (click)="viewProject(project)"
-                            class="w-full">
-                            <mat-icon>visibility</mat-icon>
-                            View Details
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-            }
-          </div>
-        </mat-tab>
+      </app-business-search-filter>
+    </div>
 
-        <!-- Business Projects Tab -->
-        <mat-tab label="Business Inquiries">
-          <div class="py-6">
-            @if (businessProjects().length === 0) {
-              <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
-                <div class="p-4 bg-gray-50 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                  <mat-icon class="text-gray-400 text-4xl">business_center</mat-icon>
-                </div>
-                <h3 class="text-xl font-medium text-gray-900 mb-2">No project inquiries yet</h3>
-                <p class="text-gray-500 mb-6">When clients are interested in your services, their project requests will appear here.</p>
-              </div>
-            } @else {
-              <!-- Pending Business Projects -->
-              @if (pendingBusinessProjects().length > 0) {
-                <div class="mb-8">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <mat-icon class="mr-2 text-yellow-600">schedule</mat-icon>
-                    Pending Requests ({{ pendingBusinessProjects().length }})
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @for (project of pendingBusinessProjects(); track project._id) {
-                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                        <!-- Project Header -->
-                        <div class="p-6 pb-4">
-                          <div class="flex items-start justify-between mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ project.title }}</h3>
-                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">
-                              <mat-icon class="w-3 h-3 mr-1 text-xs">schedule</mat-icon>
-                              {{ getStatusText(project.status) }}
-                            </span>
-                          </div>
-                          <p class="text-sm text-gray-600 mb-4">{{ getClientName(project) }}</p>
-                          
-                          @if (project.description) {
-                            <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ project.description }}</p>
-                          }
-                          
-                          <!-- Project Details -->
-                          <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">attach_money</mat-icon>
-                                Client Budget
-                              </span>
-                              <span class="text-sm font-semibold text-gray-900">{{ formatPrice(project.offered_price) }}</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">event</mat-icon>
-                                Received
-                              </span>
-                              <span class="text-sm text-gray-700">{{ formatDate(project.createdAt) }}</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <!-- Project Actions -->
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                          <div class="flex space-x-2">
-                            <button 
-                              mat-stroked-button 
-                              (click)="viewProject(project)"
-                              class="flex-1">
-                              <mat-icon>visibility</mat-icon>
-                              View
-                            </button>
-                            <button 
-                              mat-raised-button 
-                              color="primary"
-                              (click)="acceptProject(project)"
-                              class="flex-1">
-                              <mat-icon>check</mat-icon>
-                              Accept
-                            </button>
-                            <button 
-                              mat-button 
-                              color="warn"
-                              (click)="rejectProject(project)"
-                              class="flex-1">
-                              <mat-icon>close</mat-icon>
-                              Reject
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-
-              <!-- Active Business Projects -->
-              @if (activeBusinessProjects().length > 0) {
-                <div class="mb-8">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <mat-icon class="mr-2 text-blue-600">work</mat-icon>
-                    Active Projects ({{ activeBusinessProjects().length }})
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @for (project of activeBusinessProjects(); track project._id) {
-                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                        <!-- Project Header -->
-                        <div class="p-6 pb-4">
-                          <div class="flex items-start justify-between mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ project.title }}</h3>
-                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">
-                              <mat-icon class="w-3 h-3 mr-1 text-xs">
-                                {{ project.status === 'accepted' ? 'check_circle' : 'work' }}
-                              </mat-icon>
-                              {{ getStatusText(project.status) }}
-                            </span>
-                          </div>
-                          <p class="text-sm text-gray-600 mb-4">{{ getClientName(project) }}</p>
-                          
-                          @if (project.description) {
-                            <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ project.description }}</p>
-                          }
-                          
-                          <!-- Project Details -->
-                          <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">attach_money</mat-icon>
-                                Budget
-                              </span>
-                              <span class="text-sm font-semibold text-gray-900">{{ formatPrice(project.offered_price) }}</span>
-                            </div>
-                            @if (project.deadline) {
-                              <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500 flex items-center">
-                                  <mat-icon class="w-4 h-4 mr-1">event</mat-icon>
-                                  Deadline
-                                </span>
-                                <span class="text-sm text-gray-700">{{ formatDate(project.deadline) }}</span>
-                              </div>
-                            }
-                          </div>
-                        </div>
-                        
-                        <!-- Project Actions -->
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                          <button 
-                            mat-stroked-button 
-                            (click)="viewProject(project)"
-                            class="w-full">
-                            <mat-icon>visibility</mat-icon>
-                            View Details
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-
-              <!-- Completed Business Projects -->
-              @if (completedBusinessProjects().length > 0) {
-                <div class="mb-8">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <mat-icon class="mr-2 text-green-600">check_circle</mat-icon>
-                    Completed Projects ({{ completedBusinessProjects().length }})
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @for (project of completedBusinessProjects(); track project._id) {
-                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                        <!-- Project Header -->
-                        <div class="p-6 pb-4">
-                          <div class="flex items-start justify-between mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ project.title }}</h3>
-                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">
-                              <mat-icon class="w-3 h-3 mr-1 text-xs">check_circle</mat-icon>
-                              {{ getStatusText(project.status) }}
-                            </span>
-                          </div>
-                          <p class="text-sm text-gray-600 mb-4">{{ getClientName(project) }}</p>
-                          
-                          @if (project.description) {
-                            <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ project.description }}</p>
-                          }
-                          
-                          <!-- Project Details -->
-                          <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">attach_money</mat-icon>
-                                Final Amount
-                              </span>
-                              <span class="text-sm font-semibold text-gray-900">{{ formatPrice(project.offered_price) }}</span>
-                            </div>
-                            @if (project.completed_at) {
-                              <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500 flex items-center">
-                                  <mat-icon class="w-4 h-4 mr-1">event_available</mat-icon>
-                                  Completed
-                                </span>
-                                <span class="text-sm text-gray-700">{{ formatDate(project.completed_at) }}</span>
-                              </div>
-                            }
-                          </div>
-                        </div>
-                        
-                        <!-- Project Actions -->
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                          <button 
-                            mat-stroked-button 
-                            (click)="viewProject(project)"
-                            class="w-full">
-                            <mat-icon>visibility</mat-icon>
-                            View Details
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-
-              <!-- Rejected Business Projects -->
-              @if (rejectedBusinessProjects().length > 0) {
-                <div class="mb-8">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <mat-icon class="mr-2 text-red-600">cancel</mat-icon>
-                    Rejected Projects ({{ rejectedBusinessProjects().length }})
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @for (project of rejectedBusinessProjects(); track project._id) {
-                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                        <!-- Project Header -->
-                        <div class="p-6 pb-4">
-                          <div class="flex items-start justify-between mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ project.title }}</h3>
-                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">
-                              <mat-icon class="w-3 h-3 mr-1 text-xs">cancel</mat-icon>
-                              {{ getStatusText(project.status) }}
-                            </span>
-                          </div>
-                          <p class="text-sm text-gray-600 mb-4">{{ getClientName(project) }}</p>
-                          
-                          @if (project.description) {
-                            <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ project.description }}</p>
-                          }
-                          
-                          <!-- Rejection Reason -->
-                          @if (project.rejection_reason) {
-                            <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                              <p class="text-sm text-red-800 font-medium mb-1">Rejection Reason:</p>
-                              <p class="text-sm text-red-700">{{ project.rejection_reason }}</p>
-                            </div>
-                          }
-                          
-                          <!-- Project Details -->
-                          <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">attach_money</mat-icon>
-                                Client Budget
-                              </span>
-                              <span class="text-sm font-semibold text-gray-900">{{ formatPrice(project.offered_price) }}</span>
-                            </div>
-                            @if (project.rejected_at) {
-                              <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500 flex items-center">
-                                  <mat-icon class="w-4 h-4 mr-1">event</mat-icon>
-                                  Rejected
-                                </span>
-                                <span class="text-sm text-gray-700">{{ formatDate(project.rejected_at) }}</span>
-                              </div>
-                            }
-                          </div>
-                        </div>
-                        
-                        <!-- Project Actions -->
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                          <button 
-                            mat-stroked-button 
-                            (click)="viewProject(project)"
-                            class="w-full">
-                            <mat-icon>visibility</mat-icon>
-                            View Details
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-
-              <!-- Cancelled Business Projects -->
-              @if (cancelledBusinessProjects().length > 0) {
-                <div class="mb-8">
-                  <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <mat-icon class="mr-2 text-orange-600">block</mat-icon>
-                    Cancelled Projects ({{ cancelledBusinessProjects().length }})
-                  </h3>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @for (project of cancelledBusinessProjects(); track project._id) {
-                      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                        <!-- Project Header -->
-                        <div class="p-6 pb-4">
-                          <div class="flex items-start justify-between mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ project.title }}</h3>
-                            <span [class]="getStatusColor(project.status)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">
-                              <mat-icon class="w-3 h-3 mr-1 text-xs">block</mat-icon>
-                              {{ getStatusText(project.status) }}
-                            </span>
-                          </div>
-                          <p class="text-sm text-gray-600 mb-4">{{ getClientName(project) }}</p>
-                          
-                          @if (project.description) {
-                            <p class="text-sm text-gray-700 mb-4 line-clamp-3">{{ project.description }}</p>
-                          }
-                          
-                          <!-- Cancellation Reason -->
-                          @if (project.cancellation_reason) {
-                            <div class="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                              <p class="text-sm text-orange-800 font-medium mb-1">Cancellation Reason:</p>
-                              <p class="text-sm text-orange-700">{{ project.cancellation_reason }}</p>
-                            </div>
-                          }
-                          
-                          <!-- Project Details -->
-                          <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                              <span class="text-sm text-gray-500 flex items-center">
-                                <mat-icon class="w-4 h-4 mr-1">attach_money</mat-icon>
-                                Budget
-                              </span>
-                              <span class="text-sm font-semibold text-gray-900">{{ formatPrice(project.offered_price) }}</span>
-                            </div>
-                            @if (project.cancelled_at) {
-                              <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500 flex items-center">
-                                  <mat-icon class="w-4 h-4 mr-1">event</mat-icon>
-                                  Cancelled
-                                </span>
-                                <span class="text-sm text-gray-700">{{ formatDate(project.cancelled_at) }}</span>
-                              </div>
-                            }
-                          </div>
-                        </div>
-                        
-                        <!-- Project Actions -->
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                          <button 
-                            mat-stroked-button 
-                            (click)="viewProject(project)"
-                            class="w-full">
-                            <mat-icon>visibility</mat-icon>
-                            View Details
-                          </button>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-            }
-          </div>
-        </mat-tab>
-      </mat-tab-group>
+    <!-- Content Section -->
+    @if (filteredProjects().length === 0) {
+    <!-- Empty State -->
+    <div class="px-0 sm:px-6 pt-6">
+      <app-empty-state 
+        icon="assignment"
+        title="No projects found"
+        description="Try adjusting your filters to find what you're looking for."
+        [buttons]="[{ label: 'Clear Filters', callback: handleClearFilters }]">
+      </app-empty-state>
+    </div>
+    } @else {
+    <!-- List View (Table) -->
+    <div class="lg:max-w-7xl max-w-12xl px-0 sm:px-6 pb-12 pt-6">
+      <app-project-list-card
+        [projects]="filteredProjects()"
+        [displayedColumns]="displayedColumns()"
+        (view)="viewProject($event)"
+        (accept)="acceptProject($event)"
+        (reject)="rejectProject($event)">
+      </app-project-list-card>
+    </div>
+    }
     }
   </div>
 </div>

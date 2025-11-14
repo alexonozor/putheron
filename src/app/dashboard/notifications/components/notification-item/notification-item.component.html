@@ -1,0 +1,100 @@
+<mat-card 
+  class="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+  [class]="'bg-white! ' + getCardClass()"
+  (click)="onCardClick()">
+  <mat-card-content class="p-6">
+    <div class="flex items-start gap-4">
+      <!-- Icon -->
+      <div class="flex-shrink-0">
+        <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-xl">
+          {{ getNotificationIcon() }}
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1">
+            <!-- Title and Badges -->
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <h3 class="text-lg font-semibold text-gray-900">{{ notification.title }}</h3>
+              
+              <!-- Priority Badge -->
+              @if (notification.priority !== 'low') {
+                <span 
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  [class]="getPriorityBadgeClass()">
+                  {{ notification.priority | uppercase }}
+                </span>
+              }
+              
+              <!-- Type Badge -->
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                {{ getTypeLabel() }}
+              </span>
+            </div>
+
+            <!-- Message -->
+            <p class="text-gray-700 mb-3">{{ notification.message }}</p>
+
+            <!-- Project Info -->
+            @if (notification.project_id) {
+              <div class="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="text-sm font-medium text-blue-900">Project: {{ notification.project_id.title }}</div>
+                <div class="text-sm text-blue-700">{{ notification.project_id.description }}</div>
+              </div>
+            }
+
+            <!-- Business Info -->
+            @if (notification.business_id) {
+              <div class="mb-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                <div class="text-sm font-medium text-green-900">Business: {{ notification.business_id.name }}</div>
+              </div>
+            }
+
+            <!-- Sender Info -->
+            @if (notification.sender_id) {
+              <div class="text-sm text-gray-600 mb-3">
+                From: {{ notification.sender_id.first_name }} {{ notification.sender_id.last_name }} ({{ notification.sender_id.email }})
+              </div>
+            }
+
+            <!-- Timestamps -->
+            <div class="flex items-center gap-4 text-sm text-gray-500">
+              <span>{{ formatTimeAgo(notification.createdAt) }}</span>
+              @if (notification.is_read && notification.read_at) {
+                <span>• Read {{ formatTimeAgo(notification.read_at) }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center gap-2 flex-shrink-0">
+            @if (!notification.is_read) {
+              <button
+                mat-icon-button
+                (click)="onMarkAsRead($event)"
+                matTooltip="Mark as read"
+                class="text-blue-600 hover:text-blue-800 hover:bg-blue-50">
+                <mat-icon>done</mat-icon>
+              </button>
+            }
+
+            <button
+              mat-icon-button
+              (click)="onDelete($event)"
+              matTooltip="Delete notification"
+              class="text-red-600 hover:text-red-800 hover:bg-red-50">
+              <mat-icon>delete</mat-icon>
+            </button>
+
+            <!-- Unread Indicator -->
+            @if (!notification.is_read) {
+              <div class="w-3 h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

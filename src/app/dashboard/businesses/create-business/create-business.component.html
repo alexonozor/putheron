@@ -1,10 +1,10 @@
 <div class="min-h-screen bg-gray-50">
   @if (loading()) {
-    <div class="flex justify-center items-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <div class="flex justify-center items-center min-h-screen">
+      <mat-spinner [diameter]="isMobile() ? 40 : 60" [strokeWidth]="4"></mat-spinner>
     </div>
   } @else if (error()) {
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-2xl  px-4 sm:px-6 lg:px-8 py-12">
       <div class="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="text-red-400 mb-4">
           <mat-icon class="text-6xl">error_outline</mat-icon>
@@ -25,33 +25,24 @@
       </div>
     </div>
   } @else {
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="lg:max-w-6xl max-w-12xl  px-0 lg:px-8 py-8">
       <!-- Header -->
-      <div class="mb-8">
-        <button 
-          (click)="goBack()"
-          class="mb-4 flex items-center text-gray-600 hover:text-gray-800 transition-colors">
-          <mat-icon class="mr-2">arrow_back</mat-icon>
-          Back to Dashboard
-        </button>
-        
-        <div class="text-center">
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">
-            {{ isEditMode() ? 'Edit Your Business' : 'Create Your Business' }}
-          </h1>
-          <p class="text-gray-600">
-            {{ isEditMode() ? 'Update your business profile and information' : 'Set up your business profile and start connecting with customers' }}
-          </p>
-        </div>
-      </div>
-
+       <div class="lg:px-0 px-6">
+        <app-dashboard-subheader
+        [title]="isEditMode() ? 'Edit Your Business' : 'Create Your Business'"
+        [subtitle]="isEditMode() ? 'Update your business profile and information' : 'Set up your business profile and start connecting with customers'"
+        (backClicked)="goBack()">
+      </app-dashboard-subheader>
+       </div>
+      
+      
       <!-- Business Creation Form -->
       <mat-card class="w-full">
         <!-- <mat-card-content class="p-6"> -->
           <mat-stepper #stepper [linear]="true" [orientation]="isMobile() ? 'vertical' : 'horizontal'" class="business-stepper">
           <!-- Step 1: Business Information -->
           <mat-step [stepControl]="businessInfoForm" label="Business Information">
-            <form [formGroup]="businessInfoForm" class="p-6 space-y-6">
+            <form [formGroup]="businessInfoForm" class="lg:p-6 space-y-6">
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
                   Tell us about your business
@@ -146,6 +137,7 @@
                 }
                 <button 
                   type="button"
+                  matButton="filled"
                   (click)="nextStep(stepper)"
                   [disabled]="!isBusinessInfoValid()"
                   mat-raised-button
@@ -160,7 +152,7 @@
 
           <!-- Step 2: Business Details -->
           <mat-step [stepControl]="businessDetailsForm" label="Contact & Location">
-            <form [formGroup]="businessDetailsForm" class="p-6 space-y-6" autocomplete="off">
+            <form [formGroup]="businessDetailsForm" class="lg:p-6 space-y-6" autocomplete="off">
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
                   Contact Information & Location
@@ -187,9 +179,9 @@
                     <mat-hint>Start typing to search for your business address (USA only)</mat-hint>
                   </mat-form-field>
 
-                  <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
-                    <div class="flex items-start">
-                      <mat-icon class="text-blue-600 mr-2 mt-0.5 text-base">info</mat-icon>
+                  <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+                    <div class="flex items-start gap-2">
+                      <mat-icon class="text-blue-600 text-base flex-shrink-0">info</mat-icon>
                       <div>
                         <strong>Auto-complete tip:</strong> Type your complete business address above. City, state, and postal code will be automatically filled and locked. Use "Edit" to manually modify or "Clear" to start over.
                       </div>
@@ -224,47 +216,49 @@
                     </mat-form-field>
                   </div>
 
-                  <div class="flex gap-4 items-start">
-                    <mat-form-field appearance="outline" class="flex-1" [class.opacity-75]="businessDetailsForm.get('postal_code')?.disabled">
-                      <mat-label>Postal Code</mat-label>
-                      <input 
-                        matInput 
-                        formControlName="postal_code" 
-                        placeholder="Postal code">
-                      @if (businessDetailsForm.get('postal_code')?.disabled) {
-                        <mat-icon matSuffix class="text-gray-400">lock</mat-icon>
-                      }
-                    </mat-form-field>
+                  <mat-form-field appearance="outline" class="w-full" [class.opacity-75]="businessDetailsForm.get('postal_code')?.disabled">
+                    <mat-label>Postal Code</mat-label>
+                    <input 
+                      matInput 
+                      formControlName="postal_code" 
+                      placeholder="Postal code">
+                    @if (businessDetailsForm.get('postal_code')?.disabled) {
+                      <mat-icon matSuffix class="text-gray-400">lock</mat-icon>
+                    }
+                  </mat-form-field>
+                  
+                  <div class="flex flex-col sm:flex-row gap-2 w-full">
+                    <button 
+                      type="button"
+                      (click)="enableManualLocationEdit()"
+                      mat-stroked-button
+                      color="primary"
+                      class="flex items-center justify-center w-full sm:w-auto">
+                      <mat-icon class="mr-1">edit</mat-icon>
+                      Edit
+                    </button>
                     
-                    <div class="flex flex-col gap-2 pt-1">
-                      <button 
-                        type="button"
-                        (click)="enableManualLocationEdit()"
-                        class="flex items-center justify-center px-3 py-1.5 text-xs h-8 min-w-[80px] border border-blue-300 text-blue-600 bg-white rounded-md hover:bg-blue-50 transition-colors">
-                        <mat-icon class="mr-1" style="font-size: 14px; width: 14px; height: 14px;">edit</mat-icon>
-                        Edit
-                      </button>
-                      
-                      <button 
-                        type="button"
-                        (click)="clearLocationData()"
-                        class="flex items-center justify-center px-3 py-1.5 text-xs h-8 min-w-[80px] border border-red-300 text-red-600 bg-white rounded-md hover:bg-red-50 transition-colors">
-                        <mat-icon class="mr-1" style="font-size: 14px; width: 14px; height: 14px;">clear</mat-icon>
-                        Clear
-                      </button>
-                    </div>
+                    <button 
+                      type="button"
+                      (click)="clearLocationData()"
+                      mat-stroked-button
+                      color="warn"
+                      class="flex items-center justify-center w-full sm:w-auto">
+                      <mat-icon class="mr-1">clear</mat-icon>
+                      Clear
+                    </button>
                   </div>
 
                   <!-- Location status indicator -->
                   <div class="mt-3 p-2 rounded-md text-xs">
                     @if (businessDetailsForm.get('location')?.value?.coordinates) {
-                      <div class="flex items-center text-green-700 bg-green-50 p-2 rounded-md border border-green-200">
-                        <mat-icon class="text-sm mr-2">check_circle</mat-icon>
+                      <div class="flex items-center gap-2 text-green-700 bg-green-50 p-2 rounded-md border border-green-200">
+                        <mat-icon class="text-sm flex-shrink-0">check_circle</mat-icon>
                         <span><strong>Location saved!</strong> Coordinates automatically detected from address.</span>
                       </div>
                     } @else {
-                      <div class="flex items-center text-amber-700 bg-amber-50 p-2 rounded-md border border-amber-200">
-                        <mat-icon class="text-sm mr-2">info</mat-icon>
+                      <div class="flex items-start gap-2 text-amber-700 bg-amber-50 p-2 rounded-md border border-amber-200">
+                        <mat-icon class="text-sm flex-shrink-0 mt-0.5">info</mat-icon>
                         <span>Use the address search above for automatic location detection and coordinates.</span>
                       </div>
                     }
@@ -324,7 +318,7 @@
                   <!-- Logo Upload -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Business Logo (Optional)
+                      Business Logo <span class="text-red-600">*</span>
                     </label>
                     <div class="flex items-center space-x-4">
                       @if (logoPreview()) {
@@ -364,7 +358,7 @@
                   <!-- Banner Upload -->
                   <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                      Banner Image (Optional)
+                      Banner Image <span class="text-red-600">*</span>
                     </label>
                     <div class="space-y-4">
                       @if (bannerPreview()) {
@@ -514,16 +508,16 @@
                 </button>
                 <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center order-1 md:order-2 w-full md:w-auto">
                   @if (!isBusinessDetailsValid()) {
-                    <div class="text-sm text-amber-600 flex items-center">
-                      <mat-icon class="text-sm mr-1">info</mat-icon>
-                      Please complete required location fields to continue
+                    <div class="text-sm text-amber-600 flex items-center gap-1">
+                      <mat-icon class="text-sm flex-shrink-0">info</mat-icon>
+                      <span>Please complete required location fields to continue</span>
                     </div>
                   }
                   <button 
                     type="button"
                     (click)="nextStep(stepper)"
                     [disabled]="!isBusinessDetailsValid()"
-                    mat-raised-button
+                    matButton="filled"
                     color="primary"
                     class="flex items-center justify-center w-full md:w-auto">
                     Next
@@ -536,7 +530,7 @@
 
           <!-- Step 3: Business Compliance & Operations -->
           <mat-step [stepControl]="businessComplianceForm" label="Compliance & Operations">
-            <form [formGroup]="businessComplianceForm" class="p-6 space-y-6">
+            <form [formGroup]="businessComplianceForm" class="lg:p-6 space-y-6">
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
                   Business Compliance & Operations
@@ -565,17 +559,29 @@
                 <h4 class="text-md font-medium text-gray-900 mb-3">Business Hours of Operation</h4>
                 <div class="space-y-3">
                   @for (day of ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']; track day) {
-                    <div [formGroupName]="day" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <div class="w-28 font-medium text-gray-700 capitalize">{{ day }}</div>
-                      <mat-checkbox formControlName="closed" class="mr-3">Closed</mat-checkbox>
-                      <mat-form-field appearance="outline" class="flex-1" [class.opacity-50]="businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value">
-                        <mat-label>Open</mat-label>
-                        <input matInput type="time" formControlName="open" [disabled]="businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value">
-                      </mat-form-field>
-                      <mat-form-field appearance="outline" class="flex-1" [class.opacity-50]="businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value">
-                        <mat-label>Close</mat-label>
-                        <input matInput type="time" formControlName="close" [disabled]="businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value">
-                      </mat-form-field>
+                    <div [formGroupName]="day" class="p-3 bg-gray-50 rounded-lg space-y-3">
+                      <div class="flex items-center justify-between">
+                        <div class="font-medium text-gray-700 capitalize text-sm">{{ day }}</div>
+                        <mat-checkbox formControlName="closed">Closed</mat-checkbox>
+                      </div>
+                      <div class="grid grid-cols-2 gap-3" [class.opacity-50]="businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value">
+                        <mat-form-field appearance="outline" class="w-full">
+                          <mat-label>Open Time</mat-label>
+                          <input 
+                            matInput 
+                            type="time" 
+                            formControlName="open" 
+                            [disabled]="businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value">
+                        </mat-form-field>
+                        <mat-form-field appearance="outline" class="w-full">
+                          <mat-label>Close Time</mat-label>
+                          <input 
+                            matInput 
+                            type="time" 
+                            formControlName="close" 
+                            [disabled]="businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value">
+                        </mat-form-field>
+                      </div>
                     </div>
                   }
                 </div>
@@ -585,9 +591,9 @@
               <div class="space-y-4">
                 <div>
                   <h4 class="text-md font-medium text-gray-900 mb-3">Business Registration</h4>
-                  <div class="flex items-center gap-4">
-                    <label class="text-sm font-medium text-gray-700">Is your business registered?</label>
-                    <mat-radio-group formControlName="business_registered" class="flex gap-4">
+                  <div class="space-y-3">
+                    <label class="text-sm font-medium text-gray-700 block">Is your business registered?</label>
+                    <mat-radio-group formControlName="business_registered" class="flex flex-col sm:flex-row gap-4">
                       <mat-radio-button [value]="true">Yes</mat-radio-button>
                       <mat-radio-button [value]="false">No</mat-radio-button>
                     </mat-radio-group>
@@ -610,27 +616,29 @@
               </div>
 
               <!-- Tax ID/EIN/SSN -->
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Tax ID/EIN/SSN</mat-label>
-                <input 
-                  matInput 
-                  formControlName="tax_id" 
-                  placeholder="SSN: 888-88-8888 or EIN: 88-8888888"
-                  maxlength="12">
-                <mat-hint>SSN format: 888-88-8888 (9 digits) or EIN format: 88-8888888 (9 digits)</mat-hint>
+              <div class="mt-4">
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Tax ID/EIN/SSN</mat-label>
+                  <input 
+                    matInput 
+                    formControlName="tax_id" 
+                    placeholder="SSN: 888-88-8888 or EIN: 88-8888888"
+                    maxlength="12">
+                  <mat-hint>SSN format: 888-88-8888 (9 digits) or EIN format: 88-8888888 (9 digits)</mat-hint>
                 @if (businessComplianceForm.get('tax_id')?.hasError('pattern') && businessComplianceForm.get('tax_id')?.touched) {
                   <mat-error>Please enter a valid Tax ID in format: SSN (888-88-8888) or EIN (88-8888888)</mat-error>
                 }
               </mat-form-field>
+              </div>
 
               <!-- Certified WBE/MBE -->
               <div>
                 <h4 class="text-md font-medium text-gray-900 mb-3">Business Certifications</h4>
-                <div class="flex items-center gap-4">
-                  <label class="text-sm font-medium text-gray-700">
+                <div class="space-y-3">
+                  <label class="text-sm font-medium text-gray-700 block">
                     Certified Women Business Enterprise or Minority Business Enterprise?
                   </label>
-                  <mat-radio-group formControlName="is_certified_wbe_mbe" class="flex gap-4">
+                  <mat-radio-group formControlName="is_certified_wbe_mbe" class="flex flex-col sm:flex-row gap-4">
                     <mat-radio-button [value]="true">Yes</mat-radio-button>
                     <mat-radio-button [value]="false">No</mat-radio-button>
                   </mat-radio-group>
@@ -673,7 +681,7 @@
                     type="button"
                     (click)="nextStep(stepper)"
                     [disabled]="!isBusinessComplianceValid()"
-                    mat-raised-button
+                    matButton="filled"
                     color="primary"
                     class="flex items-center justify-center w-full md:w-auto">
                     Next
@@ -686,44 +694,42 @@
 
           <!-- Step 4: Review & Submit -->
           <mat-step label="Review & Submit">
-            <div class="p-6 space-y-6">
+            <div class="lg:p-6  space-y-6">
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
                   Review Your Business Information
                 </h3>
-                <p class="text-gray-600 mb-6">
+                <p class="text-gray-600 mb-6 text-sm">
                   Please review your business details before submitting.
                 </p>
               </div>
 
               <!-- Business Summary -->
-              <div class="bg-gray-50 rounded-lg p-6 space-y-4">
+              <div class="bg-gray-50 rounded-lg p-4 lg:p-6 space-y-4">
                 <div class="border-b border-gray-200 pb-4">
-                  <h4 class="font-medium text-gray-900 mb-2">Business Information</h4>
-                  <div class="space-y-2">
-                    <div>
+                  <h4 class="font-medium text-gray-900 mb-3 text-base">Business Information</h4>
+                  <div class="space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <span class="text-sm font-medium text-gray-600">Name:</span>
-                      <span class="ml-2 text-gray-900">{{ businessInfoForm.get('name')?.value }}</span>
+                      <span class="text-sm text-gray-900">{{ businessInfoForm.get('name')?.value }}</span>
                     </div>
-                    <div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                       <span class="text-sm font-medium text-gray-600">Type:</span>
-                      <span class="ml-2 text-gray-900">{{ businessInfoForm.get('business_type')?.value }}</span>
+                      <span class="text-sm text-gray-900">{{ businessInfoForm.get('business_type')?.value }}</span>
                     </div>
-                    <div>
+                    <div class="grid grid-cols-1 gap-2">
                       <span class="text-sm font-medium text-gray-600">Description:</span>
-                      <div class="ml-2 text-gray-900 mt-1 text-sm">
-                        {{ businessInfoForm.get('description')?.value }}
-                      </div>
+                      <div class="text-sm text-gray-900">{{ businessInfoForm.get('description')?.value }}</div>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b border-gray-200 pb-4">
-                  <h4 class="font-medium text-gray-900 mb-2">Location & Contact</h4>
-                  <div class="space-y-2">
-                    <div>
+                  <h4 class="font-medium text-gray-900 mb-3 text-base">Location & Contact</h4>
+                  <div class="space-y-3">
+                    <div class="grid grid-cols-1 gap-2">
                       <span class="text-sm font-medium text-gray-600">Address:</span>
-                      <div class="ml-2 text-gray-900">
+                      <div class="text-sm text-gray-900 space-y-1">
                         @if (businessDetailsForm.get('address')?.value) {
                           <div>{{ businessDetailsForm.get('address')?.value }}</div>
                         }
@@ -736,21 +742,21 @@
                       </div>
                     </div>
                     @if (businessDetailsForm.get('contact_email')?.value) {
-                      <div>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <span class="text-sm font-medium text-gray-600">Email:</span>
-                        <span class="ml-2 text-gray-900">{{ businessDetailsForm.get('contact_email')?.value }}</span>
+                        <span class="text-sm text-gray-900 break-all">{{ businessDetailsForm.get('contact_email')?.value }}</span>
                       </div>
                     }
                     @if (businessDetailsForm.get('contact_phone')?.value) {
-                      <div>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <span class="text-sm font-medium text-gray-600">Phone:</span>
-                        <span class="ml-2 text-gray-900">{{ businessDetailsForm.get('contact_phone')?.value }}</span>
+                        <span class="text-sm text-gray-900">{{ businessDetailsForm.get('contact_phone')?.value }}</span>
                       </div>
                     }
                     @if (businessDetailsForm.get('website')?.value) {
-                      <div>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <span class="text-sm font-medium text-gray-600">Website:</span>
-                        <span class="ml-2 text-gray-900">{{ businessDetailsForm.get('website')?.value }}</span>
+                        <span class="text-sm text-gray-900 break-all">{{ businessDetailsForm.get('website')?.value }}</span>
                       </div>
                     }
                   </div>
@@ -758,25 +764,25 @@
 
                 <!-- Uploaded Images & Documents Section -->
                 <div class="border-b border-gray-200 pb-4">
-                  <h4 class="font-medium text-gray-900 mb-3">Uploaded Images & Documents</h4>
+                  <h4 class="font-medium text-gray-900 mb-4 text-base">Uploaded Images & Documents</h4>
                   
                   <!-- Business Logo -->
-                  <div class="mb-4">
+                  <div class="mb-6">
                     <span class="text-sm font-medium text-gray-600 block mb-2">Business Logo:</span>
                     @if (logoPreview()) {
-                      <div class="flex items-center">
+                      <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                         <img [src]="logoPreview()!" alt="Business Logo" class="w-16 h-16 object-cover rounded-lg border border-gray-200">
-                        <div class="ml-3">
+                        <div>
                           <p class="text-sm text-gray-900 font-medium">Logo uploaded</p>
                           <p class="text-xs text-gray-500">Ready for display</p>
                         </div>
                       </div>
                     } @else {
-                      <div class="flex items-center text-gray-500">
-                        <div class="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <div class="flex flex-col sm:flex-row sm:items-center gap-3 text-gray-500">
+                        <div class="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center flex-shrink-0">
                           <mat-icon class="text-gray-400">image</mat-icon>
                         </div>
-                        <div class="ml-3">
+                        <div>
                           <p class="text-sm">No logo uploaded</p>
                           <p class="text-xs">Optional - can be added later</p>
                         </div>
@@ -785,22 +791,22 @@
                   </div>
 
                   <!-- Banner Image -->
-                  <div class="mb-4">
+                  <div class="mb-6">
                     <span class="text-sm font-medium text-gray-600 block mb-2">Banner Image:</span>
                     @if (bannerPreview()) {
                       <div class="space-y-2">
-                        <img [src]="bannerPreview()!" alt="Banner Image" class="w-full max-w-md h-24 object-cover rounded-lg border border-gray-200">
-                        <div class="flex items-center">
-                          <mat-icon class="text-green-600 text-base mr-2">check_circle</mat-icon>
+                        <img [src]="bannerPreview()!" alt="Banner Image" class="w-full h-24 object-cover rounded-lg border border-gray-200">
+                        <div class="flex items-center gap-2">
+                          <mat-icon class="text-green-600 text-base flex-shrink-0">check_circle</mat-icon>
                           <p class="text-sm text-gray-900 font-medium">Banner image uploaded</p>
                         </div>
                       </div>
                     } @else {
-                      <div class="flex items-center text-gray-500">
-                        <div class="w-full max-w-md h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <div class="flex flex-col gap-2 text-gray-500">
+                        <div class="w-full h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
                           <mat-icon class="text-gray-400 text-2xl">image</mat-icon>
                         </div>
-                        <div class="ml-3">
+                        <div>
                           <p class="text-sm">No banner image uploaded</p>
                           <p class="text-xs">Optional - can be added later</p>
                         </div>
@@ -813,27 +819,27 @@
                     <span class="text-sm font-medium text-gray-600 block mb-2">SOS Certification Documentation:</span>
                     @if (sosCertificationPreviews().length > 0) {
                       <div class="space-y-3">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           @for (preview of sosCertificationPreviews(); track preview.preview) {
-                            <div class="border border-gray-200 rounded-lg p-3">
+                            <div class="border border-gray-200 rounded-lg p-2">
                               @if (preview.file && preview.file.type && preview.file.type.startsWith('image/')) {
                                 <!-- Image preview -->
                                 <img [src]="preview.preview" [alt]="preview.file.name" class="w-full h-20 object-cover rounded border mb-2">
-                                <div class="flex items-center">
-                                  <mat-icon class="text-blue-600 text-sm mr-1">image</mat-icon>
+                                <div class="flex items-center gap-1">
+                                  <mat-icon class="text-blue-600 text-sm flex-shrink-0">image</mat-icon>
                                   <p class="text-xs text-gray-900 font-medium truncate">{{ preview.file.name }}</p>
                                 </div>
                               } @else if (!preview.file && (preview.preview.includes('.jpg') || preview.preview.includes('.jpeg') || preview.preview.includes('.png') || preview.preview.includes('/image/'))) {
                                 <!-- URL-based image preview -->
                                 <img [src]="preview.preview" alt="SOS Certification" class="w-full h-20 object-cover rounded border mb-2">
-                                <div class="flex items-center">
-                                  <mat-icon class="text-blue-600 text-sm mr-1">image</mat-icon>
+                                <div class="flex items-center gap-1">
+                                  <mat-icon class="text-blue-600 text-sm flex-shrink-0">image</mat-icon>
                                   <p class="text-xs text-gray-900 font-medium">Certification Image</p>
                                 </div>
                               } @else {
                                 <!-- Document preview -->
-                                <div class="flex items-center p-2 bg-blue-50 rounded border">
-                                  <mat-icon class="text-blue-600 text-2xl mr-2">description</mat-icon>
+                                <div class="flex items-center gap-2 p-2 bg-blue-50 rounded border">
+                                  <mat-icon class="text-blue-600 text-2xl flex-shrink-0">description</mat-icon>
                                   <div class="flex-1 min-w-0">
                                     <p class="text-xs font-medium text-gray-900 truncate">{{ preview.file?.name || 'SOS Certification Document' }}</p>
                                     <p class="text-xs text-gray-500">{{ preview.file?.type || 'Document' }}</p>
@@ -843,8 +849,8 @@
                             </div>
                           }
                         </div>
-                        <div class="flex items-center">
-                          <mat-icon class="text-green-600 text-base mr-2">check_circle</mat-icon>
+                        <div class="flex items-center gap-2">
+                          <mat-icon class="text-green-600 text-base flex-shrink-0">check_circle</mat-icon>
                           <p class="text-sm text-gray-900 font-medium">
                             {{ sosCertificationPreviews().length }} certification {{ sosCertificationPreviews().length === 1 ? 'document' : 'documents' }} uploaded
                           </p>
@@ -854,11 +860,11 @@
                       <!-- Legacy single file display -->
                       <div class="space-y-2">
                         @if (sosCertificationFile && sosCertificationFile.type.startsWith('image/')) {
-                          <img [src]="sosCertificationPreview()!" alt="SOS Certification" class="w-full max-w-md h-24 object-cover rounded-lg border border-gray-200">
+                          <img [src]="sosCertificationPreview()!" alt="SOS Certification" class="w-full h-24 object-cover rounded-lg border border-gray-200">
                         } @else {
-                          <div class="border border-gray-200 rounded-lg p-3 bg-blue-50 max-w-md">
-                            <div class="flex items-center">
-                              <mat-icon class="text-blue-600 text-2xl mr-3">description</mat-icon>
+                          <div class="border border-gray-200 rounded-lg p-3 bg-blue-50">
+                            <div class="flex items-center gap-3">
+                              <mat-icon class="text-blue-600 text-2xl flex-shrink-0">description</mat-icon>
                               <div class="flex-1">
                                 <p class="text-sm font-medium text-gray-900">{{ sosCertificationPreview() }}</p>
                                 <p class="text-xs text-gray-500">{{ sosCertificationFile?.type || 'Document' }}</p>
@@ -866,17 +872,17 @@
                             </div>
                           </div>
                         }
-                        <div class="flex items-center">
-                          <mat-icon class="text-green-600 text-base mr-2">check_circle</mat-icon>
+                        <div class="flex items-center gap-2">
+                          <mat-icon class="text-green-600 text-base flex-shrink-0">check_circle</mat-icon>
                           <p class="text-sm text-gray-900 font-medium">SOS certification document uploaded</p>
                         </div>
                       </div>
                     } @else {
-                      <div class="flex items-center text-gray-500">
-                        <div class="w-20 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <div class="flex flex-col gap-2 text-gray-500">
+                        <div class="w-full h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
                           <mat-icon class="text-gray-400">description</mat-icon>
                         </div>
-                        <div class="ml-3">
+                        <div>
                           <p class="text-sm">No certification documents uploaded</p>
                           <p class="text-xs">Optional - can be added later</p>
                         </div>
@@ -888,19 +894,19 @@
                 <!-- Business Compliance & Operations Section -->
                 @if (businessComplianceForm.get('business_stage')?.value) {
                   <div class="border-t border-gray-200 pt-4">
-                    <h4 class="font-medium text-gray-900 mb-3">Business Compliance & Operations</h4>
+                    <h4 class="font-medium text-gray-900 mb-3 text-base">Business Compliance & Operations</h4>
                     <div class="space-y-3">
                       <!-- Business Stage -->
-                      <div>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <span class="text-sm font-medium text-gray-600">Business Stage:</span>
-                        <span class="ml-2 text-gray-900 capitalize">{{ formatBusinessStage(businessComplianceForm.get('business_stage')?.value) }}</span>
+                        <span class="text-sm text-gray-900 capitalize">{{ formatBusinessStage(businessComplianceForm.get('business_stage')?.value) }}</span>
                       </div>
 
                       <!-- Business Hours -->
                       @if (businessComplianceForm.get('business_hours')) {
                         <div>
                           <span class="text-sm font-medium text-gray-600 block mb-2">Business Hours:</span>
-                          <div class="ml-2 space-y-1 text-sm">
+                          <div class="ml-0 sm:ml-2 space-y-1 text-xs sm:text-sm">
                             @for (day of ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']; track day) {
                               @if (!businessComplianceForm.get('business_hours')?.get(day)?.get('closed')?.value) {
                                 <div class="text-gray-700">
@@ -920,42 +926,42 @@
 
                       <!-- Business Registered -->
                       @if (businessComplianceForm.get('business_registered')?.value !== null) {
-                        <div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                           <span class="text-sm font-medium text-gray-600">Business Registered:</span>
-                          <span class="ml-2 text-gray-900">{{ businessComplianceForm.get('business_registered')?.value ? 'Yes' : 'No' }}</span>
+                          <span class="text-sm text-gray-900">{{ businessComplianceForm.get('business_registered')?.value ? 'Yes' : 'No' }}</span>
                         </div>
                       }
 
                       <!-- Registered State -->
                       @if (businessComplianceForm.get('registered_state')?.value) {
-                        <div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                           <span class="text-sm font-medium text-gray-600">Registered State:</span>
-                          <span class="ml-2 text-gray-900">{{ businessComplianceForm.get('registered_state')?.value }}</span>
+                          <span class="text-sm text-gray-900">{{ businessComplianceForm.get('registered_state')?.value }}</span>
                         </div>
                       }
 
                       <!-- Tax ID -->
                       @if (businessComplianceForm.get('tax_id')?.value) {
-                        <div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                           <span class="text-sm font-medium text-gray-600">Tax ID/EIN/SSN:</span>
-                          <span class="ml-2 text-gray-900 font-mono">{{ businessComplianceForm.get('tax_id')?.value }}</span>
+                          <span class="text-sm text-gray-900 font-mono">{{ businessComplianceForm.get('tax_id')?.value }}</span>
                         </div>
                       }
 
                       <!-- Certified WBE/MBE -->
                       @if (businessComplianceForm.get('is_certified_wbe_mbe')?.value !== null) {
-                        <div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                           <span class="text-sm font-medium text-gray-600">Certified WBE/MBE:</span>
-                          <span class="ml-2 text-gray-900">{{ businessComplianceForm.get('is_certified_wbe_mbe')?.value ? 'Yes' : 'No' }}</span>
+                          <span class="text-sm text-gray-900">{{ businessComplianceForm.get('is_certified_wbe_mbe')?.value ? 'Yes' : 'No' }}</span>
                         </div>
                       }
 
                       <!-- Woman Owned Attestation -->
                       @if (businessComplianceForm.get('woman_owned_attestation')?.value) {
                         <div class="bg-green-50 border border-green-200 rounded-lg p-3 mt-2">
-                          <div class="flex items-start">
-                            <mat-icon class="text-green-600 mr-2 text-base mt-0.5">check_circle</mat-icon>
-                            <span class="text-sm text-green-900">This business is confirmed to be 51-100% owned and operated by a woman.</span>
+                          <div class="flex items-start gap-2">
+                            <mat-icon class="text-green-600 text-base flex-shrink-0 mt-0.5">check_circle</mat-icon>
+                            <span class="text-xs sm:text-sm text-green-900">This business is confirmed to be 51-100% owned and operated by a woman.</span>
                           </div>
                         </div>
                       }
@@ -964,19 +970,19 @@
                 }
 
                 <div>
-                  <h4 class="font-medium text-gray-900 mb-2">Next Steps</h4>
-                  <div class="text-sm text-gray-600 space-y-1">
-                    <div class="flex items-center">
-                      <mat-icon class="text-green-600 mr-2 text-base">check_circle</mat-icon>
-                      Your business profile will be created
+                  <h4 class="font-medium text-gray-900 mb-3 text-base">Next Steps</h4>
+                  <div class="text-xs sm:text-sm text-gray-600 space-y-2">
+                    <div class="flex items-start sm:items-center gap-2">
+                      <mat-icon class="text-green-600 text-base flex-shrink-0">check_circle</mat-icon>
+                      <span>Your business profile will be created</span>
                     </div>
-                    <div class="flex items-center">
-                      <mat-icon class="text-green-600 mr-2 text-base">check_circle</mat-icon>
-                      You can add services and showcase your work
+                    <div class="flex items-start sm:items-center gap-2">
+                      <mat-icon class="text-green-600 text-base flex-shrink-0">check_circle</mat-icon>
+                      <span>You can add services and showcase your work</span>
                     </div>
-                    <div class="flex items-center">
-                      <mat-icon class="text-green-600 mr-2 text-base">check_circle</mat-icon>
-                      Customers can find and contact you
+                    <div class="flex items-start sm:items-center gap-2">
+                      <mat-icon class="text-green-600 text-base flex-shrink-0">check_circle</mat-icon>
+                      <span>Customers can find and contact you</span>
                     </div>
                   </div>
                 </div>
@@ -994,28 +1000,24 @@
                 </button>
                 <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center order-1 md:order-2 w-full md:w-auto">
                   @if (!isAllFormsValid() && !submitting()) {
-                    <div class="text-sm text-red-600 flex items-center">
-                      <mat-icon class="text-sm mr-1">error</mat-icon>
-                      Please complete all required fields before submitting
+                    <div class="text-xs sm:text-sm text-red-600 flex items-center gap-1">
+                      <mat-icon class="text-sm flex-shrink-0">error</mat-icon>
+                      <span>Please complete all required fields before submitting</span>
                     </div>
                   }
                   <button 
                     type="button"
                     (click)="submitBusiness()"
                     [disabled]="submitting() || !isAllFormsValid()"
-                    mat-raised-button
+                    matButton="filled"
                     color="primary"
                     class="flex items-center justify-center w-full md:w-auto">
+                    <mat-icon>business</mat-icon>
                     @if (submitting()) {
-                      <ng-container>
-                        <mat-icon class="mr-2 animate-spin">refresh</mat-icon>
-                        {{ isEditMode() ? 'Updating Business...' : 'Creating Business...' }}
-                      </ng-container>
+                      {{ isEditMode() ? 'Updating...' : 'Creating...' }}
+                      
                     } @else {
-                      <ng-container>
-                        <mat-icon class="mr-2">business</mat-icon>
                         {{ isEditMode() ? 'Update Business' : 'Create Business' }}
-                      </ng-container>
                     }
                   </button>
                 </div>

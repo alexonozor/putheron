@@ -1,0 +1,132 @@
+<mat-card class="h-full bg-white! hover:shadow-lg transition-all duration-200">
+  <!-- Banner Section -->
+  <div class="relative h-32 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+    @if (business.banner_url) {
+      <img 
+        [src]="business.banner_url" 
+        [alt]="business.name + ' banner'"
+        class="w-full h-full object-cover">
+    } @else {
+      <div class="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <mat-icon class="text-gray-300" [style.font-size.px]="48" [style.width.px]="48" [style.height.px]="48">business</mat-icon>
+      </div>
+    }
+    
+    <!-- Favorite Button -->
+    @if (showFavoriteButton) {
+      <div class="absolute top-3 left-3" (click)="$event.stopPropagation()">
+        <app-favorite-button
+          [businessId]="business._id"
+          [businessName]="business.name"
+          buttonClass="bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-md">
+        </app-favorite-button>
+      </div>
+    }
+
+    <!-- Featured Badge -->
+    @if (business.is_featured) {
+      <div class="absolute top-3 left-3" [class.left-16]="showFavoriteButton">
+        <span class="bg-yellow-100 text-yellow-800 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium backdrop-blur-sm">
+          <mat-icon class="mr-1" [style.font-size.px]="14" [style.width.px]="14" [style.height.px]="14">star</mat-icon>
+          Featured
+        </span>
+      </div>
+    }
+
+    <!-- Status Badge -->
+    <div class="absolute top-3 right-3">
+      <span [class]="statusColorClass" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium backdrop-blur-sm">
+        {{ statusText }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <mat-card-content class="pt-8 pb-4 px-6 text-center">
+    <!-- Logo positioned to overlap banner -->
+    <div class="flex justify-center -mt-24 mb-6 relative z-10">
+      <div class="w-20 h-20 rounded-full bg-white shadow-lg ring-4 ring-white overflow-hidden">
+        @if (business.logo_url) {
+          <img 
+            [src]="business.logo_url" 
+            [alt]="business.name + ' logo'"
+            class="w-full h-full object-cover">
+        } @else {
+          <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+            <mat-icon class="text-gray-400" [style.font-size.px]="36" [style.width.px]="36" [style.height.px]="36">business</mat-icon>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Business Details -->
+    <h3 class="text-lg font-semibold text-gray-900 truncate mb-2">{{ business.name }}</h3>
+    <p class="text-sm text-gray-600 mb-1">{{ categoryName }}</p>
+    
+    @if (business.city && business.state) {
+      <p class="text-xs text-gray-500 flex items-center justify-center mb-4">
+        <mat-icon class="mr-1" [style.font-size.px]="14" [style.width.px]="14" [style.height.px]="14">location_on</mat-icon>
+        {{ business.city }}, {{ business.state }}
+      </p>
+    }
+
+    <p class="text-sm text-gray-600 mb-4 line-clamp-2">
+      {{ business.short_description || business.description || 'No description available' }}
+    </p>
+
+    <!-- Business Type -->
+    <div class="flex items-center justify-center mb-4">
+      <span [class]="businessTypeColor" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+        {{ businessTypeText }}
+      </span>
+    </div>
+
+    <!-- Tags -->
+    @if (business.tags && business.tags.length > 0) {
+      <div class="mb-4">
+        <div class="flex flex-wrap gap-1 justify-center">
+          @for (tag of business.tags.slice(0, 2); track tag) {
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
+              {{ tag }}
+            </span>
+          }
+          @if (business.tags.length > 2) {
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
+              +{{ business.tags.length - 2 }}
+            </span>
+          }
+        </div>
+      </div>
+    }
+  </mat-card-content>
+
+  <!-- Action Buttons -->
+  <mat-card-actions class="flex justify-center gap-2">
+    <button 
+      mat-button
+      color="accent"
+      (click)="onView()"
+      title="View Business">
+      <mat-icon class="mr-1">visibility</mat-icon>
+      View
+    </button>
+    @if (showEditDelete && isBusinessOwner()) {
+      <button 
+        mat-button
+        color="accent"
+        (click)="onEdit()"
+        title="Edit Business">
+        <mat-icon class="mr-1">edit</mat-icon>
+        Edit
+      </button>
+      <button 
+        mat-button
+        color="warn"
+        (click)="onDelete()"
+        title="Delete Business">
+        <mat-icon class="mr-1">delete</mat-icon>
+        Delete
+      </button>
+    }
+  </mat-card-actions>
+</mat-card>

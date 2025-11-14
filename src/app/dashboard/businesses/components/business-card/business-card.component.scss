@@ -1,0 +1,8 @@
+/* Business Card Component Styles */
+
+:host ::ng-deep mat-card-actions {
+  mat-form-field {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}

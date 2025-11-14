@@ -11,11 +11,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AuthService } from '../../../shared/services/auth.service';
 import { BusinessService, Category, Subcategory, CreateBusinessDto, UpdateBusinessDto, Business } from '../../../shared/services/business.service';
 import { PhoneValidators } from '../../../shared/validators/phone.validator';
 import { PhoneFormatDirective } from '../../../shared/directives/phone-format.directive';
+import { DashboardSubheaderComponent } from '../../../shared/components/dashboard-subheader/dashboard-subheader.component';
 
 declare let google: any;
 
@@ -34,7 +36,9 @@ declare let google: any;
     MatStepperModule,
     MatCheckboxModule,
     MatRadioModule,
-    PhoneFormatDirective
+    MatProgressSpinnerModule,
+    PhoneFormatDirective,
+    DashboardSubheaderComponent
   ],
   templateUrl: './create-business.component.html',
   styleUrl: './create-business.component.scss'
@@ -438,6 +442,17 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    // Validate that required images are present
+    if (!this.logoPreview()) {
+      this.error.set('Business logo is required. Please upload a logo image.');
+      return;
+    }
+
+    if (!this.bannerPreview()) {
+      this.error.set('Banner image is required. Please upload a banner image.');
+      return;
+    }
+
     const currentUser = this.authService.user();
     if (!currentUser) {
       this.router.navigate(['/auth']);
@@ -578,7 +593,7 @@ export class CreateBusinessComponent implements OnInit, AfterViewInit {
   }
 
   isBusinessDetailsValid(): boolean {
-    return this.businessDetailsForm.valid;
+    return this.businessDetailsForm.valid && !!this.logoPreview() && !!this.bannerPreview();
   }
 
   isBusinessComplianceValid(): boolean {

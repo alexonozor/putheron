@@ -1,0 +1,83 @@
+<mat-card class="h-full bg-white! hover:shadow-lg transition-all duration-200">
+  <!-- Image Section -->
+  <div class="relative aspect-video bg-gray-100 overflow-hidden">
+    @if (service.images && service.images.length > 0) {
+      <img 
+        [src]="service.images[0]" 
+        [alt]="service.name"
+        class="w-full h-full object-cover">
+    } @else {
+      <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+        <mat-icon class="text-gray-400" [style.font-size.px]="48" [style.width.px]="48" [style.height.px]="48">build</mat-icon>
+      </div>
+    }
+    
+    <!-- Status Badge -->
+    <div class="absolute top-3 right-3">
+      <span [class]="statusColorClass" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium backdrop-blur-sm">
+        {{ statusText }}
+      </span>
+    </div>
+    
+    @if (service.is_featured) {
+      <div class="absolute top-3 left-3">
+        <span class="bg-yellow-100 text-yellow-800 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium backdrop-blur-sm">
+          <mat-icon class="mr-1" [style.font-size.px]="14" [style.width.px]="14" [style.height.px]="14">star</mat-icon>
+          Featured
+        </span>
+      </div>
+    }
+  </div>
+
+  <!-- Content Section -->
+  <mat-card-content class="p-6">
+    <!-- Service Name -->
+    <h3 class="text-lg font-semibold text-gray-900 truncate mb-1">{{ service.name }}</h3>
+    <p class="text-sm text-gray-600 mb-3">{{ businessName }}</p>
+    
+    <!-- Description -->
+    <p class="text-sm text-gray-600 mb-4 line-clamp-2">
+      {{ service.short_description || service.description || 'No description available' }}
+    </p>
+
+    <!-- Price and Duration -->
+    <div class="flex items-center justify-between mb-4">
+      @if (service.price !== undefined && service.price !== null) {
+        <span class="text-lg font-semibold text-gray-900">${{ service.price }}</span>
+      } @else {
+        <span class="text-lg font-semibold text-gray-900">Custom</span>
+      }
+      @if (service.duration) {
+        <span class="text-sm text-gray-500">{{ service.duration }}</span>
+      }
+    </div>
+  </mat-card-content>
+
+  <!-- Action Buttons -->
+  <mat-card-actions class="flex justify-center gap-2">
+    <button 
+      mat-button
+      color="accent"
+      (click)="onView()"
+      title="View Service">
+      <mat-icon class="mr-1">visibility</mat-icon>
+      View
+    </button>
+    <button 
+      mat-button
+      color="accent"
+      (click)="onEdit()"
+      title="Edit Service">
+      <mat-icon class="mr-1">edit</mat-icon>
+      Edit
+    </button>
+    <button 
+      mat-button
+      color="warn"
+      (click)="onDelete()"
+      title="Delete Service">
+      <mat-icon class="mr-1">delete</mat-icon>
+      Delete
+    </button>
+  </mat-card-actions>
+</mat-card>
